@@ -19,7 +19,7 @@ nSegments = 100 * 1000 # 100, 500, 1000, 1600 thousands segments
 
 alphabet = "ACGTN"
 
-nDegeneratePositions = int(0.1 * nSegments)  # number of degenerate positions, 10% of the text as in Grossi et al.
+nDegeneratePositions = int(0.1 * nSegments) # Number of degenerate positions, 10 % of the text as in Grossi et al.
 nMaxSegmentVariants = 10
 nMaxVariantLength = 10
 
@@ -81,7 +81,7 @@ def main():
         howMany = random.randint(1, nMaxSegmentVariants) # Degenerate letter is defined as a "non-empty set of strings".
         curSet = set()
 
-        for iV in xrange(howMany):
+        while len(curSet) < howMany:
             curLen = random.randint(0, nMaxVariantLength) # Includes empty strings.
             curStr = randomString(alphabet, curLen)
             curSet.add(curStr)
