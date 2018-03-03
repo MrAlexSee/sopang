@@ -18,7 +18,7 @@ struct Params
     const string alphabet = "ACGTNUVISMEL<>:0123456789";
 
     const bool dumpToFile = true; // Dumps input file info and throughput to outFile.
-    const bool dumpIndexes = false; // Dumps resulting indexes to outFile.
+    const bool dumpIndexes = false; // Dumps resulting indexes to stdout.
 
     const int nPatterns = -1; // Set to -1 to ignore.
 };
