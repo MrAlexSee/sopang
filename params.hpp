@@ -14,7 +14,8 @@ struct Params
     string inDataFolder = "sample/"; // Used with command line args.
     string outFile = "res.txt";
 
-    const string alphabet = "ACGTNUVISMEL<>:0123456789"; // matches characters in edso output
+    // Matches all characters in EDSO (Grossi et al. CPM '17) tool output.
+    const string alphabet = "ACGTNUVISMEL<>:0123456789";
 
     const bool dumpToFile = true; // Dumps input file info and throughput to outFile.
     const bool dumpIndexes = false; // Dumps resulting indexes to outFile.
