@@ -11,6 +11,7 @@ Add Boost library to the path for compilation.
 
 Regular compile: g++ -Wall -pedantic -std=c++11 main.cpp sopang.cpp -o sopang
 Optimized compile: g++ -Wall -pedantic -std=c++11 -DNDEBUG -O3 main.cpp sopang.cpp -o sopang
+Or type "make" for optimized compile.
 
 Tested with gcc 64-bit 7.2.0 and Boost 1.65.1 on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
 
