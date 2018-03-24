@@ -2,7 +2,7 @@
 
 // Regular compile: g++ -Wall -pedantic -std=c++11 main.cpp sopang.cpp -o sopang
 // Optimized compile: g++ -Wall -pedantic -std=c++11 -DNDEBUG -O3 main.cpp sopang.cpp -o sopang
-// Or type "make" for optimized compile.
+// Or set BOOST_DIR in makefile and type "make" for optimized compile.
 
 #include <boost/format.hpp>
 #include <chrono>
