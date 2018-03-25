@@ -49,7 +49,7 @@ int main(int argc, char **argv)
     if (Helpers::fileExists(params.inTextFile) == false)
     {
         cerr << endl << "Cannot access input text file (doesn't exist or insufficient permissions): " << params.inTextFile << endl;
-        cerr << "a) Set inTextFile in params.hpp, recompile and run as ./sopang, or b) check inDataFolder and run as ./sopang [chromosome index] [pattern length]" << endl;
+        cerr << "a) Set inTextFile in params.hpp, recompile and run as ./sopang, or b) set inDataFolder in params.hpp, recompile and run as ./sopang [chromosome index] [pattern length]" << endl;
         cerr << endl << "Run ./sopang --help for more information" << endl;
         return 1;
     }
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     if (Helpers::fileExists(params.inPatternFile) == false)
     {
         cerr << endl << "Cannot access input patterns file (doesn't exist or insufficient permissions): " << params.inPatternFile << endl;
-        cerr << "a) Set inPatternFile in params.hpp, recompile and run as ./sopang, or b) check inDataFolder and run as ./sopang [chromosome index] [pattern length]" << endl;
+        cerr << "a) Set inPatternFile in params.hpp, recompile and run as ./sopang, or b) set inDataFolder in params.hpp, recompile and run as ./sopang [chromosome index] [pattern length]" << endl;
         cerr << endl << "Run ./sopang --help for more information" << endl;
 
         clearMemory(segments, nSegments, segmentSizes);
