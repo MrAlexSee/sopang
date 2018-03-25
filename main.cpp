@@ -6,6 +6,7 @@
 
 #include <boost/format.hpp>
 #include <chrono>
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <set>
@@ -17,7 +18,9 @@
 
 using namespace std;
 
-void parseParams(int argc, char **argv);
+bool handleParams(int argc, char **argv);
+void parseParamsForInputData(int argc, char **argv);
+
 void calcTextSize(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
                   int *textSize, double *textSizeMB);
 
@@ -34,20 +37,22 @@ namespace
 
 int main(int argc, char **argv)
 {
-    if (argc == 3)
+    if (handleParams(argc, argv) == false)
     {
-        cout << "Using command-line args" << endl;
-        parseParams(argc, argv);
-    }
-    else if (argc > 1)
-    {
-        cerr << "Usage: sopang [chromosome index] [pattern length]" << endl;
-        return 1;
+        return 0;
     }
 
     cout << boost::format("Started, using alphabet = \"%1%\" (make sure it matches the input file!)")
             % params.alphabet << endl;
     cout << "If the alphabet does not match the input file, undefined behavior occurs" << endl;
+
+    if (Helpers::fileExists(params.inTextFile) == false)
+    {
+        cerr << endl << "Cannot access input text file (doesn't exist or insufficient permissions): " << params.inTextFile << endl;
+        cerr << "a) Set inTextFile in params.hpp, recompile and run as ./sopang, or b) run as ./sopang [chromosome index] [pattern length]" << endl;
+        cerr << endl << "Run ./sopang --help for more information" << endl;
+        return 1;
+    }
 
     string text = Helpers::readFile(params.inTextFile);
     cout << "Read file: " << params.inTextFile << endl;
@@ -68,6 +73,16 @@ int main(int argc, char **argv)
     const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
     cout << "Parsed #segments = " << nSegments << endl;
 
+    if (Helpers::fileExists(params.inPatternFile) == false)
+    {
+        cerr << endl << "Cannot access input patterns file (doesn't exist or insufficient permissions): " << params.inPatternFile << endl;
+        cerr << "a) Set inPatternFile in params.hpp, recompile and run as ./sopang, or b) run as ./sopang [chromosome index] [pattern length]" << endl;
+        cerr << endl << "Run ./sopang --help for more information" << endl;
+
+        clearMemory(segments, nSegments, segmentSizes);
+        return 1;
+    }
+
     string patternsStr = Helpers::readFile(params.inPatternFile);
     cout << "Read patterns, #chars = " << patternsStr.size() << endl;
 
@@ -84,7 +99,37 @@ int main(int argc, char **argv)
     clearMemory(segments, nSegments, segmentSizes);
 }
 
-void parseParams(int argc, char **argv)
+bool handleParams(int argc, char **argv)
+{
+    if (argc == 3)
+    {
+        cout << "Using command-line args" << endl;
+        parseParamsForInputData(argc, argv);
+
+        return true;
+    }
+    else if (argc > 1)
+    {
+        if (strcmp(argv[1], "-h") == 0 or strcmp(argv[1], "--help") == 0)
+        {
+            cout << params.helpString << endl;
+        }
+        else if (strcmp(argv[1], "-v") == 0 or strcmp(argv[1], "--version") == 0)
+        {
+            cout << params.verNumber << endl;
+        }
+        else
+        {
+            cerr << "Usage: ./sopang [chromosome index] [pattern length]" << endl;
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+void parseParamsForInputData(int argc, char **argv)
 {
     assert(argc == 3);
 
