@@ -11,6 +11,9 @@ using namespace std;
 class Sopang
 {
 public:
+    Sopang();
+    ~Sopang();
+
     static const string *const *parseTextArray(string text, unsigned *nSegments, unsigned **segmentSizes);
     static vector<string> parsePatterns(string patternsStr);
 
@@ -26,7 +29,7 @@ private:
 
     static constexpr uint64_t allOnes = ~(0x0ULL);
 
-    uint64_t dBuffer[dBufferSize];
+    uint64_t *dBuffer;
     uint64_t maskBuffer[maskBufferSize];
 };
 

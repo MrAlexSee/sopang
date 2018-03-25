@@ -9,6 +9,16 @@
 
 using namespace std;
 
+Sopang::Sopang()
+{
+    dBuffer = new uint64_t[dBufferSize];
+}
+
+Sopang::~Sopang()
+{
+    delete[] dBuffer;
+}
+
 const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, unsigned **segmentSizes)
 {
     boost::trim(text);
