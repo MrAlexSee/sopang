@@ -22,7 +22,7 @@ struct Params
 
     const int nPatterns = -1; // Set to -1 to ignore.
 
-    const string verNumber = "1.0.1"; // Current version: major.minor.patch
+    const string verNumber = "sopang v1.0.1"; // Current version: major.minor.patch
     const string helpString =
         "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pangenome model).\n"
         "ED text is in a format: {A,C,}GAAT{AT,A}ATT. Braces determine the start and end of each indeterminate segment (i.e. segment having multiple variants), and commas delimit segment variants. Determinate segments (i.e. segments having a single variant) are stored as regular contiguous strings.\n"
