@@ -21,9 +21,9 @@ data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
 
 The program can be run in two following modes of operation.
 
-1. In order to run the program on a single input elastic degenerate file and a single patterns file, set parameters inTextFile and inPatternFile (in params.hpp) to their paths, respectively (either absolute or relative paths to the root folder). Run without arguments as `./sopang` in order to perform a run on these two files. In this mode, changing input files requires program recompilation.
+1. In order to run the program on a single input elastic degenerate file and a single patterns file, set parameters `inTextFile` and `inPatternFile` (in `params.hpp`) to their paths, respectively (either absolute or relative paths to the root folder). Run without arguments as `./sopang` in order to perform a run on these two files. In this mode, changing input files requires program recompilation.
 
-1. The program can be also run with command line arguments for automated processing. Firstly, the parameter inDataFolder (in params.hpp) should be set to point to the folder containing the data -- changing this parameter requires recompilation, by default it points to the sample folder containing a single elastic-degenerate text and a single patterns file. Each input chromosome file name should be in the form `chrN.eds`, where `N` is the chromosome number, e.g., 1, 2, etc., and each input patterns file name should be in a form `patternsM.txt`, where `M` is the length of patterns in this file, e.g., 8, 16, etc. The program can be then run as follows:
+1. The program can be also run with command line arguments for automated processing. Firstly, the parameter `inDataFolder` (in `params.hpp`) should be set to point to the folder containing the data -- changing this parameter requires recompilation, by default it points to the sample folder containing a single elastic-degenerate text and a single patterns file. Each input chromosome file name should be in the form `chrN.eds`, where `N` is the chromosome number, e.g., 1, 2, etc., and each input patterns file name should be in a form `patternsM.txt`, where `M` is the length of patterns in this file, e.g., 8, 16, etc. The program can be then run as follows:
 `./sopang [chromosome index] [pattern length]`
 e.g., `./sopang 10 8` for chromosome 10 (input text file `chr10.eds`) and pattern length 8 (input patterns file `patterns8.txt`). Attached is also a script `run_all.sh`, which allows for running sopang over multiple chromosomes and pattern files.
 
@@ -35,15 +35,15 @@ Testing on human genome and synthetic data:
 
 1. Download data from the 1000 Genomes project: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/.
 
-1. Run edso for each chromosome and variants file. Rename resulting files as chr1.eds, chr2.eds, ..., chr23.eds.
+1. Run edso for each chromosome and variants file. Rename resulting files as `chr1.eds`, `chr2.eds`, ..., `chr23.eds`.
 
-1. Generate synthetic data by running python generate synth.py (requires Python 2.7) 4 times for the number of segments (parameter nSegments) set to 100, 500, 1000, and 1600. Rename files as chr24.eds, chr25.eds, chr26.eds, chr27.eds.
+1. Generate synthetic data by running `python generate_synth.py` (requires Python 2.7) 4 times for the number of segments (parameter `nSegments`) set to 100, 500, 1000, and 1600. Rename files as `chr24.eds`, `chr25.eds`, `chr26.eds`, `chr27.eds`.
 
-1. Set parameter inDataFolder to the folder containing .eds files and pattern files (all pattern files are located in the sample/ folder as part of this package).
+1. Set parameter `inDataFolder` to the folder containing `.eds` files and pattern files (all pattern files are located in the `sample/` folder as part of this package).
 
 1. Compile SoPanG (see above).
 
-1. Run python run_all.sh.
+1. Run `python run_all.sh`.
 
 ## Compile-time parameter description
 
@@ -56,7 +56,7 @@ Parameter name  | Parameter description
 `inDataFolder`  | input root folder path for processing with command line arguments
 `outFile`       | output file path
 `alphabet`      | a set of symbols occurring in input text or patterns
-`dumpToFile`    | set to true in order to dump file size information and throughput to output file (outFile)
+`dumpToFile`    | set to true in order to dump file size information and throughput to output file (`outFile`)
 `dumpIndexes`   | set to true in order to dump all results, i.e., resulting indexes (end positions of segments where a match occurred) to standard output
 `nPatterns`     | maximum number of patterns from the input pattern file (`inPatternFile`) which are processed, set to -1 to ignore
 
@@ -74,7 +74,7 @@ Parameter name         | Parameter description
 ---------------------- | ---------------------
 `nSegments`            | total number of segments
 `alphabet`             | alphabet for character sampling
-`nDegeneratePositions` | number of segments (must be smaller or equal to nSegments) which are degenerate (indeterminate), i.e., contain multiple variants
+`nDegeneratePositions` | number of segments (must be smaller or equal to `nSegments`) which are degenerate (indeterminate), i.e., contain multiple variants
 `nMaxSegmentVariants`  | maximum number of variants (`a`), the number of variants for each degenerate segment will be sampled from the interval `[1, a]`
 `nMaxVariantLength`    | maximum length of each segment variant (`b`), the length for each variant will be sampled from the interval `[0, b]` (segments might contain empty words)
 `outFile`              | output file path
