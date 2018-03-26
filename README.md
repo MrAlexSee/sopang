@@ -6,7 +6,7 @@ ED text is in a format: {A,C,}GAAT{AT,A}ATT. Braces determine the start and end 
 
 SOPanG returns the end positions of pattern occurrences in the ED text. More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).
 
-## To compile
+## Compilation
 
 Add Boost library to the path for compilation.
 
@@ -17,7 +17,7 @@ Add Boost library to the path for compilation.
 Tested with gcc 64-bit 7.2.0 and Boost 1.65.1 (not time-critical, used only for
 data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
 
-## To use
+## Usage
 
 The program can be run in two following modes of operation.
 
@@ -29,9 +29,9 @@ The program can be run in two following modes of operation.
 
 e.g., ./sopang 10 8 for chromosome 10 (input text file chr10.eds) and pattern length 8 (input patterns file patterns8.txt). Attached is also a script run all.sh, which allows for running sopang over multiple chromosomes and pattern files.
 
-## To test on full data sets
+## Testing
 
-Testing on human genome and synthetic data
+Testing on human genome and synthetic data:
 
 1. Download edso: https://github.com/webmasterar/edso/.
 
