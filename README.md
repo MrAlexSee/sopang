@@ -24,9 +24,7 @@ The program can be run in two following modes of operation.
 1. In order to run the program on a single input elastic degenerate file and a single patterns file, set parameters inTextFile and inPatternFile (in params.hpp) to their paths, respectively (either absolute or relative paths to the root folder). Run without arguments as ./sopangi.e. human genome and synthetic data in order to perform a run on these two files. In this mode, changing input files requires program recompilation.
 
 1. The program can be also run with command line arguments for automated processing. Firstly, the parameter inDataFolder (in params.hpp) should be set to point to the folder containing the data -- changing this parameter requires recompilation, by default it points to the sample folder containing a single elastic-degenerate text and a single patterns file. Each input chromosome file name should be in the form chrN.eds, where N is the chromosome number, e.g., 1, 2, etc., and each input patterns file name should be in a form patternsM.txt, where M is the length of patterns in this file, e.g., 8, 16, etc. The program can be then run as follows:
-
 `./sopang [chromosome index] [pattern length]`
-
 e.g., ./sopang 10 8 for chromosome 10 (input text file chr10.eds) and pattern length 8 (input patterns file patterns8.txt). Attached is also a script run all.sh, which allows for running sopang over multiple chromosomes and pattern files.
 
 ## Testing
@@ -52,6 +50,7 @@ Testing on human genome and synthetic data:
 #### params.hpp
 
 Parameter name | Parameter description
+-------------- | ---------------------
 inTextFile     | input text (elastic-degenerate format) file path for processing without command line arguments
 inPatternFile  | input file path with a list of patterns, each of the same length, separated with newline characters for processing without command line arguments
 inDataFolder   | input root folder path for processing with command line arguments
@@ -64,6 +63,7 @@ nPatterns      | maximum number of patterns from the input pattern file (inPatte
 #### sopang.hpp
 
 Parameter name | Parameter description
+-------------- | ---------------------
 dBufferSize    | buffer size for processing segment variants, the size of the
 largest segment (i.e., the number of variants) from the input file cannot
 be larger than this value,
@@ -74,6 +74,7 @@ wordSize       | shift-or word size in bits.
 #### generate_synth.py
 
 Parameter name       | Parameter description
+-------------------- | ---------------------
 nSegments            | total number of segments
 alphabet             | alphabet for character sampling
 nDegeneratePositions | number of segments (must be smaller or equal to nSegments) which are degenerate (indeterminate), i.e., contain multiple variants
