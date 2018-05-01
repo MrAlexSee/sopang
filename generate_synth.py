@@ -15,15 +15,45 @@ output.
 
 import random
 
-nSegments = 100 * 1000 # 100, 500, 1000, 1600 thousands segments
+nSegments = 100 * 1000 # Total number of segments: 100, 500, 1000, 1600 thousands segments.
+alphabet = "ACGTN" # Alphabet for character sampling.
 
-alphabet = "ACGTN"
+# Number of segments (must be smaller or equal to `nSegments`) which are degenerate (indeterminate), i.e. contain multiple variants.
+# 10% of the text as in Grossi et al.
+nDegeneratePositions = int(0.1 * nSegments)
 
-nDegeneratePositions = int(0.1 * nSegments) # Number of degenerate positions, 10 % of the text as in Grossi et al.
+# Maximum number of variants (a), the number of variants for each degenerate segment will be sampled from the interval [2, a].
 nMaxSegmentVariants = 10
+
+# Maximum length of each segment variant (b), the length for each variant will be sampled from the interval [0, b] (segments might contain empty words).
 nMaxVariantLength = 10
 
-outFile = "text.eds"
+outFile = "text.eds" # Output file path.
+
+def main():
+    textSizeMB = round(nSegments / 1000.0 / 1000.0, 3)
+    print "Started, alph = \"{0}\", text size = {1}m".format(alphabet, textSizeMB)
+
+    text = randomString(alphabet, nSegments)
+
+    degenPosList = random.sample(xrange(nSegments), nDegeneratePositions) # Randomly drawn degenerate positions.
+    degenStrings = {} # Dictionary: position in text -> list of a few strings
+
+    print "Generating degenerate strings for #positions = {0}k".format(nDegeneratePositions / 1000.0)
+
+    for curPos in degenPosList:
+        howMany = random.randint(2, nMaxSegmentVariants) # Degenerate letter is defined as a "non-empty set of strings".
+        curSet = set()
+
+        while len(curSet) < howMany:
+            curLen = random.randint(0, nMaxVariantLength) # Includes empty strings.
+            curStr = randomString(alphabet, curLen)
+            curSet.add(curStr)
+
+        degenStrings[curPos] = curSet
+
+    assert len(degenPosList) == len(degenStrings) == nDegeneratePositions
+    dumpToFile(text, set(degenPosList), degenStrings)
 
 def randomString(alph, size):
     sigma = len(alph)
@@ -58,40 +88,6 @@ def dumpToFile(text, degenPosSet, degenStrings):
         f.write(outStr)
 
     print "Dumped to file: {0}".format(outFile)
-
-def main():
-    textSizeMB = round(nSegments / 1000.0 / 1000.0, 3)
-    print "Started, alph = \"{0}\", text size = {1}m".format(alphabet, textSizeMB)
-
-    text = randomString(alphabet, nSegments)
-
-    degenPosSet = set() # (randomly drawn) degenerate positions
-    while len(degenPosSet) < nDegeneratePositions:
-        cur = random.randint(0, nSegments - 1)
-        degenPosSet.add(cur)
-
-    degenPosList = sorted(list(degenPosSet))
-    degenStrings = {} # Dictionary: position in text -> list of a few strings
-
-    print "Generating degenerate strings..."
-
-    for iD in xrange(nDegeneratePositions):
-        curPos = degenPosList[iD]
-
-        howMany = random.randint(1, nMaxSegmentVariants) # Degenerate letter is defined as a "non-empty set of strings".
-        curSet = set()
-
-        while len(curSet) < howMany:
-            curLen = random.randint(0, nMaxVariantLength) # Includes empty strings.
-            curStr = randomString(alphabet, curLen)
-            curSet.add(curStr)
-
-        degenStrings[curPos] = curSet
-
-    assert len(degenPosList) == len(degenStrings) == nDegeneratePositions
-    print "Generated degenerate strings at #positions = {0}k".format(nDegeneratePositions / 1000.0)
-
-    dumpToFile(text, set(degenPosList), degenStrings)
 
 if __name__ == "__main__":
     main()
