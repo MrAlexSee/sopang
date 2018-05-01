@@ -1,9 +1,12 @@
 #!/bin/sh
 
+inputDir="data"
+outFile="out"
+
 for i in $(seq 1 27);
 do
-    ./sopang $i 8;
-    ./sopang $i 16;
-    ./sopang $i 32;
-    ./sopang $i 64;
+    ./sopang -d -o ${outFile}8.txt $inputDir/chr${i}.eds patterns8.txt;
+    ./sopang -d -o ${outFile}16.txt $inputDir/chr${i}.eds patterns16.txt;
+    ./sopang -d -o ${outFile}32.txt $inputDir/chr${i}.eds patterns32.txt;
+    ./sopang -d -o ${outFile}64.txt $inputDir/chr${i}.eds patterns64.txt;
 done

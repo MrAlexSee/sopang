@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "helpers.hpp"
 #include "sopang.hpp"
 
 using namespace std;
@@ -35,7 +36,11 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
         {
             if (inSeg == false)
             {
-                assert(text[i] != ',');
+                if (text[i] == ',')
+                {
+                    throw runtime_error("bad input text formatting: comma outside segment");
+                }
+
                 curStr += text[i];
             }
             else
@@ -70,6 +75,11 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
         {
             assert(text[i] == '}');
             assert(inSeg == true and curSegment.size() >= 1);
+
+            if (curSegment.empty())
+            {
+                throw runtime_error("degenerate segment cannot be empty");
+            }
 
             curSegment.push_back(string(curStr));
             segments.push_back(vector<string>(curSegment));
@@ -112,8 +122,8 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
 
 vector<string> Sopang::parsePatterns(string patternsStr)
 {
-    vector<string> res;
     boost::trim(patternsStr);
+    vector<string> res;
 
     vector<string> splitRes;
     boost::split(splitRes, patternsStr, boost::is_any_of("\n"));
@@ -123,12 +133,13 @@ vector<string> Sopang::parsePatterns(string patternsStr)
         boost::trim(pattern);
     }
 
+    Helpers::removeEmptyStrings(splitRes);
     return splitRes;
 }
 
-unordered_set<unsigned> Sopang::matchArray(const string *const *segments,
-                                           unsigned nSegments, const unsigned *segmentSizes,
-                                           const string &pattern, const string &alphabet)
+unordered_set<unsigned> Sopang::match(const string *const *segments,
+                                      unsigned nSegments, const unsigned *segmentSizes,
+                                      const string &pattern, const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
     unordered_set<unsigned> res;
