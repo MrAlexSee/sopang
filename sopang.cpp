@@ -10,6 +10,9 @@
 
 using namespace std;
 
+namespace inverted_basilisk
+{
+
 Sopang::Sopang()
 {
     dBuffer = new uint64_t[dBufferSize];
@@ -203,4 +206,5 @@ void Sopang::fillPatternMaskBuffer(const string &pattern, const string &alphabet
         assert(pattern[iC] > 0 and static_cast<unsigned char>(pattern[iC]) < maskBufferSize);
         maskBuffer[static_cast<unsigned char>(pattern[iC])] &= (~(0x1ULL << iC));
     }
+}
 }

@@ -8,6 +8,9 @@
 
 using namespace std;
 
+namespace inverted_basilisk
+{
+
 struct Helpers
 {
     Helpers() = delete;
@@ -78,5 +81,6 @@ struct Helpers
         }
     }
 };
+}
 
 #endif // HELPERS_HPP

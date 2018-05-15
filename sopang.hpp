@@ -8,6 +8,9 @@
 
 using namespace std;
 
+namespace inverted_basilisk
+{
+
 class Sopang
 {
 public:
@@ -32,5 +35,6 @@ private:
     uint64_t *dBuffer;
     uint64_t maskBuffer[maskBufferSize];
 };
+}
 
 #endif // SOPANG_HPP

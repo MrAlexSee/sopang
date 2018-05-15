@@ -22,13 +22,18 @@
 #include "params.hpp"
 #include "sopang.hpp"
 
+using namespace inverted_basilisk;
 using namespace std;
+
 namespace po = boost::program_options;
 
 namespace
 {
     Params params;
 }
+
+namespace inverted_basilisk
+{
 
 int handleParams(int argc, const char **argv);
 bool checkInputFiles(const char *execName);
@@ -49,6 +54,7 @@ void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
 void dumpIndexes(const unordered_set<unsigned> &indexes);
 
 void clearMemory(const string *const *segments, unsigned nSegments, unsigned *segmentSizes);
+}
 
 int main(int argc, const char **argv)
 {
@@ -65,6 +71,9 @@ int main(int argc, const char **argv)
 
     return run();
 }
+
+namespace inverted_basilisk
+{
 
 int handleParams(int argc, const char **argv)
 {
@@ -353,4 +362,5 @@ void clearMemory(const string *const *segments, unsigned nSegments, unsigned *se
     delete[] segmentSizes;
 
     cout << endl << "Cleared memory" << endl;
+}
 }

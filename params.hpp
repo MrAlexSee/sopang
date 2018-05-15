@@ -6,6 +6,9 @@
 
 using namespace std;
 
+namespace inverted_basilisk
+{
+
 struct Params
 {
     // COMPILE-TIME PARAMS
@@ -13,7 +16,7 @@ struct Params
     const string alphabet = "ACGTNUVISMEL<>:0123456789"; // Matches all characters in EDSO (Grossi et al. CPM '17) tool output.
 
     // COMMAND-LINE PARAMS
-    // These parameters are set in handleParams() after parsing command line args.
+    // These parameters are set by handleParams() in main.cpp after parsing command line args.
 
     bool dumpToFile = false; // Dump input file info and throughput to output file (outFile). Cmd arg -d.
     bool dumpIndexes = false; // Dump resulting indexes (full results) to stdout. Cmd arg -D.
@@ -41,5 +44,6 @@ struct Params
         "Input pattern file (positional parameter 2 or named parameter -I or --in-pattern-file) should contain the list of patterns, each of the same length, separated with newline characters.\n"
         "Attached as part of the sopang package is a script run_all.sh, which allows for processing multiple input text (chromosome) and pattern files.";
 };
+}
 
 #endif // PARAMS_HPP
