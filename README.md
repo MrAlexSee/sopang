@@ -43,7 +43,7 @@ Testing on human genome and synthetic data.
 
 1. Download [edso](https://github.com/webmasterar/edso/) by Ahmad Retha.
 
-1. Download data from the <a href="ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/">1000 Genomes project</a>.
+1. Download data from the 1000 Genomes project: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/.
 
 1. Run edso for each chromosome and variants file. Rename resulting files as `chr1.eds`, `chr2.eds`, ..., `chr23.eds`.
 
