@@ -1,5 +1,5 @@
 CC        = g++
-EXE		  = sopang
+EXE       = sopang
 CCFLAGS   = -Wall -pedantic -std=c++11
 OPTFLAGS  = -DNDEBUG -O3
 

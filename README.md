@@ -8,9 +8,9 @@ SOPanG returns the end positions of pattern occurrences in the ED text. More pre
 
 ## Compilation
 
-Add Boost library to the path for compilation. Requires boost program options module to be compiled for static linking.
+Add Boost library to the path for compilation by setting `BOOST_DIR` in the makefile. Requires boost program options module to be compiled for static linking.
 
-Set `BOOST_DIR` in the makefile and type `make` for optimized compile.
+Type `make` for optimized compile.
 Comment out `OPTFLAGS` in the makefile in order to disable optimization.
 
 Tested with gcc 64-bit 7.2.0 and Boost 1.67.0 (not time-critical, used only for parameter and data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
@@ -30,7 +30,7 @@ Short name | Long name           | Parameter description
 `-d`       | `--dump`            | dump input file info and throughput to output file (useful for throughput testing)
 `-D`       | `--dump-indexes`    | dump resulting indexes (full results) to stdout
 `-h`       | `-help`             | display help message
-           | `--help-verbose`    | display verbose help message
+&nbsp;     | `--help-verbose`    | display verbose help message
 `-i`       | `--in-text-file`    | input text file path (positional arg 1)
 `-I`       | `--in-pattern-file` | input pattern file path (positional arg 2)
 `-o`       | `--out-file`        | output file path
