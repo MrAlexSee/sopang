@@ -75,10 +75,10 @@ Parameter name   | Parameter description
 
 #### run_all.sh
 
-Parameter name | Parameter description
--------------- | ---------------------
-inputDir       | input directory containing `.eds` input ED text files and `.txt` input pattern files
-outFile        | base name for output files
+Parameter name   | Parameter description
+---------------- | ---------------------
+`inputDir`       | input directory containing `.eds` input ED text files and `.txt` input pattern files
+`outFile`        | base name for output files
 
 #### generate_synth.py
 
