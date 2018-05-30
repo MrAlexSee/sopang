@@ -13,7 +13,7 @@ Add Boost library to the path for compilation by setting `BOOST_DIR` in the make
 Type `make` for optimized compile.
 Comment out `OPTFLAGS` in the makefile in order to disable optimization.
 
-Tested with gcc 64-bit 7.2.0 and Boost 1.67.0 (not time-critical, used only for parameter and data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
+Tested with gcc 64-bit 7.2.0 and Boost 1.67.0 (the latter is not time-critical, used only for parameter and data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
 
 ## Usage
 
@@ -21,7 +21,7 @@ Basic usage: `./sopang [options] <input text file> <input pattern file>`
 
 Input text file (positional parameter 1 or named parameter `-i` or `--in-text-file`) should contain the elastic-degenerate text in the format `{A,C,}GAAT{AT,A}ATT`.
 Input pattern file (positional parameter 2 or named parameter `-I` or `--in-pattern-file`) should contain the list of patterns, each of the same length, separated with newline characters.
-Attached as part of the this package is a script `run_all.sh`, which allows for processing multiple input text (chromosome) and pattern files.
+Attached as part of this package is a script `run_all.sh`, which allows for processing multiple input text (chromosome) and pattern files.
 
 #### Command-line parameter description
 
