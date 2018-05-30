@@ -18,7 +18,7 @@ import random
 nSegments = 100 * 1000 # Total number of segments: 100, 500, 1000, 1600 thousands segments.
 alphabet = "ACGTN" # Alphabet for character sampling.
 
-# Number of segments (must be smaller or equal to nSegments) which are degenerate (indeterminate), i.e. contain multiple variants.
+# Number of segments (must be smaller than or equal to nSegments) which are degenerate (indeterminate), i.e. contain multiple variants.
 # 10% of the text as in Grossi et al.
 nDegeneratePositions = int(0.1 * nSegments)
 
