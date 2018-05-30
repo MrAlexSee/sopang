@@ -2,7 +2,7 @@
 
 This software is called **SOPanG** (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pangenome model). Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
 
-ED text is in a format: `{A,C,}GAAT{AT,A}ATT`. Braces determine the start and end of each indeterminate segment (degenerate segments, i.e. segments having multiple variants), and commas delimit segment variants. Determinate segments (i.e. segments having a single variant) are stored as regular contiguous strings.
+ED text is in a format: `{A,C,}GAAT{AT,A}ATT`. Braces determine the start and end of each indeterminate segment (degenerate segments, i.e. segments having multiple variants), and commas delimit segment variants. A trailing comma, as in `{A,C,}`, indicates an empty word. Determinate segments (i.e. segments having a single variant) are stored as regular contiguous strings.
 
 SOPanG returns the end positions of pattern occurrences in the ED text. More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).
 
@@ -88,7 +88,7 @@ Parameter name         | Parameter description
 ---------------------- | ---------------------
 `nSegments`            | total number of segments
 `alphabet`             | alphabet for character sampling
-`nDegeneratePositions` | number of segments (must be smaller or equal to `nSegments`) which are degenerate (indeterminate), i.e., contain multiple variants
+`nDegeneratePositions` | number of segments (must be smaller than or equal to `nSegments`) which are degenerate (indeterminate), i.e., contain multiple variants
 `nMaxSegmentVariants`  | maximum number of variants (`a`), the number of variants for each degenerate segment will be sampled from the interval `[2, a]`
 `nMaxVariantLength`    | maximum length of each segment variant (`b`), the length for each variant will be sampled from the interval `[0, b]` (segments might contain empty words)
 `outFile`              | output file path
