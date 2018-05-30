@@ -45,9 +45,9 @@ Testing on human genome and synthetic data.
 
 1. Download data from the 1000 Genomes project: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/.
 
-1. Run edso for each chromosome and variants file. Rename resulting files as `chr1.eds`, `chr2.eds`, ..., `chr23.eds`.
+1. Run EDSO for each chromosome and variants file. Rename resulting files as `chr1.eds`, `chr2.eds`, ..., `chr23.eds`.
 
-1. Generate synthetic data by running `python generate_synth.py` (requires Python 2.7) 4 times for the number of segments (parameter `nSegments`) set to 100, 500, 1000, and 1600. Rename files as `chr24.eds`, `chr25.eds`, `chr26.eds`, `chr27.eds`.
+1. Generate synthetic data by running `python generate_synth.py` (requires Python 2.7) 4 times for the number of segments (parameter `nSegments`) set to 100, 500, 1000, and 1600 thousands. Rename files as `chr24.eds`, `chr25.eds`, `chr26.eds`, `chr27.eds`.
 
 1. Set parameter `inputDir` in `run_all.sh` to the folder containing `.eds` files and pattern files (all pattern files are located in the `sample/` folder as part of this package).
 
