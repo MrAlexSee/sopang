@@ -1,6 +1,8 @@
 #define CATCH_CONFIG_MAIN
 
 #include <random>
+#include <string>
+#include <vector>
 
 #include "catch.hpp"
 #include "repeat.hpp"
@@ -10,46 +12,50 @@
 using namespace inverted_basilisk;
 using namespace std;
 
-const int nRandMedianElems = 101;
-const int nRandIter = 100;
+constexpr int nRandIter = 100;
 
-TEST_CASE("is median calculation correct for { 1, 2, 3 }", "[median]")
+constexpr int nRandMedianElems = 101;
+constexpr int minVal = 0;
+constexpr int maxVal = 1000;
+
+constexpr int nVectorStrings = 10;
+constexpr int strSize = 10;
+
+TEST_CASE("is median calculation correct for { 1, 2, 3 }", "[collections]")
 {
     int median1;
-    Helpers::calcStatsMedian(vector<int> { 1, 2, 3 }, &median1);
+    Helpers::calcStatsMedian({ 1, 2, 3 }, &median1);
     REQUIRE(median1 == 2);
 
     int median2;
-    Helpers::calcStatsMedian(vector<int> { 3, 2, 1 }, &median2);
+    Helpers::calcStatsMedian({ 3, 2, 1 }, &median2);
     REQUIRE(median1 == 2);
 }
 
-TEST_CASE("is median calculation correct for { 1, 2, 3, 4, 5 }", "[median]")
+TEST_CASE("is median calculation correct for { 1, 2, 3, 4, 5 }", "[collections]")
 {
     int median1;
-    Helpers::calcStatsMedian(vector<int> { 1, 2, 3, 4, 5 }, &median1);
+    Helpers::calcStatsMedian({ 1, 2, 3, 4, 5 }, &median1);
     REQUIRE(median1 == 3);
 
     int median2;
-    Helpers::calcStatsMedian(vector<int> { 5, 4, 3, 2, 1 }, &median2);
+    Helpers::calcStatsMedian({ 5, 4, 3, 2, 1 }, &median2);
     REQUIRE(median1 == 3);
 }
 
-TEST_CASE("is median calculation correct for { 1, 2, 3, 4, 5, 6 }", "[median]")
+TEST_CASE("is median calculation correct for { 1, 2, 3, 4, 5, 6 }", "[collections]")
 {
     int median1;
-    Helpers::calcStatsMedian(vector<int> { 1, 2, 3, 4, 5, 6 }, &median1);
+    Helpers::calcStatsMedian({ 1, 2, 3, 4, 5, 6 }, &median1);
     REQUIRE(median1 == 4);
 
     int median2;
-    Helpers::calcStatsMedian(vector<int> { 6, 5, 4, 3, 2, 1 }, &median2);
+    Helpers::calcStatsMedian({ 6, 5, 4, 3, 2, 1 }, &median2);
     REQUIRE(median1 == 4);
 }
 
-TEST_CASE("is median calculation correct for randomized odd #elems", "[median]")
+TEST_CASE("is median calculation correct for randomized odd #elems", "[collections]")
 {
-    const int minVal = 0, maxVal = 1000;
-
     random_device rd;
     mt19937 mt(rd());
     uniform_int_distribution<int> dist(minVal + 1, maxVal - 1);
@@ -75,7 +81,72 @@ TEST_CASE("is median calculation correct for randomized odd #elems", "[median]")
     });
 }
 
-TEST_CASE("is removing empty strings correct", "[string]")
+TEST_CASE("is join correct for empty vector", "[strings]")
 {
-    
+    REQUIRE(Helpers::join(vector<int> {}, "") == "");
+    REQUIRE(Helpers::join(vector<string> {}, "") == "");
+
+    REQUIRE(Helpers::join(vector<int> {}, ",") == "");
+    REQUIRE(Helpers::join(vector<string> {}, ",") == "");
+}
+
+TEST_CASE("is join correct", "[strings]")
+{
+    REQUIRE(Helpers::join(vector<int> {1, 2, 3}, "") == "123");
+    REQUIRE(Helpers::join(vector<int> {1, 2, 3}, ",") == "1,2,3");
+
+    REQUIRE(Helpers::join(vector<string> {"ala", "ma", "kota"}, "") == "alamakota");
+    REQUIRE(Helpers::join(vector<string> {"ala", "ma", "kota"}, ",") == "ala,ma,kota");
+    REQUIRE(Helpers::join(vector<string> {"ala", "ma", "kota"}, "--") == "ala--ma--kota");
+}
+
+TEST_CASE("is removing empty strings correct", "[strings]")
+{
+    vector<string> v1 { "ala", "", "ma", "", "kota", "" };
+    Helpers::removeEmptyStrings(v1);
+
+    REQUIRE(v1.size() == 3);
+    REQUIRE(Helpers::join(v1, "") == "alamakota");
+
+    vector<string> v2 { "ala", "", "ma", "", "kota", "", "", "", "", "", "", "", "a nie psa", "" };
+    Helpers::removeEmptyStrings(v2);
+
+    REQUIRE(v2.size() == 4);
+    REQUIRE(Helpers::join(v2, "") == "alamakotaa nie psa");
+}
+
+TEST_CASE("is removing empty strings correct for randomized", "[strings]")
+{
+    random_device rd;
+    mt19937 mt(rd());
+    uniform_int_distribution<int> dist(minVal + 1, maxVal - 1);
+
+    repeat(nRandIter, [&dist, &mt]() {
+        vector<string> vec;
+
+        for (int i = 0; i < nVectorStrings; ++i)
+        {
+            vec.push_back(Helpers::genRandomString(strSize));
+        }
+
+        for (int i = 0; i < nVectorStrings; ++i)
+        {
+            vec.push_back("");
+        }
+
+        REQUIRE(vec.size() == 2 * nVectorStrings);
+
+        Helpers::removeEmptyStrings(vec);
+        REQUIRE(vec.size() == nVectorStrings);
+    });
+}
+
+TEST_CASE("is generated random string of correct size", "[strings]")
+{
+    repeat(nRandIter, []() {
+        for (int size = 0; size <= strSize; ++size)
+        {
+            REQUIRE(Helpers::genRandomString(size).size() == size);
+        }
+    });
 }

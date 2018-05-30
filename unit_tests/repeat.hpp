@@ -1,3 +1,6 @@
+#ifndef REPEAT_HPP
+#define REPEAT_HPP
+
 #include <functional>
 
 void repeat(int count, std::function<void()> fun)
@@ -7,3 +10,5 @@ void repeat(int count, std::function<void()> fun)
         fun();
     }
 }
+
+#endif // REPEAT_HPP

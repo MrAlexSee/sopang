@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <type_traits>
 
 using namespace std;
 
@@ -14,6 +15,10 @@ namespace inverted_basilisk
 struct Helpers
 {
     Helpers() = delete;
+
+    /*
+     *** FILES
+     */
 
     static bool isFileReadable(const string &filePath)
     {
@@ -50,6 +55,10 @@ struct Helpers
         }
     }
 
+    /*
+     *** COLLECTIONS
+     */
+
     template<typename T>
     static void calcStatsMedian(const vector<T> &throughputVec, T *throughputMedian)
     {
@@ -62,6 +71,28 @@ struct Helpers
 
         sort(tmp.begin(), tmp.end());
         *throughputMedian = tmp[tmp.size() / 2];
+    }
+
+    /*
+     *** STRINGS
+     */
+
+    template<typename T>
+    static string join(const vector<T> &vec, const string &delim)
+    {
+        if (vec.size() == 0)
+        {
+            return "";
+        }
+
+        string res = "";
+
+        for (size_t i = 0; i < vec.size() - 1; ++i)
+        {
+            res += toString(vec[i]) + delim;
+        }
+
+        return res + toString(vec.back());
     }
 
     static void removeEmptyStrings(vector<string> &vec)
@@ -80,7 +111,38 @@ struct Helpers
             }
         }
     }
+
+    static string genRandomString(int size)
+    {
+        random_device rd;
+        mt19937 mt(rd());
+        uniform_int_distribution<int> dist(0, chLUTSize - 1);
+
+        string res = "";
+
+        for (int i = 0; i < size; ++i)
+        {
+            res += chLUT[dist(mt)];
+        }
+
+        return res;
+    }
+
+private:
+    template<typename T, typename = typename enable_if<is_arithmetic<T>::value, T>::type>
+    static string toString(T val)
+    {
+        return to_string(val);
+    }
+    inline static string toString(const string &str)
+    {
+        return str;
+    }
+
+    static constexpr const char *chLUT = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    static constexpr int chLUTSize = 62;
 };
+
 }
 
 #endif // HELPERS_HPP
