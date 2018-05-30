@@ -25,17 +25,17 @@ Attached as part of the sopang package is a script `run_all.sh`, which allows fo
 
 #### Command-line parameter description
 
-Short name | Long name           | Parameter description
----------- | ------------------- | ---------------------
-`-d`       | `--dump`            | dump input file info and throughput to output file (useful for throughput testing)
-`-D`       | `--dump-indexes`    | dump resulting indexes (full results) to stdout
-`-h`       | `--help`            | display help message
-&nbsp;     | `--help-verbose`    | display verbose help message
-`-i`       | `--in-text-file`    | input text file path (positional arg 1)
-`-I`       | `--in-pattern-file` | input pattern file path (positional arg 2)
-`-o`       | `--out-file`        | output file path
-`-p`       | `--pattern-count`   | maximum number of patterns read from top of the patterns file
-`-v`       | `--version`         | display version info
+Short name | Long name               | Parameter description
+---------- | ----------------------- | ---------------------
+`-d`       | `--dump`                | dump input file info and throughput to output file (useful for throughput testing)
+`-D`       | `--dump-indexes`        | dump resulting indexes (full results) to stdout
+`-h`       | `--help`                | display help message
+&nbsp;     | `--help-verbose`        | display verbose help message
+`-i`       | `--in-text-file arg`    | input text file path (positional arg 1)
+`-I`       | `--in-pattern-file arg` | input pattern file path (positional arg 2)
+`-o`       | `--out-file arg`        | output file path
+`-p`       | `--pattern-count arg`   | maximum number of patterns read from top of the patterns file
+`-v`       | `--version`             | display version info
 
 ## Testing
 
