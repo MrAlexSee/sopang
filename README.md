@@ -21,7 +21,7 @@ Basic usage: `./sopang [options] <input text file> <input pattern file>`
 
 Input text file (positional parameter 1 or named parameter `-i` or `--in-text-file`) should contain the elastic-degenerate text in the format `{A,C,}GAAT{AT,A}ATT`.
 Input pattern file (positional parameter 2 or named parameter `-I` or `--in-pattern-file`) should contain the list of patterns, each of the same length, separated with newline characters.
-Attached as part of the sopang package is a script `run_all.sh`, which allows for processing multiple input text (chromosome) and pattern files.
+Attached as part of the this package is a script `run_all.sh`, which allows for processing multiple input text (chromosome) and pattern files.
 
 #### Command-line parameter description
 
