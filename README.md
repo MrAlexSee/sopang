@@ -15,6 +15,8 @@ Comment out `OPTFLAGS` in the makefile in order to disable optimization.
 
 Tested with gcc 64-bit 7.2.0 and Boost 1.67.0 (the latter is not time-critical, used only for parameter and data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
 
+A binary (compiled executable) for Linux is available in the release (file name `sopang`).
+
 ## Usage
 
 Basic usage: `./sopang [options] <input text file> <input pattern file>`
