@@ -1,5 +1,4 @@
 CC        = g++
-EXE       = sopang
 CCFLAGS   = -Wall -pedantic -std=c++11
 OPTFLAGS  = -DNDEBUG -O3
 
@@ -9,9 +8,12 @@ INCLUDE   = -I$(BOOST_DIR)
 LDFLAGS   = -L$(BOOST_DIR)
 LDLIBS    = -lboost_program_options -lm
 
+EXE       = sopang
+OBJ       = main.o sopang.o
+
 all: $(EXE)
 
-$(EXE): main.o sopang.o
+$(EXE): $(OBJ)
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
 main.o: main.cpp helpers.hpp params.hpp
@@ -23,6 +25,6 @@ sopang.o: sopang.cpp sopang.hpp helpers.hpp
 .PHONY: clean
 
 clean:
-	rm -f main.o sopang.o $(EXE)
+	rm -f $(EXE) $(OBJ)
 
 rebuild: clean all
