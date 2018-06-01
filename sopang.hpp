@@ -6,6 +6,10 @@
 #include <unordered_set>
 #include <vector>
 
+#ifndef SOPANG_WHITEBOX
+#define SOPANG_WHITEBOX
+#endif
+
 using namespace std;
 
 namespace inverted_basilisk
@@ -34,6 +38,8 @@ private:
 
     uint64_t *dBuffer;
     uint64_t maskBuffer[maskBufferSize];
+
+    SOPANG_WHITEBOX
 };
 }
 

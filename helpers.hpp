@@ -2,6 +2,7 @@
 #define HELPERS_HPP
 
 #include <cmath>
+#include <cstdio>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -53,6 +54,11 @@ struct Helpers
         {
             outStream << endl;
         }
+    }
+
+    inline static bool removeFile(const string &filePath)
+    {
+        return remove(filePath.c_str()) == 0;
     }
 
     /*
@@ -112,7 +118,7 @@ struct Helpers
         }
     }
 
-    static string genRandomString(int size)
+    static string genRandomStringAlphNum(int size)
     {
         random_device rd;
         mt19937 mt(rd());

@@ -1,5 +1,3 @@
-#define CATCH_CONFIG_MAIN
-
 #include <random>
 #include <string>
 #include <vector>
@@ -9,10 +7,14 @@
 
 #include "../helpers.hpp"
 
-using namespace inverted_basilisk;
 using namespace std;
 
-constexpr int nRandIter = 100;
+namespace inverted_basilisk
+{
+
+namespace
+{
+constexpr int nRandIter = 10;
 
 constexpr int nRandMedianElems = 101;
 constexpr int minVal = 0;
@@ -20,6 +22,35 @@ constexpr int maxVal = 1000;
 
 constexpr int nVectorStrings = 10;
 constexpr int strSize = 10;
+
+const string testText = "Ala ma kota, a Jarek ma psa.";
+}
+
+TEST_CASE("is file dumping-reading symmetric for random file names", "[files]")
+{
+    repeat(nRandIter, []() {
+        string fileName = Helpers::genRandomStringAlphNum(strSize);
+
+        Helpers::dumpToFile(testText, fileName);
+        string read = Helpers::readFile(fileName);
+
+        REQUIRE(testText == read);
+        Helpers::removeFile(fileName);
+    });
+}
+
+TEST_CASE("is file removing correct", "[files]")
+{
+    repeat(nRandIter, []() {
+        string fileName = Helpers::genRandomStringAlphNum(strSize);
+        Helpers::dumpToFile(testText, fileName);
+
+        REQUIRE(Helpers::isFileReadable(fileName));
+
+        Helpers::removeFile(fileName);
+        REQUIRE(Helpers::isFileReadable(fileName) == false);
+    });
+}
 
 TEST_CASE("is median calculation correct for { 1, 2, 3 }", "[collections]")
 {
@@ -126,7 +157,7 @@ TEST_CASE("is removing empty strings correct for randomized", "[strings]")
 
         for (int i = 0; i < nVectorStrings; ++i)
         {
-            vec.push_back(Helpers::genRandomString(strSize));
+            vec.push_back(Helpers::genRandomStringAlphNum(strSize));
         }
 
         for (int i = 0; i < nVectorStrings; ++i)
@@ -141,12 +172,14 @@ TEST_CASE("is removing empty strings correct for randomized", "[strings]")
     });
 }
 
-TEST_CASE("is generated random string of correct size", "[strings]")
+TEST_CASE("is generated random alphanumeric string of correct size", "[strings]")
 {
     repeat(nRandIter, []() {
         for (int size = 0; size <= strSize; ++size)
         {
-            REQUIRE(Helpers::genRandomString(size).size() == size);
+            REQUIRE(Helpers::genRandomStringAlphNum(size).size() == size);
         }
     });
+}
+
 }
