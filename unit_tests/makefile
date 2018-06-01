@@ -18,10 +18,10 @@ helpers_tests.o: helpers_tests.cpp ../helpers.hpp $(TEST_FILES)
 	$(CC) $(CCFLAGS) -c helpers_tests.cpp
 
 sopang_tests.o: sopang_tests.cpp ../sopang.hpp $(TEST_FILES)
-	$(CC) $(CCFLAGS) -c sopang_tests.cpp ../sopang.cpp
+	$(CC) $(CCFLAGS) -c sopang_tests.cpp
 
 sopang.o: ../sopang.cpp ../sopang.hpp ../helpers.hpp
-	$(CC) $(CCFLAGS) -c sopang.cpp
+	$(CC) $(CCFLAGS) -c ../sopang.cpp
 
 run: all
 	./$(EXE)
