@@ -218,6 +218,39 @@ TEST_CASE("is parsing patterns correct for trailing whitespace", "[parsing]")
     REQUIRE(Helpers::join(patterns, "") == "12345");
 }
 
+TEST_CASE("is matching for a single segment correct, whole segment match", "[matching]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGT", alphabet);
+
+    REQUIRE(res.size() == 1);
+    REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
+}
+
+TEST_CASE("is matching for a single segment correct, partial segment match", "[matching]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res1 = sopang.match(segments, nSegments, segmentSizes, "ACG", alphabet);
+
+    REQUIRE(res1.size() == 1);
+    REQUIRE(res1.count(0) == 1); // 0 = index of the first segment.
+
+    unordered_set<unsigned> res2 = sopang.match(segments, nSegments, segmentSizes, "CGT", alphabet);
+
+    REQUIRE(res2.size() == 1);
+    REQUIRE(res2.count(0) == 1); // 0 = index of the first segment.
+}
+
 TEST_CASE("is filling mask buffer correct for a predefined pattern", "[matching]")
 {
     Sopang sopang;
