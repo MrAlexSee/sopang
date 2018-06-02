@@ -2,7 +2,7 @@
  ***
  SOPanG, a simple tool for exact pattern matching over a so-called elastic-degenerate string, a recently proposed simplified model for the pan-genome.
  ***
- Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
+ Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub. License: GNU LGPL v3.
  ***
  Set BOOST_DIR in makefile and type "make" for optimized compile.
  ***
