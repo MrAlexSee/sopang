@@ -1,2 +1,4 @@
 /*.o
+sopang
 unit_tests/*.o
+unit_tests/main_tests

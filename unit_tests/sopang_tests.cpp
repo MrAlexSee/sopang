@@ -34,6 +34,11 @@ const string alphabet = "ACGTN";
 constexpr int maxPatSize = 64;
 }
 
+TEST_CASE("is parsing patterns for an empty string correct", "[parsing]")
+{
+    
+}
+
 TEST_CASE("is parsing patterns for a single pattern correct", "[parsing]")
 {
     string str = "1";
@@ -80,13 +85,43 @@ TEST_CASE("is filling mask buffer correct for a predefined pattern", "[matching]
 
     uint64_t maskC = maskBuffer[static_cast<size_t>('C')];
 
+    REQUIRE((maskC & static_cast<uint64_t>(0x1)) != 0x0);
+    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 1)) == 0x0);
+    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 2)) != 0x0);
+    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 3)) != 0x0);
+    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 4)) == 0x0);
+    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 5)) != 0x0);
+    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 6)) != 0x0);
+
     uint64_t maskG = maskBuffer[static_cast<size_t>('G')];
+
+    REQUIRE((maskG & static_cast<uint64_t>(0x1)) != 0x0);
+    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 1)) != 0x0);
+    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 2)) != 0x0);
+    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 3)) != 0x0);
+    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 4)) != 0x0);
+    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 5)) == 0x0);
+    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 6)) != 0x0);
 
     uint64_t maskT = maskBuffer[static_cast<size_t>('T')];
 
+    REQUIRE((maskT & static_cast<uint64_t>(0x1)) != 0x0);
+    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 1)) != 0x0);
+    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 2)) != 0x0);
+    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 3)) != 0x0);
+    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 4)) != 0x0);
+    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 5)) != 0x0);
+    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 6)) == 0x0);
+
     uint64_t maskN = maskBuffer[static_cast<size_t>('N')];
 
-
+    REQUIRE((maskN & static_cast<uint64_t>(0x1)) != 0x0);
+    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 1)) != 0x0);
+    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 2)) != 0x0);
+    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 3)) != 0x0);
+    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 4)) != 0x0);
+    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 5)) != 0x0);
+    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 6)) != 0x0);
 }
 
 TEST_CASE("is filling mask buffer correct for repeated same character in pattern", "[matching]")
