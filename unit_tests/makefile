@@ -1,7 +1,7 @@
 CC            = g++
 CCFLAGS       = -Wall -pedantic -std=c++11
 
-# Try testing both without and with optimization.
+# Try testing both without and with the optimization.
 # OPTFLAGS  	  = -DNDEBUG -O3
 
 TEST_FILES    = catch.hpp repeat.hpp

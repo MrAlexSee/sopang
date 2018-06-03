@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdio>
 #include <fstream>
+#include <random>
 #include <string>
 #include <sstream>
 #include <type_traits>
