@@ -378,6 +378,21 @@ TEST_CASE("is matching multiple indeterminate and determinate segments spanning 
     }
 }
 
+TEST_CASE("is matching pattern starting and ending with text correct", "[matching]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("{A,C}ACGT{G,C}ACGT{,T}ACGT{GGGG,TTTT,C}AAC{A,G}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "AACG", alphabet);
+
+    REQUIRE(res.size() == 2);
+    REQUIRE(res.count(1) == 1);
+    REQUIRE(res.count(8) == 1);
+}
+
 TEST_CASE("is matching multiple indeterminate and determinate segments with multiple empty words spanning correct", "[matching]")
 {
     unsigned nSegments;
