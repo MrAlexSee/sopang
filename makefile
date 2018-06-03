@@ -5,7 +5,7 @@ OPTFLAGS  = -DNDEBUG -O3
 BOOST_DIR = "/home/alex/boost_1_67_0"
 
 INCLUDE   = -I$(BOOST_DIR)
-LDFLAGS   = -L$(BOOST_DIR)
+LDFLAGS   = -L$(BOOST_DIR) -static
 LDLIBS    = -lboost_program_options -lm
 
 EXE       = sopang
