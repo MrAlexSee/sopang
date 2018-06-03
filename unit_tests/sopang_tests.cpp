@@ -342,7 +342,7 @@ TEST_CASE("is matching single indeterminate and determinate segments spanning co
     REQUIRE(res.count(2) == 1);
 }
 
-TEST_CASE("is matching multiple indeterminate and determinate segments spanning correct", "[matching]")
+TEST_CASE("is matching multiple indeterminate and determinate segments spanning correct, determinate start and end", "[matching]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -355,6 +355,60 @@ TEST_CASE("is matching multiple indeterminate and determinate segments spanning 
     REQUIRE(res.size() == 4);
     
     for (unsigned i : { 1, 3, 4, 5 })
+    {
+        REQUIRE(res.count(i) == 1);
+    }
+}
+
+TEST_CASE("is matching multiple indeterminate and determinate segments spanning correct, indeterminate start and end", "[matching]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("{A,C}ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT,C}ACGT{A,C}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "CAC", alphabet);
+
+    REQUIRE(res.size() == 3);
+    
+    for (unsigned i : { 1, 3, 7 })
+    {
+        REQUIRE(res.count(i) == 1);
+    }
+}
+
+TEST_CASE("is matching multiple indeterminate and determinate segments with multiple empty words spanning correct", "[matching]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "TAC", alphabet);
+
+    REQUIRE(res.size() == 4);
+    
+    for (unsigned i : { 2, 4, 6, 8 })
+    {
+        REQUIRE(res.count(i) == 1);
+    }
+}
+
+TEST_CASE("is matching multiple indeterminate and determinate segments with multiple words spanning correct, non-dna alphabet", "[matching]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("AACABBCBBC{A,AAB,ACCA}BB{C,ACABBCBB,CBA}BACABBC{B,CABB,BBC,AACABB,CBC}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "CABBCB", "ABC");
+
+    REQUIRE(res.size() == 4);
+    
+    for (unsigned i : { 0, 3, 4, 5 })
     {
         REQUIRE(res.count(i) == 1);
     }
