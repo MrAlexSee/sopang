@@ -31,7 +31,7 @@ struct Params
     // CONSTANTS
     static constexpr int errorExitCode = 1; // Returned from main on failure.
 
-    const string versionInfo = "sopang v1.1.0"; // Current version: major.minor.patch
+    const string versionInfo = "sopang v1.2.0"; // Current version: major.minor.patch
     const string usageInfoString = "[options] <input text file> <input pattern file>";
 
     const string verboseInfoString =
