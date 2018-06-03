@@ -21,8 +21,16 @@ public:
     Sopang();
     ~Sopang();
 
+    /*
+     *** PARSING
+     */
+
     static const string *const *parseTextArray(string text, unsigned *nSegments, unsigned **segmentSizes);
     static vector<string> parsePatterns(string patternsStr);
+
+    /*
+     *** MATCHING
+     */
 
     unordered_set<unsigned> match(const string *const *segments,
                                   unsigned nSegments, const unsigned *segmentSizes,
