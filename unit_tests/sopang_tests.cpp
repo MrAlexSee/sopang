@@ -478,24 +478,25 @@ TEST_CASE("is matching pattern length 64 correct", "[matching]")
 
 TEST_CASE("is matching pattern equal to text correct", "[matching]")
 {
-    // unsigned nSegments;
-    // unsigned *segmentSizes;
-    // const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+    repeat(nRandIter, []() {
+        for (int size = 1; size <= maxPatSize; ++size)
+        {    
+            string text = Helpers::genRandomString(size, alphabet);
+            Sopang sopang;
 
-    // for (int size = 1; size <= maxPatSize; ++size)
-    // {
-    //     repeat(nRandIter, []() {
-    //         string text = Helpers::genRan
+            unsigned nSegments;
+            unsigned *segmentSizes;
+            const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+        
+            REQUIRE(nSegments == 1);
+            REQUIRE(segmentSizes[0] == 1);
 
-    //         Sopang sopang;
-    //         unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGT", alphabet);
-
-    //         REQUIRE(res.size() == 3);
-    //         REQUIRE(res.count(2) == 1);
-    //         REQUIRE(res.count(4) == 1);
-    //         REQUIRE(res.count(6) == 1);
-    //     });
-    // }
+            unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, text, alphabet);
+        
+            REQUIRE(res.size() == 1);
+            REQUIRE(res.count(0) == 1);
+        }
+    });
 }
 
 TEST_CASE("is filling mask buffer correct for a predefined pattern", "[matching]")
