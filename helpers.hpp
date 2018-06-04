@@ -119,6 +119,22 @@ struct Helpers
         }
     }
 
+    static string genRandomString(int size, string alphabet)
+    {   
+        random_device rd;
+        mt19937 mt(rd());
+        uniform_int_distribution<int> dist(0, alphabet.size() - 1);
+
+        string res = "";
+
+        for (int i = 0; i < size; ++i)
+        {
+            res += alphabet[dist(mt)];
+        }
+
+        return res;
+    }
+
     static string genRandomStringAlphNum(int size)
     {
         random_device rd;

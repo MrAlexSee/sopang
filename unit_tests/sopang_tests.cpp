@@ -2,6 +2,7 @@
     friend class SopangWhitebox;
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "catch.hpp"
@@ -31,7 +32,9 @@ public:
 namespace
 {
 const string alphabet = "ACGTN";
+
 constexpr int maxPatSize = 64;
+constexpr int nRandIter = 10;
 }
 
 TEST_CASE("is parsing text for an empty string correct", "[parsing]")
@@ -427,6 +430,72 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
     {
         REQUIRE(res.count(i) == 1);
     }
+}
+
+TEST_CASE("is matching pattern length 8 correct", "[matching]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGT", alphabet);
+
+    REQUIRE(res.size() == 3);
+    REQUIRE(res.count(2) == 1);
+    REQUIRE(res.count(4) == 1);
+    REQUIRE(res.count(6) == 1);
+}
+
+TEST_CASE("is matching pattern length 16 correct", "[matching]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGT", alphabet);
+
+    REQUIRE(res.size() == 3);
+    REQUIRE(res.count(2) == 1);
+    REQUIRE(res.count(4) == 1);
+    REQUIRE(res.count(6) == 1);
+
+    // TODO
+}
+
+TEST_CASE("is matching pattern length 32 correct", "[matching]")
+{
+    // TODO
+}
+
+TEST_CASE("is matching pattern length 64 correct", "[matching]")
+{
+    // TODO
+}
+
+TEST_CASE("is matching pattern equal to text correct", "[matching]")
+{
+    // unsigned nSegments;
+    // unsigned *segmentSizes;
+    // const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+
+    // for (int size = 1; size <= maxPatSize; ++size)
+    // {
+    //     repeat(nRandIter, []() {
+    //         string text = Helpers::genRan
+
+    //         Sopang sopang;
+    //         unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGT", alphabet);
+
+    //         REQUIRE(res.size() == 3);
+    //         REQUIRE(res.count(2) == 1);
+    //         REQUIRE(res.count(4) == 1);
+    //         REQUIRE(res.count(6) == 1);
+    //     });
+    // }
 }
 
 TEST_CASE("is filling mask buffer correct for a predefined pattern", "[matching]")

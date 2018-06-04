@@ -1,5 +1,7 @@
+#include <cctype>
 #include <random>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "catch.hpp"
@@ -21,7 +23,7 @@ constexpr int minVal = 0;
 constexpr int maxVal = 1000;
 
 constexpr int nVectorStrings = 10;
-constexpr int strSize = 10;
+constexpr int maxStrSize = 10;
 
 const string testText = "Ala ma kota, a Jarek ma psa.";
 }
@@ -29,7 +31,7 @@ const string testText = "Ala ma kota, a Jarek ma psa.";
 TEST_CASE("is file dumping-reading symmetric for random file names", "[files]")
 {
     repeat(nRandIter, []() {
-        string fileName = Helpers::genRandomStringAlphNum(strSize);
+        string fileName = Helpers::genRandomStringAlphNum(maxStrSize);
 
         Helpers::dumpToFile(testText, fileName);
         string read = Helpers::readFile(fileName);
@@ -42,7 +44,7 @@ TEST_CASE("is file dumping-reading symmetric for random file names", "[files]")
 TEST_CASE("is file removing correct", "[files]")
 {
     repeat(nRandIter, []() {
-        string fileName = Helpers::genRandomStringAlphNum(strSize);
+        string fileName = Helpers::genRandomStringAlphNum(maxStrSize);
         Helpers::dumpToFile(testText, fileName);
 
         REQUIRE(Helpers::isFileReadable(fileName));
@@ -157,7 +159,7 @@ TEST_CASE("is removing empty strings correct for randomized", "[strings]")
 
         for (int i = 0; i < nVectorStrings; ++i)
         {
-            vec.push_back(Helpers::genRandomStringAlphNum(strSize));
+            vec.push_back(Helpers::genRandomStringAlphNum(maxStrSize));
         }
 
         for (int i = 0; i < nVectorStrings; ++i)
@@ -172,12 +174,37 @@ TEST_CASE("is removing empty strings correct for randomized", "[strings]")
     });
 }
 
-TEST_CASE("is generated random alphanumeric string of correct size", "[strings]")
+TEST_CASE("is generated random alphanumeric string of correct size and sampled from correct alphabet", "[strings]")
 {
     repeat(nRandIter, []() {
-        for (int size = 0; size <= strSize; ++size)
+        for (int size = 0; size <= maxStrSize; ++size)
         {
-            REQUIRE(Helpers::genRandomStringAlphNum(size).size() == size);
+            string str = Helpers::genRandomStringAlphNum(size);
+            REQUIRE(str.size() == size);
+
+            for (const char c : str)
+            {
+                REQUIRE(isalnum(c));
+            }
+        }
+    });
+}
+
+TEST_CASE("is generated random string of correct size and sampled from correct alphabet", "[strings]")
+{
+    string alphabet = "ACGTN";
+    unordered_set<char> chars(alphabet.begin(), alphabet.end());
+
+    repeat(nRandIter, [&alphabet, &chars]() {
+        for (int size = 0; size <= maxStrSize; ++size)
+        {
+            string str = Helpers::genRandomString(size, alphabet);
+            REQUIRE(str.size() == size);
+
+            for (const char c : str)
+            {
+                REQUIRE(chars.count(c) == 1);
+            }
         }
     });
 }
