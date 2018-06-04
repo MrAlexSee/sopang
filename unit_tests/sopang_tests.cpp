@@ -456,24 +456,38 @@ TEST_CASE("is matching pattern length 16 correct", "[matching]")
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGT", alphabet);
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGTACGTACGT", alphabet);
 
-    REQUIRE(res.size() == 3);
-    REQUIRE(res.count(2) == 1);
-    REQUIRE(res.count(4) == 1);
+    REQUIRE(res.size() == 1);
     REQUIRE(res.count(6) == 1);
-
-    // TODO
 }
 
 TEST_CASE("is matching pattern length 32 correct", "[matching]")
 {
-    // TODO
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}CGTACGT{A,}CGTACGT{A,CGT}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGTACGTACGTACGTACGTACGTACGT",alphabet);
+
+    REQUIRE(res.size() == 1);
+    REQUIRE(res.count(10) == 1);
 }
 
 TEST_CASE("is matching pattern length 64 correct", "[matching]")
 {
-    // TODO
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}CGTACGT{A,}CGTACGT{A,}CGTACGTACGTACGTACGTACGTACGTACGT{A,CGT}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT", alphabet);
+
+    REQUIRE(res.size() == 1);
+    REQUIRE(res.count(12) == 1);
 }
 
 TEST_CASE("is matching pattern equal to text correct", "[matching]")
