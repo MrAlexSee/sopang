@@ -207,4 +207,5 @@ void Sopang::fillPatternMaskBuffer(const string &pattern, const string &alphabet
         maskBuffer[static_cast<unsigned char>(pattern[iC])] &= (~(0x1ULL << iC));
     }
 }
+
 }

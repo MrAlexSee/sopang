@@ -179,6 +179,25 @@ TEST_CASE("is parsing text for indeterminate segments with empty words correct",
     REQUIRE(segments[2][2] == "C");
 }
 
+TEST_CASE("is parsing text with spaces correct", "[parsing]")
+{
+    unsigned nSegments = 1000;
+    unsigned *segmentSizes;
+
+    const string *const *segments = Sopang::parseTextArray("{AC, CG}{A,,C C C}", &nSegments, &segmentSizes);
+
+    REQUIRE(nSegments == 2);
+
+    REQUIRE(segmentSizes[0] == 2);
+    REQUIRE(segmentSizes[1] == 3);
+    
+    REQUIRE(segments[0][0] == "AC");
+    REQUIRE(segments[0][1] == " CG");
+    REQUIRE(segments[1][0] == "A");
+    REQUIRE(segments[1][1] == "");
+    REQUIRE(segments[1][2] == "C C C");
+}
+
 TEST_CASE("is parsing patterns for an empty string correct", "[parsing]")
 {
     vector<string> empty = Sopang::parsePatterns("");
@@ -409,6 +428,24 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
     REQUIRE(res.size() == 4);
     
     for (unsigned i : { 2, 4, 6, 8 })
+    {
+        REQUIRE(res.count(i) == 1);
+    }
+}
+
+TEST_CASE("is matching pattern for contiguous indeterminate segments correct", "[matching]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}{,AA}{,AAAAA,TTTT}{A,}C", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "AAA", alphabet);
+
+    REQUIRE(res.size() == 3);
+    
+    for (unsigned i : { 2, 3, 4 })
     {
         REQUIRE(res.count(i) == 1);
     }
