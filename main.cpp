@@ -83,6 +83,7 @@ int handleParams(int argc, const char **argv)
        ("dump-indexes,D", "dump resulting indexes (full results) to stdout")
        ("help,h", "display help message")
        ("help-verbose", "display verbose help message")
+       ("approx,k", po::value<int>(&params.kApprox), "perform approximate search (Hamming distance) for k errors")
        ("in-text-file,i", po::value<string>(&params.inTextFile)->required(), "input text file path (positional arg 1)")
        ("in-pattern-file,I", po::value<string>(&params.inPatternFile)->required(), "input pattern file path (positional arg 2)")
        ("out-file,o", po::value<string>(&params.outFile), "output file path")
@@ -295,6 +296,7 @@ double measure(const string *const *segments, unsigned nSegments,
                const unsigned *segmentSizes, const string &pattern)
 {
     Sopang sopang;
+
 
     clock_t start = std::clock();
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, params.alphabet);

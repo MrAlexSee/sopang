@@ -21,6 +21,7 @@ struct Params
     bool dumpToFile = false; // Dump input file info and throughput to output file (outFile). Cmd arg -d.
     bool dumpIndexes = false; // Dump resulting indexes (full results) to stdout. Cmd arg -D.
 
+    int kApprox = -1; // Number of errors for approximate search (Hamming). -1 = perform exact search. Cmd arg -k.
     int nPatterns = -1; // Maximum number of patterns read from top of the patterns file; -1 = ignore the pattern count limit. Cmd arg -p.
 
     string inTextFile = ""; // Input text file path (positional arg 1).

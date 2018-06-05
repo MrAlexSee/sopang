@@ -33,7 +33,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
     vector<string> curSegment;
     string curStr = "";
 
-    for (int i = 0; text[i] != '\0'; ++i)
+    for (size_t i = 0; text[i] != '\0'; ++i)
     {
         if (text[i] != '{' and text[i] != '}') // Inside a string or segment: comma or string character
         {
@@ -190,6 +190,79 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
     return res;
 }
 
+
+unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
+                                            unsigned nSegments, const unsigned *segmentSizes,
+                                            const string &pattern, const string &alphabet,
+                                            unsigned k)
+{
+    assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
+    unordered_set<unsigned> res;
+
+    fillPatternMaskBufferApprox(pattern, alphabet);
+
+    const uint64_t counterMask = 0xFULL - k;
+    const uint64_t hitMask = (0x1ULL << (pattern.size() * saCounterSize - 1));
+    
+    uint64_t D = 0x0ULL;
+
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        D |= (counterMask << (i * saCounterSize));
+    }
+
+    for (unsigned iS = 0; iS < nSegments; ++iS)
+    {
+        assert(segmentSizes[iS] > 0 and segmentSizes[iS] <= dBufferSize);
+
+        for (unsigned iD = 0; iD < segmentSizes[iS]; ++iD)
+        {
+            dBuffer[iD] = D;
+
+            for (size_t iC = 0; iC < segments[iS][iD].size(); ++iC)
+            {
+                const char c = segments[iS][iD][iC];
+
+                assert(c > 0 and static_cast<unsigned char>(c) < maskBufferSize);
+                assert(alphabet.find(c) != string::npos);
+
+                dBuffer[iD] <<= saCounterSize;
+                dBuffer[iD] += counterMask;
+
+                dBuffer[iD] += maskBuffer[static_cast<unsigned char>(c)];
+
+                if ((dBuffer[iD] & hitMask) == 0x0)
+                {
+                    res.insert(iS);
+                }
+            }
+        }
+
+        D = 0x0ULL;
+        
+        // As a join operation, we take the minimum (the most promising alternative) from each counter.
+        for (size_t i = 0; i < pattern.size(); ++i)
+        {
+            const unsigned saBitShiftLeft = wordSize - (i + 1) * saCounterSize;
+            uint64_t min = ((dBuffer[0] << saBitShiftLeft) >> saBitShiftRight);
+
+            for (unsigned iD = 1; iD < segmentSizes[iS]; ++iD)
+            {
+                uint64_t cur = ((dBuffer[iD] << saBitShiftLeft) >> saBitShiftRight);
+                
+                if (cur < min)
+                {
+                    min = cur;
+                }
+            }
+
+            D |= (min << (i * saCounterSize));
+        }
+    }
+
+    return res;
+}
+
 void Sopang::fillPatternMaskBuffer(const string &pattern, const string &alphabet)
 {
     assert(pattern.size() > 0 and pattern.size() <= wordSize);
@@ -201,10 +274,34 @@ void Sopang::fillPatternMaskBuffer(const string &pattern, const string &alphabet
         maskBuffer[static_cast<unsigned char>(c)] = allOnes;
     }
 
-    for (unsigned iC = 0; iC < pattern.size(); ++iC)
+    for (size_t iC = 0; iC < pattern.size(); ++iC)
     {
         assert(pattern[iC] > 0 and static_cast<unsigned char>(pattern[iC]) < maskBufferSize);
         maskBuffer[static_cast<unsigned char>(pattern[iC])] &= (~(0x1ULL << iC));
+    }
+}
+
+void Sopang::fillPatternMaskBufferApprox(const string &pattern, const string &alphabet)
+{
+    assert(pattern.size() > 0 and pattern.size() <= wordSize);
+    assert(alphabet.size() > 0);
+
+    for (const char c : alphabet)
+    {
+        assert(c > 0 and static_cast<unsigned char>(c) < maskBufferSize);
+        maskBuffer[static_cast<unsigned char>(c)] = 0x0ULL;
+
+        for (size_t iC = 0; iC < pattern.size(); ++iC)
+        {
+            maskBuffer[static_cast<unsigned char>(c)] |= (0x1ULL << (iC * saCounterSize));
+        }    
+    }
+
+    for (size_t iC = 0; iC < pattern.size(); ++iC)
+    {
+        assert(pattern[iC] > 0 and static_cast<unsigned char>(pattern[iC]) < maskBufferSize);
+        // We zero the bit at the counter position corresponding to the current character in the pattern.
+        maskBuffer[static_cast<unsigned char>(pattern[iC])] &= (~(0x1ULL << (iC * saCounterSize)));
     }
 }
 
