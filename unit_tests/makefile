@@ -7,7 +7,7 @@ CCFLAGS       = -Wall -pedantic -std=c++11
 TEST_FILES    = catch.hpp repeat.hpp
 
 EXE 	      = main_tests
-OBJ           = main_tests.o helpers_tests.o sopang_tests.o sopang.o
+OBJ           = main_tests.o helpers_tests.o sopang_approx_tests.o sopang_exact_tests.o sopang_parsing_tests.o sopang.o
 
 all: $(EXE)
 
@@ -20,8 +20,14 @@ main_tests.o: main_tests.cpp catch.hpp
 helpers_tests.o: helpers_tests.cpp ../helpers.hpp $(TEST_FILES)
 	$(CC) $(CCFLAGS) $(OPTFLAGS) -c helpers_tests.cpp
 
-sopang_tests.o: sopang_tests.cpp ../sopang.hpp ../helpers.hpp $(TEST_FILES)
-	$(CC) $(CCFLAGS) $(OPTFLAGS) -c sopang_tests.cpp
+sopang_approx_tests.o: sopang_approx_tests.cpp sopang_whitebox.hpp ../sopang.hpp ../helpers.hpp $(TEST_FILES)
+	$(CC) $(CCFLAGS) $(OPTFLAGS) -c sopang_approx_tests.cpp
+
+sopang_exact_tests.o: sopang_exact_tests.cpp sopang_whitebox.hpp ../sopang.hpp ../helpers.hpp $(TEST_FILES)
+	$(CC) $(CCFLAGS) $(OPTFLAGS) -c sopang_exact_tests.cpp
+
+sopang_parsing_tests.o: sopang_parsing_tests.cpp ../sopang.hpp ../helpers.hpp $(TEST_FILES)
+	$(CC) $(CCFLAGS) $(OPTFLAGS) -c sopang_parsing_tests.cpp
 
 sopang.o: ../sopang.cpp ../sopang.hpp ../helpers.hpp
 	$(CC) $(CCFLAGS) $(OPTFLAGS) -c ../sopang.cpp
