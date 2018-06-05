@@ -111,7 +111,7 @@ TEST_CASE("is parsing text for determinate and indeterminate segments correct, s
     REQUIRE(segments[5][0] == "ACG");
 }
 
-TEST_CASE("is parsing text for repeated indeterminate segment correct", "[parsing]")
+TEST_CASE("is parsing text for a repeated indeterminate segment correct", "[parsing]")
 {
     unsigned nSegments = 1000;
     unsigned *segmentSizes;
@@ -171,6 +171,7 @@ TEST_CASE("is parsing text with spaces correct", "[parsing]")
     REQUIRE(segmentSizes[0] == 2);
     REQUIRE(segmentSizes[1] == 3);
     
+    // Spaces are not ignored.
     REQUIRE(segments[0][0] == "AC");
     REQUIRE(segments[0][1] == " CG");
     REQUIRE(segments[1][0] == "A");
@@ -193,7 +194,7 @@ TEST_CASE("is parsing patterns for a single pattern correct", "[parsing]")
     REQUIRE(patterns[0] == str);
 }
 
-TEST_CASE("is parsing patterns correct", "[parsing]")
+TEST_CASE("is parsing patterns with single newlines correct", "[parsing]")
 {
     string str = "1\n2\n3\n4\n5";
     vector<string> patterns = Sopang::parsePatterns(str);

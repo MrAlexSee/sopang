@@ -196,6 +196,8 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
                                             unsigned k)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
+    assert(k > 0);
+
     unordered_set<unsigned> res;
 
     fillPatternMaskBufferApprox(pattern, alphabet);
