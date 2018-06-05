@@ -78,7 +78,6 @@ TEST_CASE("is matching single letter pattern correct, multiple matches", "[exact
     Sopang sopang;
 
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "A", alphabet);
-
     REQUIRE(res.size() == 6);
     
     for (unsigned i : { 0, 1, 2, 3, 5, 6 })
@@ -96,7 +95,6 @@ TEST_CASE("is matching multiple determinate segments correct, whole segment matc
     Sopang sopang;
 
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGT", alphabet);
-
     REQUIRE(res.size() == 4);
 
     for (unsigned i : { 0, 2, 4, 6 })
@@ -114,7 +112,6 @@ TEST_CASE("is matching multiple determinate segments correct, partial segment ma
     Sopang sopang;
 
     unordered_set<unsigned> res1 = sopang.match(segments, nSegments, segmentSizes, "ACG", alphabet);
-
     REQUIRE(res1.size() == 4);
 
     for (unsigned i : { 0, 2, 4, 6 })
@@ -123,7 +120,6 @@ TEST_CASE("is matching multiple determinate segments correct, partial segment ma
     }
 
     unordered_set<unsigned> res2 = sopang.match(segments, nSegments, segmentSizes, "CGT", alphabet);
-
     REQUIRE(res2.size() == 4);
     
     for (unsigned i : { 0, 2, 4, 6 })
@@ -155,7 +151,6 @@ TEST_CASE("is matching multiple indeterminate and determinate segments spanning 
     Sopang sopang;
 
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTA", alphabet);
-
     REQUIRE(res.size() == 4);
     
     for (unsigned i : { 1, 3, 4, 5 })
@@ -173,7 +168,6 @@ TEST_CASE("is matching multiple indeterminate and determinate segments spanning 
     Sopang sopang;
 
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "CAC", alphabet);
-
     REQUIRE(res.size() == 3);
     
     for (unsigned i : { 1, 3, 7 })
@@ -191,8 +185,8 @@ TEST_CASE("is matching pattern starting and ending with text correct", "[exact]"
     Sopang sopang;
 
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "AACG", alphabet);
-
     REQUIRE(res.size() == 2);
+
     REQUIRE(res.count(1) == 1);
     REQUIRE(res.count(8) == 1);
 }
@@ -206,7 +200,6 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
     Sopang sopang;
 
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "TAC", alphabet);
-
     REQUIRE(res.size() == 4);
     
     for (unsigned i : { 2, 4, 6, 8 })
@@ -224,7 +217,6 @@ TEST_CASE("is matching pattern for contiguous indeterminate segments correct", "
     Sopang sopang;
 
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "AAA", alphabet);
-
     REQUIRE(res.size() == 3);
     
     for (unsigned i : { 2, 3, 4 })
@@ -242,7 +234,6 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
     Sopang sopang;
 
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "CABBCB", "ABC");
-
     REQUIRE(res.size() == 4);
     
     for (unsigned i : { 0, 3, 4, 5 })
@@ -260,11 +251,12 @@ TEST_CASE("is matching pattern length 8 correct", "[exact]")
     Sopang sopang;
 
     unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGT", alphabet);
-
     REQUIRE(res.size() == 3);
-    REQUIRE(res.count(2) == 1);
-    REQUIRE(res.count(4) == 1);
-    REQUIRE(res.count(6) == 1);
+
+    for (unsigned i : { 2, 4, 6 })
+    {
+        REQUIRE(res.count(i) == 1);
+    }
 }
 
 TEST_CASE("is matching pattern length 16 correct", "[exact]")

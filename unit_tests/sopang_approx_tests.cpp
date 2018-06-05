@@ -33,6 +33,7 @@ TEST_CASE("is matching for a single segment exact correct, whole segment match",
     for (unsigned k : { 1, 2, 3, 4 })
     {
         unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, "ACGT", alphabet, k);
+        
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
     }
@@ -51,6 +52,7 @@ TEST_CASE("is matching for a single segment approx correct for 1 error, whole se
         for (unsigned k : { 1, 2, 3, 4 })
         {
             unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, k);
+          
             REQUIRE(res.size() == 1);
             REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
         }
@@ -73,6 +75,7 @@ TEST_CASE("is matching for a single segment approx correct for 2 errors, whole s
         for (unsigned k : { 2, 3, 4 })
         {
             unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, k);
+            
             REQUIRE(res.size() == 1);
             REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
         }
@@ -89,17 +92,13 @@ TEST_CASE("is matching approx multiple determinate segments correct for 1 error,
 
     for (const string &pattern : { "NCGT", "ANGT", "ACNT", "ACGN" })
     {
-        for (unsigned k : { 1, 2, 3, 4 })
-        {
-            unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, k);
-            
-            REQUIRE(res.size() == 4);
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        REQUIRE(res.size() == 4);
 
-            for (unsigned i : { 0, 2, 4, 6 })
-            {
-                REQUIRE(res.count(i) == 1);
-            }            
-        }
+        for (unsigned i : { 0, 2, 4, 6 })
+        {
+            REQUIRE(res.count(i) == 1);
+        }            
     }
 }
 
@@ -113,18 +112,13 @@ TEST_CASE("is matching approx multiple determinate segments correct for 2 errors
 
     for (const string &pattern : { "NNGT", "ANNT", "ACNN" })
     {
-        unordered_set<unsigned> res1 = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
-        REQUIRE(res1.size() == 0);
-        
-        for (unsigned k : { 2, 3, 4 })
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 2);
+        REQUIRE(res.size() == 4);
+
+        for (unsigned i : { 0, 2, 4, 6 })
         {
-            unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, k);
-            
-            for (unsigned i : { 0, 2, 4, 6 })
-            {
-                REQUIRE(res.count(i) == 1);
-            }
-        }
+            REQUIRE(res.count(i) == 1);
+        }            
     }
 }
 

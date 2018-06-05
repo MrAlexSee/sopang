@@ -171,7 +171,7 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
                 dBuffer[iD] |= maskBuffer[static_cast<unsigned char>(c)];
 
                 // Match occurred
-                if ((dBuffer[iD] & hitMask) == 0x0)
+                if ((dBuffer[iD] & hitMask) == 0x0ULL)
                 {
                     res.insert(iS);
                 }
@@ -209,7 +209,9 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
 
     for (size_t i = 0; i < pattern.size(); ++i)
     {
-        D |= (counterMask << (i * saCounterSize));
+        // We initialize the state with full counters which allow us to effectively start matching
+        // after m characters.
+        D |= (saFullCounter << (i * saCounterSize));
     }
 
     for (unsigned iS = 0; iS < nSegments; ++iS)
@@ -232,7 +234,7 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
 
                 dBuffer[iD] += maskBuffer[static_cast<unsigned char>(c)];
 
-                if ((dBuffer[iD] & hitMask) == 0x0)
+                if ((dBuffer[iD] & hitMask) == 0x0ULL)
                 {
                     res.insert(iS);
                 }
