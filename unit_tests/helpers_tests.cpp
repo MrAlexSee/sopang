@@ -1,5 +1,6 @@
 #include <cctype>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -16,7 +17,7 @@ namespace inverted_basilisk
 
 namespace
 {
-constexpr int nRandIter = 10;
+constexpr int nRandIter = 100;
 
 constexpr int nRandMedianElems = 101;
 constexpr int minVal = 0;
@@ -26,32 +27,6 @@ constexpr int nVectorStrings = 10;
 constexpr int maxStrSize = 10;
 
 const string testText = "Ala ma kota, a Jarek ma psa.";
-}
-
-TEST_CASE("is file dumping-reading symmetric for random file names", "[files]")
-{
-    repeat(nRandIter, []() {
-        string fileName = Helpers::genRandomStringAlphNum(maxStrSize);
-
-        Helpers::dumpToFile(testText, fileName);
-        string read = Helpers::readFile(fileName);
-
-        REQUIRE(testText == read);
-        Helpers::removeFile(fileName);
-    });
-}
-
-TEST_CASE("is file removing correct", "[files]")
-{
-    repeat(nRandIter, []() {
-        string fileName = Helpers::genRandomStringAlphNum(maxStrSize);
-        Helpers::dumpToFile(testText, fileName);
-
-        REQUIRE(Helpers::isFileReadable(fileName));
-
-        Helpers::removeFile(fileName);
-        REQUIRE(Helpers::isFileReadable(fileName) == false);
-    });
 }
 
 TEST_CASE("is median calculation correct for { 1, 2, 3 }", "[collections]")
@@ -112,6 +87,63 @@ TEST_CASE("is median calculation correct for randomized odd #elems", "[collectio
 
         REQUIRE(median == randMedian);
     });
+}
+
+TEST_CASE("is file dumping-reading symmetric for random file names", "[files]")
+{
+    repeat(nRandIter, []() {
+        string fileName = Helpers::genRandomStringAlphNum(maxStrSize);
+
+        Helpers::dumpToFile(testText, fileName);
+        string read = Helpers::readFile(fileName);
+
+        REQUIRE(testText == read);
+        Helpers::removeFile(fileName);
+    });
+}
+
+TEST_CASE("is file removing correct", "[files]")
+{
+    repeat(nRandIter, []() {
+        string fileName = Helpers::genRandomStringAlphNum(maxStrSize);
+        Helpers::dumpToFile(testText, fileName);
+
+        REQUIRE(Helpers::isFileReadable(fileName));
+
+        Helpers::removeFile(fileName);
+        REQUIRE(Helpers::isFileReadable(fileName) == false);
+    });
+}
+
+TEST_CASE("is random generation from range without excluded correct", "[random]")
+{
+    const int start = 0, end = 100;
+
+    repeat(nRandIter, []() {
+        int n = Helpers::randIntRangeExcluded(start, end, -1);
+        REQUIRE(n >= start);
+        REQUIRE(n <= end);
+    });
+}
+
+TEST_CASE("is random generation from range with excluded correct", "[random]")
+{
+    repeat(nRandIter, []() {
+        int n0 = Helpers::randIntRangeExcluded(0, 1, 1);
+        REQUIRE(n0 == 0);
+
+        int n1 = Helpers::randIntRangeExcluded(0, 1, 0);
+        REQUIRE(n1 == 1);
+
+        int n2 = Helpers::randIntRangeExcluded(0, 5, 3);
+        REQUIRE(n2 != 3);
+    });
+}
+
+TEST_CASE("does random generation from bad range throw", "[random]")
+{
+    REQUIRE_THROWS_AS(Helpers::randIntRangeExcluded(10, -5, 0), invalid_argument);
+    REQUIRE_THROWS_AS(Helpers::randIntRangeExcluded(0, 0, 0), invalid_argument);
 }
 
 TEST_CASE("is join correct for empty vector", "[strings]")
