@@ -54,6 +54,7 @@ void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
 void dumpIndexes(const unordered_set<unsigned> &indexes);
 
 void clearMemory(const string *const *segments, unsigned nSegments, unsigned *segmentSizes);
+
 }
 
 int main(int argc, const char **argv)

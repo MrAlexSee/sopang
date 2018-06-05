@@ -17,6 +17,7 @@ namespace inverted_basilisk
 
 namespace
 {
+
 constexpr int nRandIter = 100;
 
 constexpr int nRandMedianElems = 101;
@@ -27,6 +28,7 @@ constexpr int nVectorStrings = 10;
 constexpr int maxStrSize = 10;
 
 const string testText = "Ala ma kota, a Jarek ma psa.";
+
 }
 
 TEST_CASE("is median calculation correct for { 1, 2, 3 }", "[collections]")

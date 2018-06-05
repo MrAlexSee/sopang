@@ -170,7 +170,7 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
                 dBuffer[iD] <<= 1;
                 dBuffer[iD] |= maskBuffer[static_cast<unsigned char>(c)];
 
-                // Match occurred
+                // Match occurred.
                 if ((dBuffer[iD] & hitMask) == 0x0ULL)
                 {
                     res.insert(iS);
@@ -182,7 +182,8 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
 
         for (unsigned iD = 1; iD < segmentSizes[iS]; ++iD)
         {
-            // We want to preserve 0s (active states): a match can occur in any segment alternative.
+            // As a join operation we want to preserve 0s (active states):
+            // a match can occur in any segment alternative.
             D &= dBuffer[iD];
         }
     }
@@ -202,7 +203,9 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
 
     fillPatternMaskBufferApprox(pattern, alphabet);
 
+    // This is the initial position of each counter, after k + 1 errors the most significant bit is set.
     const uint64_t counterMask = 0xFULL - k;
+    // Hit mask indicates whether the most significant bit in the last counter is set.
     const uint64_t hitMask = (0x1ULL << ((pattern.size() * saCounterSize) - 1));
     
     uint64_t D = 0x0ULL;
@@ -246,9 +249,9 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
         // As a join operation, we take the minimum (the most promising alternative) from each counter.
         for (size_t i = 0; i < pattern.size(); ++i)
         {
-            // Shift to the left is used in order to insert zeros to the left,
-            // that is to compare only counters corresponding to the current position in the pattern.
-            const unsigned saBitShiftLeft = wordSize - (i + 1) * saCounterSize;
+            // Shift to the left is used in order to insert zeros to the left, i.e.
+            // to compare only counters corresponding to the current position in the pattern.
+            const unsigned saBitShiftLeft = wordSize - ((i + 1) * saCounterSize);
             
             uint64_t min = ((dBuffer[0] << saBitShiftLeft) >> saBitShiftRight);
 

@@ -16,10 +16,12 @@ namespace inverted_basilisk
 
 namespace
 {
+
 const string alphabet = "ACGTN";
 
 constexpr int maxPatSize = 64;
 constexpr int nRandIter = 10;
+
 }
 
 TEST_CASE("is matching for a single segment correct, whole segment match", "[exact]")
@@ -111,20 +113,15 @@ TEST_CASE("is matching multiple determinate segments correct, partial segment ma
 
     Sopang sopang;
 
-    unordered_set<unsigned> res1 = sopang.match(segments, nSegments, segmentSizes, "ACG", alphabet);
-    REQUIRE(res1.size() == 4);
-
-    for (unsigned i : { 0, 2, 4, 6 })
+    for (const string &pattern : { "ACG", "CGT" })
     {
-        REQUIRE(res1.count(i) == 1);
-    }
+        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        REQUIRE(res.size() == 4);
 
-    unordered_set<unsigned> res2 = sopang.match(segments, nSegments, segmentSizes, "CGT", alphabet);
-    REQUIRE(res2.size() == 4);
-    
-    for (unsigned i : { 0, 2, 4, 6 })
-    {
-        REQUIRE(res2.count(i) == 1);
+        for (unsigned i : { 0, 2, 4, 6 })
+        {
+            REQUIRE(res.count(i) == 1);
+        }
     }
 }
 
@@ -136,10 +133,13 @@ TEST_CASE("is matching single indeterminate and determinate segments spanning co
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "CAC", alphabet);
+    for (const string &pattern : { "CAC", "AAC", "TAA", "TCA" })
+    {
+        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
 
-    REQUIRE(res.size() == 1);
-    REQUIRE(res.count(2) == 1);
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(2) == 1);
+    }
 }
 
 TEST_CASE("is matching multiple indeterminate and determinate segments spanning correct, determinate start and end", "[exact]")

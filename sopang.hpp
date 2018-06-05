@@ -52,7 +52,7 @@ private:
     static constexpr unsigned saBitShiftRight = wordSize - saCounterSize;
 
     static constexpr uint64_t allOnes = ~(0x0ULL);
-    static constexpr uint64_t saFullCounter = 0x10ULL; // Full shift-add counter (indicating no match).
+    static constexpr uint64_t saFullCounter = 0x10ULL; // Full shift-add counter indicating no match.
 
     uint64_t *dBuffer;
     uint64_t maskBuffer[maskBufferSize];
