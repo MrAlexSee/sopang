@@ -190,7 +190,6 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
     return res;
 }
 
-
 unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
                                             unsigned nSegments, const unsigned *segmentSizes,
                                             const string &pattern, const string &alphabet,
@@ -202,7 +201,7 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
     fillPatternMaskBufferApprox(pattern, alphabet);
 
     const uint64_t counterMask = 0xFULL - k;
-    const uint64_t hitMask = (0x1ULL << (pattern.size() * saCounterSize - 1));
+    const uint64_t hitMask = (0x1ULL << ((pattern.size() * saCounterSize) - 1));
     
     uint64_t D = 0x0ULL;
 

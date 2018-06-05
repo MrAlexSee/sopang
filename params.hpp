@@ -21,8 +21,8 @@ struct Params
     bool dumpToFile = false; // Dump input file info and throughput to output file (outFile). Cmd arg -d.
     bool dumpIndexes = false; // Dump resulting indexes (full results) to stdout. Cmd arg -D.
 
-    int kApprox = -1; // Number of errors for approximate search (Hamming). -1 = perform exact search. Cmd arg -k.
-    int nPatterns = -1; // Maximum number of patterns read from top of the patterns file; -1 = ignore the pattern count limit. Cmd arg -p.
+    int kApprox = noValue; // Number of errors for approximate search (Hamming). noValue = perform exact search. Cmd arg -k.
+    int nPatterns = noValue; // Maximum number of patterns read from top of the patterns file; noValue = ignore the pattern count limit. Cmd arg -p.
 
     string inTextFile = ""; // Input text file path (positional arg 1).
     string inPatternFile = ""; // Input pattern file path (positional arg 2).
@@ -31,6 +31,7 @@ struct Params
 
     // CONSTANTS
     static constexpr int errorExitCode = 1; // Returned from main on failure.
+    static constexpr int noValue = -1; // Indicates that a given non-negative integer is not set.
 
     const string versionInfo = "sopang v1.2.0"; // Current version: major.minor.patch
     const string usageInfoString = "[options] <input text file> <input pattern file>";

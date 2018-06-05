@@ -296,12 +296,23 @@ double measure(const string *const *segments, unsigned nSegments,
                const unsigned *segmentSizes, const string &pattern)
 {
     Sopang sopang;
+    
+    clock_t start, end;
+    unordered_set<unsigned> res;
 
-
-    clock_t start = std::clock();
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, params.alphabet);
-    clock_t end = std::clock();
-
+    if (params.kApprox > 0)
+    {
+        start = std::clock();
+        res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, params.alphabet, params.kApprox);
+        end = std::clock();
+    }
+    else 
+    {
+        start = std::clock();
+        res = sopang.match(segments, nSegments, segmentSizes, pattern, params.alphabet);
+        end = std::clock();
+    }
+    
     // Make sure that the number of results is printed in order to
     // prevent the compiler from overoptimizing unused results.
     cout << "#results = " << res.size() << endl;
