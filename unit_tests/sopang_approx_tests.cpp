@@ -394,6 +394,30 @@ TEST_CASE("is approx matching multiple indeterminate and determinate segments wi
     }
 }
 
+TEST_CASE("is approx matching pattern starting and ending with text correct", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("{A,C}ACGT{G,C}ACGT{,T}ACGT{GGGG,TTTT,C}AAC{A,G}TGA", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    string basePattern = "AACGTGA";
+
+    for (size_t i = 0; i < basePattern.size(); ++i)
+    {
+        string pattern = basePattern;
+        pattern[i] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+        REQUIRE(res.size() == 2);
+        
+        REQUIRE(res.count(3) == 1);
+        REQUIRE(res.count(9) == 1);
+    }
+}
+
 TEST_CASE("is approx matching pattern length 8 correct for 1 error", "[approx]")
 {
     unsigned nSegments;
