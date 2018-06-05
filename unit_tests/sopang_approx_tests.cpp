@@ -24,7 +24,7 @@ constexpr int nRandIter = 10;
 
 }
 
-TEST_CASE("is matching for a single segment exact correct, whole segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment exact correct, whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -41,7 +41,7 @@ TEST_CASE("is matching for a single segment exact correct, whole segment match",
     }
 }
 
-TEST_CASE("is matching for a single segment exact correct, partial segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment exact correct, partial segment match", "[approx]")
 {    
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -51,14 +51,17 @@ TEST_CASE("is matching for a single segment exact correct, partial segment match
 
     for (const string &pattern : { "ACG", "CGT" })
     {
-        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
-        
-        REQUIRE(res.size() == 1);
-        REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
+        for (unsigned k : { 1, 2, 3, 4 })
+        {
+            unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, k);
+            
+            REQUIRE(res.size() == 1);
+            REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
+        }
     }
 }
 
-TEST_CASE("is matching for a single segment approx correct for 1 error, whole segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment correct for 1 error, whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -78,7 +81,7 @@ TEST_CASE("is matching for a single segment approx correct for 1 error, whole se
     }
 }
 
-TEST_CASE("is matching for a single segment approx correct for 1 error, partial segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment correct for 1 error, partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -98,7 +101,41 @@ TEST_CASE("is matching for a single segment approx correct for 1 error, partial 
     }
 }
 
-TEST_CASE("is matching for a single segment approx correct for 2 errors, partial segment match", "[approx]")
+TEST_CASE("is approx matching for a single longer segment correct for 1 error, partial segment match", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGTAAGGCTTTAAGCTTA", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "ANGCT", "AGNCT", "AGGNT", "AGGCN" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(0) == 1);
+    }
+}
+
+TEST_CASE("is approx matching for a single longer segment at 2nd position correct for 1 error, partial segment match", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("{ACC,AAAC}ACGTAAGGCTTTAAGCTTA{CC,AA}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "ANGCT", "AGNCT", "AGGNT", "AGGCN" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(1) == 1);
+    }
+}
+
+TEST_CASE("is approx matching for a single segment correct for 2 errors, partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -121,42 +158,27 @@ TEST_CASE("is matching for a single segment approx correct for 2 errors, partial
     }
 }
 
-
-TEST_CASE("is matching for a single first segment approx correct for 1 error, partial segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments exact correct, partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGTAAGGCTTTAAGCTTA", &nSegments, &segmentSizes);
+    const string *const *segments = Sopang::parseTextArray("ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    for (const string &pattern : { "ANGCT", "AGNCT", "AGGNT", "AGGCN" })
+    for (const string &pattern : { "ACG", "CGT" })
     {
         unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
-        
-        REQUIRE(res.size() == 1);
-        REQUIRE(res.count(0) == 1);
+        REQUIRE(res.size() == 4);
+
+        for (unsigned i : { 0, 2, 4, 6 })
+        {
+            REQUIRE(res.count(i) == 1);
+        }
     }
 }
 
-TEST_CASE("is matching for a single second segment approx correct for 1 error, partial segment match", "[approx]")
-{
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("{ACC,AAAC}ACGTAAGGCTTTAAGCTTA{CC,AA}", &nSegments, &segmentSizes);
-
-    Sopang sopang;
-
-    for (const string &pattern : { "ANGCT", "AGNCT", "AGGNT", "AGGCN" })
-    {
-        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
-        
-        REQUIRE(res.size() == 1);
-        REQUIRE(res.count(1) == 1);
-    }
-}
-
-TEST_CASE("is matching approx multiple determinate segments correct for 1 error, whole segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments correct for 1 error, whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -176,32 +198,7 @@ TEST_CASE("is matching approx multiple determinate segments correct for 1 error,
     }
 }
 
-TEST_CASE("is matching exact multiple determinate segments correct for 1 error, partial segment match", "[approx]")
-{
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
-
-    Sopang sopang;
-
-    unordered_set<unsigned> res1 = sopang.matchApprox(segments, nSegments, segmentSizes, "ACG", alphabet, 1);
-    REQUIRE(res1.size() == 4);
-
-    for (unsigned i : { 0, 2, 4, 6 })
-    {
-        REQUIRE(res1.count(i) == 1);
-    }
-
-    unordered_set<unsigned> res2 = sopang.matchApprox(segments, nSegments, segmentSizes, "CGT", alphabet, 1);
-    REQUIRE(res2.size() == 4);
-    
-    for (unsigned i : { 0, 2, 4, 6 })
-    {
-        REQUIRE(res2.count(i) == 1);
-    }
-}
-
-TEST_CASE("is matching approx multiple determinate segments correct for 1 error, partial segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments correct for 1 error, partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -221,7 +218,7 @@ TEST_CASE("is matching approx multiple determinate segments correct for 1 error,
     }
 }
 
-TEST_CASE("is matching for a single segment approx correct for 2 errors, whole segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment correct for 2 errors, whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -244,7 +241,7 @@ TEST_CASE("is matching for a single segment approx correct for 2 errors, whole s
     }
 }
 
-TEST_CASE("is matching approx multiple determinate segments correct for 2 errors, whole segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments correct for 2 errors, whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -267,7 +264,7 @@ TEST_CASE("is matching approx multiple determinate segments correct for 2 errors
     }
 }
 
-TEST_CASE("is matching approx multiple determinate segments correct for 2 errors, partial segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments correct for 2 errors, partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -290,7 +287,7 @@ TEST_CASE("is matching approx multiple determinate segments correct for 2 errors
     }
 }
 
-TEST_CASE("is matching single indeterminate and determinate segments spanning correct for 1 error", "[approx]")
+TEST_CASE("is approx matching single indeterminate and determinate segments spanning exact correct", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -298,7 +295,7 @@ TEST_CASE("is matching single indeterminate and determinate segments spanning co
 
     Sopang sopang;
 
-    for (const string &pattern : { "TAAN", "TCAN", "TNAC" })
+    for (const string &pattern : { "TAAC", "TCAC" })
     {
         unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
 
@@ -307,7 +304,24 @@ TEST_CASE("is matching single indeterminate and determinate segments spanning co
     }
 }
 
-TEST_CASE("is approx matching pattern for contiguous indeterminate segments correct for 1 error", "[approx]")
+TEST_CASE("is approx matching single indeterminate and determinate segments spanning correct for 1 error", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{A,C}ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "TAAN", "TANC", "TNAC", "NAAC", "TCAN", "TCNC", "NCAC" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(2) == 1);
+    }
+}
+
+TEST_CASE("is approx matching for contiguous indeterminate segments correct for 1 error", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -331,7 +345,7 @@ TEST_CASE("is approx matching pattern for contiguous indeterminate segments corr
     REQUIRE(res3.count(3) == 1);
 }
 
-TEST_CASE("is matching approx multiple indeterminate and determinate segments with multiple words spanning correct for 1 error", "[approx]")
+TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple words spanning correct for 1 error", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -363,7 +377,7 @@ TEST_CASE("is matching approx multiple indeterminate and determinate segments wi
     }
 }
 
-TEST_CASE("is matching approx multiple indeterminate and determinate segments with multiple words spanning correct for 1 error, non-dna alphabet", "[approx]")
+TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple words spanning correct for 1 error, non-dna alphabet", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -380,7 +394,7 @@ TEST_CASE("is matching approx multiple indeterminate and determinate segments wi
     }
 }
 
-TEST_CASE("is matching approx pattern length 8 correct for 1 error", "[approx]")
+TEST_CASE("is approx matching pattern length 8 correct for 1 error", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -405,7 +419,7 @@ TEST_CASE("is matching approx pattern length 8 correct for 1 error", "[approx]")
     }
 }
 
-TEST_CASE("is matching approx pattern length 8 correct for 2 errors", "[approx]")
+TEST_CASE("is approx matching pattern length 8 correct for 2 errors", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
