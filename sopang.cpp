@@ -246,7 +246,10 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
         // As a join operation, we take the minimum (the most promising alternative) from each counter.
         for (size_t i = 0; i < pattern.size(); ++i)
         {
+            // Shift to the left is used in order to insert zeros to the left,
+            // that is to compare only counters corresponding to the current position in the pattern.
             const unsigned saBitShiftLeft = wordSize - (i + 1) * saCounterSize;
+            
             uint64_t min = ((dBuffer[0] << saBitShiftLeft) >> saBitShiftRight);
 
             for (unsigned iD = 1; iD < segmentSizes[iS]; ++iD)

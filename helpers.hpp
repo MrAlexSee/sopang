@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <fstream>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <sstream>
 #include <type_traits>
@@ -17,6 +18,24 @@ namespace inverted_basilisk
 struct Helpers
 {
     Helpers() = delete;
+
+    /*
+     *** COLLECTIONS
+     */
+
+    template<typename T>
+    static void calcStatsMedian(const vector<T> &throughputVec, T *throughputMedian)
+    {
+        if (throughputVec.size() == 0)
+        {
+            return;
+        }
+
+        vector<T> tmp = throughputVec;
+
+        sort(tmp.begin(), tmp.end());
+        *throughputMedian = tmp[tmp.size() / 2];
+    }
 
     /*
      *** FILES
@@ -63,21 +82,28 @@ struct Helpers
     }
 
     /*
-     *** COLLECTIONS
+     *** RANDOM
      */
 
-    template<typename T>
-    static void calcStatsMedian(const vector<T> &throughputVec, T *throughputMedian)
+    static int randIntRangeExcluded(int start, int end, int excluded)
     {
-        if (throughputVec.size() == 0)
+        if (start > end or (start == end and start == excluded))
         {
-            return;
+            throw invalid_argument("range is empty");
         }
 
-        vector<T> tmp = throughputVec;
+        random_device rd;
+        mt19937 mt(rd());
+        uniform_int_distribution<int> dist(start, end);
 
-        sort(tmp.begin(), tmp.end());
-        *throughputMedian = tmp[tmp.size() / 2];
+        while (true)
+        {
+            int res = dist(mt);
+            if (res != excluded)
+            {
+                return res;
+            }
+        }
     }
 
     /*

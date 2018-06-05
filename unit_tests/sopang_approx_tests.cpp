@@ -54,7 +54,7 @@ TEST_CASE("is matching for a single segment approx correct for 1 error, whole se
             unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, k);
           
             REQUIRE(res.size() == 1);
-            REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
+            REQUIRE(res.count(0) == 1);
         }
     }
 }
@@ -77,8 +77,42 @@ TEST_CASE("is matching for a single segment approx correct for 2 errors, whole s
             unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, k);
             
             REQUIRE(res.size() == 1);
-            REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
+            REQUIRE(res.count(0) == 1);
         }
+    }
+}
+
+TEST_CASE("is matching for a single first segment approx correct for 1 error, partial segment match", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGTAAGGCTTTAAGCTTA", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "ANGCT", "AGNCT", "AGGNT", "AGGCN" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(0) == 1);
+    }
+}
+
+TEST_CASE("is matching for a single second segment approx correct for 1 error, partial segment match", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("{ACC,AAAC}ACGTAAGGCTTTAAGCTTA{CC,AA}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "ANGCT", "AGNCT", "AGGNT", "AGGCN" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(1) == 1);
     }
 }
 
@@ -190,6 +224,75 @@ TEST_CASE("is matching approx multiple determinate segments correct for 2 errors
         {
             REQUIRE(res.count(i) == 1);
         }            
+    }
+}
+
+TEST_CASE("is matching single indeterminate and determinate segments spanning correct for 1 error", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{A,C}ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "TAAN", "TCAN", "TNAC" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(2) == 1);
+    }
+}
+
+TEST_CASE("is matching approx pattern length 8 correct for 1 error", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    string patternBase = "ACGTACGT";
+
+    for (size_t i = 0; i < patternBase.size(); ++i)
+    {
+        string pattern = patternBase;
+        pattern[i] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        REQUIRE(res.size() == 3);
+
+        for (unsigned i : { 2, 4, 6 })
+        {
+            REQUIRE(res.count(i) == 1);
+        }
+    }
+}
+
+TEST_CASE("is matching approx pattern length 8 correct for 2 errors", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    string patternBase = "ACGTACGT";
+
+    for (size_t i = 0; i < patternBase.size(); ++i)
+    {
+        string pattern = patternBase;
+        
+        pattern[i] = 'N';
+        pattern[Helpers::randIntRangeExcluded(0, patternBase.size() - 1, i)] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 2);
+        REQUIRE(res.size() == 3);
+
+        for (unsigned i : { 2, 4, 6 })
+        {
+            REQUIRE(res.count(i) == 1);
+        }
     }
 }
 

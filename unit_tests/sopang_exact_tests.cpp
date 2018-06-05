@@ -47,12 +47,12 @@ TEST_CASE("is matching for a single segment correct, partial segment match", "[e
     unordered_set<unsigned> res1 = sopang.match(segments, nSegments, segmentSizes, "ACG", alphabet);
 
     REQUIRE(res1.size() == 1);
-    REQUIRE(res1.count(0) == 1); // 0 = index of the first segment.
+    REQUIRE(res1.count(0) == 1);
 
     unordered_set<unsigned> res2 = sopang.match(segments, nSegments, segmentSizes, "CGT", alphabet);
 
     REQUIRE(res2.size() == 1);
-    REQUIRE(res2.count(0) == 1); // 0 = index of the first segment.
+    REQUIRE(res2.count(0) == 1);
 }
 
 TEST_CASE("is matching single letter pattern correct, single match", "[exact]")
