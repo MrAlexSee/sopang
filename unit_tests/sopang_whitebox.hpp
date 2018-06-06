@@ -14,6 +14,8 @@ namespace inverted_basilisk
 class SopangWhitebox
 {
 public:
+    SopangWhitebox() = delete;
+
     inline static void fillPatternMaskBuffer(Sopang &sopang, const string &arg1, const string &arg2)
     {
         sopang.fillPatternMaskBuffer(arg1, arg2);
@@ -23,9 +25,14 @@ public:
         sopang.fillPatternMaskBufferApprox(arg1, arg2);
     }
 
-    inline static uint64_t *getMaskBuffer(Sopang &sopang)
+    inline static const uint64_t *getMaskBuffer(const Sopang &sopang)
     {
         return sopang.maskBuffer;
+    }
+
+    inline static unsigned getSACounterSize(const Sopang &sopang) 
+    {
+        return sopang.saCounterSize;
     }
 };
 

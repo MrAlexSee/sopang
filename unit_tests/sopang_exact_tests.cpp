@@ -20,8 +20,9 @@ namespace
 const string alphabet = "ACGTN";
 
 constexpr int maxPatSize = 64;
-constexpr int nRandIter = 10;
+constexpr int nRandIter = 100;
 
+constexpr int nTextRepeats = 100;
 }
 
 TEST_CASE("is matching for a single segment correct, whole segment match", "[exact]")
@@ -117,6 +118,120 @@ TEST_CASE("is matching multiple determinate segments correct, partial segment ma
         REQUIRE(res.size() == 4);
 
         for (unsigned i : { 0, 2, 4, 6 })
+        {
+            REQUIRE(res.count(i) == 1);
+        }
+    }
+}
+
+TEST_CASE("is matching multiple determinate segments correct, whole segment match, long generated text where start and end are determinate", "[exact]")
+{
+    const string det = "GAACTA";
+    string text = det;
+
+    for (int i = 0; i < nTextRepeats; ++i)
+    {
+        text += "{ANA,ATA,TATA,GATA}";
+    }
+
+    text += det;
+
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, det, alphabet);
+    REQUIRE(res.size() == 2);
+
+    REQUIRE(res.count(0) == 1);
+    REQUIRE(res.count(nTextRepeats + 1) == 1);
+}
+
+TEST_CASE("is matching multiple determinate segments correct, partial segment match, long generated text where start and end are determinate", "[exact]")
+{
+    const string det = "GAACTA";
+    string text = det;
+
+    for (int i = 0; i < nTextRepeats; ++i)
+    {
+        text += "{ANA,ATA,TATA,GATA}";
+    }
+
+    text += det;
+
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "GAACTA", "AACTA", "ACTA", "CTA", "GAACT", "GAAC" })
+    {
+        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        REQUIRE(res.size() == 2);
+
+        REQUIRE(res.count(0) == 1);
+        REQUIRE(res.count(nTextRepeats + 1) == 1);
+    }
+}
+
+TEST_CASE("is matching multiple determinate segments correct, whole segment match, long generated text where segments are once determinate, once indeterminate", "[exact]")
+{
+    const string det = "GAACTA";
+    const string ndet = "{ANA,ATA,TATA,GATA}";
+
+    string text;
+
+    for (int i = 0; i < nTextRepeats; ++i)
+    {
+        text += ndet + det;
+    }
+
+    text += ndet;
+
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, det, alphabet);
+    REQUIRE(res.size() == nTextRepeats);
+
+    for (unsigned i = 1; i < 2 * nTextRepeats; i += 2)
+    {
+        REQUIRE(res.count(i) == 1);
+    }
+}
+
+TEST_CASE("is matching multiple determinate segments correct, partial segment match, long generated text where segments are once determinate, once indeterminate", "[exact]")
+{
+    const string det = "GAACTA";
+    const string ndet = "{ANA,ATA,TATA,GATA}";
+
+    string text;
+
+    for (int i = 0; i < nTextRepeats; ++i)
+    {
+        text += ndet + det;
+    }
+
+    text += ndet;
+
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "GAACTA", "AACTA", "ACTA", "CTA", "GAACT", "GAAC" })
+    {
+        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        REQUIRE(res.size() == nTextRepeats);
+
+        for (unsigned i = 1; i < 2 * nTextRepeats; i += 2)
         {
             REQUIRE(res.count(i) == 1);
         }
@@ -327,7 +442,7 @@ TEST_CASE("is filling mask buffer correct for a predefined pattern", "[exact]")
     Sopang sopang;
     SopangWhitebox::fillPatternMaskBuffer(sopang, "ACAACGT", alphabet);
 
-    uint64_t *maskBuffer = SopangWhitebox::getMaskBuffer(sopang);
+    const uint64_t *maskBuffer = SopangWhitebox::getMaskBuffer(sopang);
 
     uint64_t maskA = maskBuffer[static_cast<size_t>('A')];
 
@@ -392,7 +507,7 @@ TEST_CASE("is filling mask buffer correct for repeated same character in pattern
             Sopang sopang;
             SopangWhitebox::fillPatternMaskBuffer(sopang, pattern, alphabet);
 
-            uint64_t *maskBuffer = SopangWhitebox::getMaskBuffer(sopang);
+            const uint64_t *maskBuffer = SopangWhitebox::getMaskBuffer(sopang);
             uint64_t m = 0x1;
 
             for (int shift = 0; shift < size; ++shift)

@@ -253,7 +253,9 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
             // to compare only counters corresponding to the current position in the pattern.
             const unsigned saBitShiftLeft = wordSize - ((i + 1) * saCounterSize);
             
+            // uint64_t min = ((dBuffer[0] << saBitShiftLeft) >> saBitShiftRight);
             uint64_t min = ((dBuffer[0] << saBitShiftLeft) >> saBitShiftRight);
+            // and with a mask from LUT instead of shifting
 
             for (unsigned iD = 1; iD < segmentSizes[iS]; ++iD)
             {
@@ -265,7 +267,8 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
                 }
             }
 
-            D |= (min << (i * saCounterSize));
+            // D |= (min << (i * saCounterSize));
+            D |= min;
         }
     }
 
