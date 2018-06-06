@@ -26,7 +26,7 @@ constexpr int nTextRepeats = 100;
 
 }
 
-TEST_CASE("is matching for a single segment correct, whole segment match", "[exact]")
+TEST_CASE("is matching a single segment correct for whole segment match", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -40,7 +40,7 @@ TEST_CASE("is matching for a single segment correct, whole segment match", "[exa
     REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
 }
 
-TEST_CASE("is matching for a single segment correct, partial segment match", "[exact]")
+TEST_CASE("is matching a single segment correct for partial segment match", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -57,7 +57,7 @@ TEST_CASE("is matching for a single segment correct, partial segment match", "[e
     }
 }
 
-TEST_CASE("is matching single letter pattern correct, single match", "[exact]")
+TEST_CASE("is matching single letter pattern correct for single match", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -71,7 +71,7 @@ TEST_CASE("is matching single letter pattern correct, single match", "[exact]")
     REQUIRE(res.count(2) == 1);
 }
 
-TEST_CASE("is matching single letter pattern correct, multiple matches", "[exact]")
+TEST_CASE("is matching single letter pattern correct for multiple matches", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -88,7 +88,7 @@ TEST_CASE("is matching single letter pattern correct, multiple matches", "[exact
     }
 }
 
-TEST_CASE("is matching multiple determinate segments correct, whole segment match", "[exact]")
+TEST_CASE("is matching multiple determinate segments correct for whole segment match", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -105,7 +105,7 @@ TEST_CASE("is matching multiple determinate segments correct, whole segment matc
     }
 }
 
-TEST_CASE("is matching multiple determinate segments correct, partial segment match", "[exact]")
+TEST_CASE("is matching multiple determinate segments correct for partial segment match", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -125,7 +125,7 @@ TEST_CASE("is matching multiple determinate segments correct, partial segment ma
     }
 }
 
-TEST_CASE("is matching multiple determinate segments correct, whole segment match, long generated text where start and end are determinate", "[exact]")
+TEST_CASE("is matching multiple determinate segments correct for whole segment match for long generated text where start and end are determinate", "[exact]")
 {
     const string det = "GAACTA";
     string text = det;
@@ -150,7 +150,7 @@ TEST_CASE("is matching multiple determinate segments correct, whole segment matc
     REQUIRE(res.count(nTextRepeats + 1) == 1);
 }
 
-TEST_CASE("is matching multiple determinate segments correct, partial segment match, long generated text where start and end are determinate", "[exact]")
+TEST_CASE("is matching multiple determinate segments correct for partial segment match for long generated text where start and end are determinate", "[exact]")
 {
     const string det = "GAACTA";
     string text = det;
@@ -178,7 +178,7 @@ TEST_CASE("is matching multiple determinate segments correct, partial segment ma
     }
 }
 
-TEST_CASE("is matching multiple determinate segments correct, whole segment match, long generated text where segments are once determinate, once indeterminate", "[exact]")
+TEST_CASE("is matching multiple determinate segments correct for whole segment match for long generated text where segments are once determinate once indeterminate", "[exact]")
 {
     const string det = "GAACTA";
     const string ndet = "{ANA,ATA,TATA,GATA}";
@@ -207,7 +207,7 @@ TEST_CASE("is matching multiple determinate segments correct, whole segment matc
     }
 }
 
-TEST_CASE("is matching multiple determinate segments correct, partial segment match, long generated text where segments are once determinate, once indeterminate", "[exact]")
+TEST_CASE("is matching multiple determinate segments correct for partial segment match for long generated text where segments are once determinate once indeterminate", "[exact]")
 {
     const string det = "GAACTA";
     const string ndet = "{ANA,ATA,TATA,GATA}";
@@ -239,7 +239,7 @@ TEST_CASE("is matching multiple determinate segments correct, partial segment ma
     }
 }
 
-TEST_CASE("is matching single indeterminate and determinate segments spanning correct", "[exact]")
+TEST_CASE("is matching single indeterminate and determinate segments for spanning correct", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -256,7 +256,7 @@ TEST_CASE("is matching single indeterminate and determinate segments spanning co
     }
 }
 
-TEST_CASE("is matching multiple indeterminate and determinate segments spanning correct, determinate start and end", "[exact]")
+TEST_CASE("is matching multiple indeterminate and determinate segments for spanning correct for determinate start and end", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -273,7 +273,7 @@ TEST_CASE("is matching multiple indeterminate and determinate segments spanning 
     }
 }
 
-TEST_CASE("is matching multiple indeterminate and determinate segments spanning correct, indeterminate start and end", "[exact]")
+TEST_CASE("is matching multiple indeterminate and determinate segments for spanning correct for indeterminate start and end", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -305,7 +305,7 @@ TEST_CASE("is matching pattern starting and ending with text correct", "[exact]"
     REQUIRE(res.count(8) == 1);
 }
 
-TEST_CASE("is matching multiple indeterminate and determinate segments with multiple empty words spanning correct", "[exact]")
+TEST_CASE("is matching multiple indeterminate and determinate segments with multiple empty words for spanning correct", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -339,7 +339,7 @@ TEST_CASE("is matching pattern for contiguous indeterminate segments correct", "
     }
 }
 
-TEST_CASE("is matching multiple indeterminate and determinate segments with multiple words spanning correct, non-dna alphabet", "[exact]")
+TEST_CASE("is matching multiple indeterminate and determinate segments with multiple words for spanning correct for non-dna alphabet", "[exact]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
