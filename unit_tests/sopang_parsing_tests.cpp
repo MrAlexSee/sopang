@@ -55,7 +55,7 @@ TEST_CASE("is parsing text for a single indeterminate segment correct", "[parsin
     REQUIRE(segments[0][3] == "T");
 }
 
-TEST_CASE("is parsing text for determinate and indeterminate segments correct, start/end is indeterminate", "[parsing]")
+TEST_CASE("is parsing text for determinate and indeterminate segments correct where start and end are indeterminate", "[parsing]")
 {
     unsigned nSegments = 1000;
     unsigned *segmentSizes;
@@ -82,7 +82,7 @@ TEST_CASE("is parsing text for determinate and indeterminate segments correct, s
     REQUIRE(segments[4][1] == "C");
 }
 
-TEST_CASE("is parsing text for determinate and indeterminate segments correct, start/end is determinate", "[parsing]")
+TEST_CASE("is parsing text for determinate and indeterminate segments correct where start and end is determinate", "[parsing]")
 {
     unsigned nSegments = 1000;
     unsigned *segmentSizes;
