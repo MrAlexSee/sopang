@@ -307,6 +307,20 @@ TEST_CASE("is matching multiple indeterminate and determinate segments for spann
     }
 }
 
+TEST_CASE("is matching multiple short contiguous indeterminate segments correct", "[exact]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("AC{A,G,C}T{,A}{A,T}{C,GC}{A,CA,T}{CA,GG}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "CTATGCTC", alphabet);
+   
+    REQUIRE(res.size() == 1);
+    REQUIRE(res.count(7) == 1);
+}
+
 TEST_CASE("is matching pattern starting and ending with text correct", "[exact]")
 {
     unsigned nSegments;

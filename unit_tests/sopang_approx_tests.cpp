@@ -267,6 +267,42 @@ TEST_CASE("is approx matching multiple determinate segments correct for 2 errors
     }
 }
 
+TEST_CASE("is approx matching multiple short contiguous indeterminate segments correct for exact", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("AC{A,G,C}T{,A}{A,T}{C,GC}{A,CA,T}{CA,GG}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, "CTATGCTC", alphabet, 1);
+   
+    REQUIRE(res.size() == 1);
+    REQUIRE(res.count(7) == 1);
+}
+
+TEST_CASE("is approx matching multiple short contiguous indeterminate segments correct for 1 error", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("AC{A,G,C}T{,A}{A,T}{C,GC}{A,CA,T}{CA,GG}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    string basePattern = "CTATGCTC";
+
+    for (size_t i = 0; i < basePattern.size(); ++i)
+    {
+        string pattern = basePattern;
+        pattern[i] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(7) == 1);
+    }
+}
+
 TEST_CASE("is approx matching multiple determinate segments correct for 2 errors for partial segment match", "[approx]")
 {
     unsigned nSegments;
