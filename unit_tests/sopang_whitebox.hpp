@@ -30,6 +30,10 @@ public:
         return sopang.maskBuffer;
     }
 
+    inline static unsigned getWordSize(const Sopang &sopang) 
+    {
+        return sopang.wordSize;
+    }
     inline static unsigned getSACounterSize(const Sopang &sopang) 
     {
         return sopang.saCounterSize;

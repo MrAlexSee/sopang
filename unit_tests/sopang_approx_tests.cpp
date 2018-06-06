@@ -472,7 +472,27 @@ TEST_CASE("is approx matching pattern length 8 correct for 2 errors", "[approx]"
 
 TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[approx]")
 {
-    // TODO
+    Sopang sopang;
+    SopangWhitebox::fillPatternMaskBufferApprox(sopang, "ACAACGT", alphabet);
+
+    const unsigned saCounterSize = SopangWhitebox::getSACounterSize(sopang);
+    const unsigned wordSize = SopangWhitebox::getWordSize(sopang);
+    
+    const unsigned saBitShiftRight = wordSize - saCounterSize;
+
+    const uint64_t *maskBuffer = SopangWhitebox::getMaskBuffer(sopang);
+    
+    uint64_t maskA = maskBuffer[static_cast<size_t>('A')];
+
+    // REQUIRE((maskA & static_cast<uint64_t>(0x1)) == 0x0);
+
+    uint64_t maskC = maskBuffer[static_cast<size_t>('C')];
+
+    uint64_t maskG = maskBuffer[static_cast<size_t>('G')];
+
+    uint64_t maskT = maskBuffer[static_cast<size_t>('T')];
+
+    uint64_t maskN = maskBuffer[static_cast<size_t>('N')];
 }
 
 TEST_CASE("is filling approx mask buffer correct for repeated same character in pattern", "[approx]")

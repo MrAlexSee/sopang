@@ -23,6 +23,7 @@ constexpr int maxPatSize = 64;
 constexpr int nRandIter = 100;
 
 constexpr int nTextRepeats = 100;
+
 }
 
 TEST_CASE("is matching for a single segment correct, whole segment match", "[exact]")
@@ -446,53 +447,53 @@ TEST_CASE("is filling mask buffer correct for a predefined pattern", "[exact]")
 
     uint64_t maskA = maskBuffer[static_cast<size_t>('A')];
 
-    REQUIRE((maskA & static_cast<uint64_t>(0x1)) == 0x0);
-    REQUIRE((maskA & static_cast<uint64_t>(0x1 << 1)) != 0x0);
-    REQUIRE((maskA & static_cast<uint64_t>(0x1 << 2)) == 0x0);
-    REQUIRE((maskA & static_cast<uint64_t>(0x1 << 3)) == 0x0);
-    REQUIRE((maskA & static_cast<uint64_t>(0x1 << 4)) != 0x0);
-    REQUIRE((maskA & static_cast<uint64_t>(0x1 << 5)) != 0x0);
-    REQUIRE((maskA & static_cast<uint64_t>(0x1 << 6)) != 0x0);
+    REQUIRE((maskA & 0x1ULL) == 0x0);
+    REQUIRE((maskA & (0x1ULL << 1)) != 0x0);
+    REQUIRE((maskA & (0x1ULL << 2)) == 0x0);
+    REQUIRE((maskA & (0x1ULL << 3)) == 0x0);
+    REQUIRE((maskA & (0x1ULL << 4)) != 0x0);
+    REQUIRE((maskA & (0x1ULL << 5)) != 0x0);
+    REQUIRE((maskA & (0x1ULL << 6)) != 0x0);
 
     uint64_t maskC = maskBuffer[static_cast<size_t>('C')];
 
-    REQUIRE((maskC & static_cast<uint64_t>(0x1)) != 0x0);
-    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 1)) == 0x0);
-    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 2)) != 0x0);
-    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 3)) != 0x0);
-    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 4)) == 0x0);
-    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 5)) != 0x0);
-    REQUIRE((maskC & static_cast<uint64_t>(0x1 << 6)) != 0x0);
+    REQUIRE((maskC & 0x1ULL) != 0x0);
+    REQUIRE((maskC & (0x1ULL << 1)) == 0x0);
+    REQUIRE((maskC & (0x1ULL << 2)) != 0x0);
+    REQUIRE((maskC & (0x1ULL << 3)) != 0x0);
+    REQUIRE((maskC & (0x1ULL << 4)) == 0x0);
+    REQUIRE((maskC & (0x1ULL << 5)) != 0x0);
+    REQUIRE((maskC & (0x1ULL << 6)) != 0x0);
 
     uint64_t maskG = maskBuffer[static_cast<size_t>('G')];
 
-    REQUIRE((maskG & static_cast<uint64_t>(0x1)) != 0x0);
-    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 1)) != 0x0);
-    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 2)) != 0x0);
-    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 3)) != 0x0);
-    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 4)) != 0x0);
-    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 5)) == 0x0);
-    REQUIRE((maskG & static_cast<uint64_t>(0x1 << 6)) != 0x0);
+    REQUIRE((maskG & 0x1ULL) != 0x0);
+    REQUIRE((maskG & (0x1ULL << 1)) != 0x0);
+    REQUIRE((maskG & (0x1ULL << 2)) != 0x0);
+    REQUIRE((maskG & (0x1ULL << 3)) != 0x0);
+    REQUIRE((maskG & (0x1ULL << 4)) != 0x0);
+    REQUIRE((maskG & (0x1ULL << 5)) == 0x0);
+    REQUIRE((maskG & (0x1ULL << 6)) != 0x0);
 
     uint64_t maskT = maskBuffer[static_cast<size_t>('T')];
 
-    REQUIRE((maskT & static_cast<uint64_t>(0x1)) != 0x0);
-    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 1)) != 0x0);
-    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 2)) != 0x0);
-    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 3)) != 0x0);
-    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 4)) != 0x0);
-    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 5)) != 0x0);
-    REQUIRE((maskT & static_cast<uint64_t>(0x1 << 6)) == 0x0);
+    REQUIRE((maskT & 0x1ULL) != 0x0);
+    REQUIRE((maskT & (0x1ULL << 1)) != 0x0);
+    REQUIRE((maskT & (0x1ULL << 2)) != 0x0);
+    REQUIRE((maskT & (0x1ULL << 3)) != 0x0);
+    REQUIRE((maskT & (0x1ULL << 4)) != 0x0);
+    REQUIRE((maskT & (0x1ULL << 5)) != 0x0);
+    REQUIRE((maskT & (0x1ULL << 6)) == 0x0);
 
     uint64_t maskN = maskBuffer[static_cast<size_t>('N')];
 
-    REQUIRE((maskN & static_cast<uint64_t>(0x1)) != 0x0);
-    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 1)) != 0x0);
-    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 2)) != 0x0);
-    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 3)) != 0x0);
-    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 4)) != 0x0);
-    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 5)) != 0x0);
-    REQUIRE((maskN & static_cast<uint64_t>(0x1 << 6)) != 0x0);
+    REQUIRE((maskN & 0x1ULL) != 0x0);
+    REQUIRE((maskN & (0x1ULL << 1)) != 0x0);
+    REQUIRE((maskN & (0x1ULL << 2)) != 0x0);
+    REQUIRE((maskN & (0x1ULL << 3)) != 0x0);
+    REQUIRE((maskN & (0x1ULL << 4)) != 0x0);
+    REQUIRE((maskN & (0x1ULL << 5)) != 0x0);
+    REQUIRE((maskN & (0x1ULL << 6)) != 0x0);
 }
 
 TEST_CASE("is filling mask buffer correct for repeated same character in pattern", "[exact]")
