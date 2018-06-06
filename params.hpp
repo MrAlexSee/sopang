@@ -33,7 +33,7 @@ struct Params
     static constexpr int errorExitCode = 1; // Returned from main on failure.
     static constexpr int noValue = -1; // Indicates that a given non-negative integer is not set.
 
-    const string versionInfo = "sopang v1.2.0"; // Current version: major.minor.patch
+    const string versionInfo = "sopang v1.3.0"; // Current version: major.minor.patch
     const string usageInfoString = "[options] <input text file> <input pattern file>";
 
     const string verboseInfoString =
