@@ -24,7 +24,7 @@ constexpr int nRandIter = 10;
 
 }
 
-TEST_CASE("is approx matching for a single segment exact correct, whole segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment exact correct for whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -41,7 +41,7 @@ TEST_CASE("is approx matching for a single segment exact correct, whole segment 
     }
 }
 
-TEST_CASE("is approx matching for a single segment exact correct, partial segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment exact correct for partial segment match", "[approx]")
 {    
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -61,7 +61,7 @@ TEST_CASE("is approx matching for a single segment exact correct, partial segmen
     }
 }
 
-TEST_CASE("is approx matching for a single segment correct for 1 error, whole segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment correct for 1 error for whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -81,7 +81,7 @@ TEST_CASE("is approx matching for a single segment correct for 1 error, whole se
     }
 }
 
-TEST_CASE("is approx matching for a single segment correct for 1 error, partial segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment correct for 1 error for partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -101,7 +101,7 @@ TEST_CASE("is approx matching for a single segment correct for 1 error, partial 
     }
 }
 
-TEST_CASE("is approx matching for a single longer segment correct for 1 error, partial segment match", "[approx]")
+TEST_CASE("is approx matching for a single longer segment correct for 1 error for partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -118,7 +118,7 @@ TEST_CASE("is approx matching for a single longer segment correct for 1 error, p
     }
 }
 
-TEST_CASE("is approx matching for a single longer segment at 2nd position correct for 1 error partial segment match", "[approx]")
+TEST_CASE("is approx matching for a single longer segment at 2nd position correct for 1 error for partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -135,7 +135,7 @@ TEST_CASE("is approx matching for a single longer segment at 2nd position correc
     }
 }
 
-TEST_CASE("is approx matching for a single segment correct for 2 errors, partial segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment correct for 2 errors for partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -158,7 +158,7 @@ TEST_CASE("is approx matching for a single segment correct for 2 errors, partial
     }
 }
 
-TEST_CASE("is approx matching multiple determinate segments exact correct, partial segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments exact correct for partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -178,7 +178,7 @@ TEST_CASE("is approx matching multiple determinate segments exact correct, parti
     }
 }
 
-TEST_CASE("is approx matching multiple determinate segments correct for 1 error, whole segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments correct for 1 error for whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -198,7 +198,7 @@ TEST_CASE("is approx matching multiple determinate segments correct for 1 error,
     }
 }
 
-TEST_CASE("is approx matching multiple determinate segments correct for 1 error, partial segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments correct for 1 error for partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -218,7 +218,7 @@ TEST_CASE("is approx matching multiple determinate segments correct for 1 error,
     }
 }
 
-TEST_CASE("is approx matching for a single segment correct for 2 errors, whole segment match", "[approx]")
+TEST_CASE("is approx matching for a single segment correct for 2 errors for whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -241,7 +241,7 @@ TEST_CASE("is approx matching for a single segment correct for 2 errors, whole s
     }
 }
 
-TEST_CASE("is approx matching multiple determinate segments correct for 2 errors, whole segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments correct for 2 errors for whole segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -264,7 +264,7 @@ TEST_CASE("is approx matching multiple determinate segments correct for 2 errors
     }
 }
 
-TEST_CASE("is approx matching multiple determinate segments correct for 2 errors, partial segment match", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments correct for 2 errors for partial segment match", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -287,7 +287,7 @@ TEST_CASE("is approx matching multiple determinate segments correct for 2 errors
     }
 }
 
-TEST_CASE("is approx matching single indeterminate and determinate segments spanning exact correct", "[approx]")
+TEST_CASE("is approx matching single indeterminate and determinate segments spanning correct for exact", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -377,7 +377,7 @@ TEST_CASE("is approx matching multiple indeterminate and determinate segments wi
     }
 }
 
-TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple words spanning correct for 1 error, non-dna alphabet", "[approx]")
+TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple words spanning correct for 1 error for non-dna alphabet", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
