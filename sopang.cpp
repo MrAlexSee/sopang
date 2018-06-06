@@ -267,8 +267,8 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
                 }
             }
 
-            // D |= (min << (i * saCounterSize));
-            D |= min;
+            D |= (min << (i * saCounterSize));
+            // D |= min;
         }
     }
 

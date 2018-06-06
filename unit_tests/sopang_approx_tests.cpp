@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -19,7 +20,7 @@ namespace
 
 const string alphabet = "ACGTN";
 
-constexpr int maxPatSize = 64;
+constexpr int maxPatSize = 12;
 constexpr int nRandIter = 10;
 
 }
@@ -129,7 +130,7 @@ TEST_CASE("is approx matching for a single longer segment at 2nd position correc
     for (const string &pattern : { "ANGCT", "AGNCT", "AGGNT", "AGGCN" })
     {
         unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
-        
+
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(1) == 1);
     }
@@ -472,6 +473,8 @@ TEST_CASE("is approx matching pattern length 8 correct for 2 errors", "[approx]"
 
 TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[approx]")
 {
+    const string pattern = "ACAACGT";
+    
     Sopang sopang;
     SopangWhitebox::fillPatternMaskBufferApprox(sopang, "ACAACGT", alphabet);
 
@@ -479,63 +482,84 @@ TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[ap
     const unsigned wordSize = SopangWhitebox::getWordSize(sopang);
     
     const unsigned saBitShiftRight = wordSize - saCounterSize;
-
     const uint64_t *maskBuffer = SopangWhitebox::getMaskBuffer(sopang);
     
     uint64_t maskA = maskBuffer[static_cast<size_t>('A')];
+    const vector<unsigned> expectedA { 0x0, 0x1, 0x0, 0x0, 0x1, 0x1, 0x1 };
 
-    REQUIRE(((maskA << saBitShiftRight) >> saBitShiftRight) == 0x0);
-    REQUIRE(((maskA << saBitShiftRight - saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskA << saBitShiftRight - 2 * saCounterSize) >> saBitShiftRight) == 0x0);
-    REQUIRE(((maskA << saBitShiftRight - 3 * saCounterSize) >> saBitShiftRight) == 0x0);
-    REQUIRE(((maskA << saBitShiftRight - 4 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskA << saBitShiftRight - 5 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskA << saBitShiftRight - 6 * saCounterSize) >> saBitShiftRight) == 0x1);
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskA << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedA[i]);
+    }
 
     uint64_t maskC = maskBuffer[static_cast<size_t>('C')];
-
-    REQUIRE(((maskC << saBitShiftRight) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskC << saBitShiftRight - saCounterSize) >> saBitShiftRight) == 0x0);
-    REQUIRE(((maskC << saBitShiftRight - 2 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskC << saBitShiftRight - 3 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskC << saBitShiftRight - 4 * saCounterSize) >> saBitShiftRight) == 0x0);
-    REQUIRE(((maskC << saBitShiftRight - 5 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskC << saBitShiftRight - 6 * saCounterSize) >> saBitShiftRight) == 0x1);
+    const vector<unsigned> expectedC { 0x1, 0x0, 0x1, 0x1, 0x0, 0x1, 0x1 };
+    
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskC << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedC[i]);
+    }
 
     uint64_t maskG = maskBuffer[static_cast<size_t>('G')];
-
-    REQUIRE(((maskG << saBitShiftRight) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskG << saBitShiftRight - saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskG << saBitShiftRight - 2 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskG << saBitShiftRight - 3 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskG << saBitShiftRight - 4 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskG << saBitShiftRight - 5 * saCounterSize) >> saBitShiftRight) == 0x0);
-    REQUIRE(((maskG << saBitShiftRight - 6 * saCounterSize) >> saBitShiftRight) == 0x1);
+    const vector<unsigned> expectedG { 0x1, 0x1, 0x1, 0x1, 0x1, 0x0, 0x1 };
     
-    uint64_t maskT = maskBuffer[static_cast<size_t>('T')];
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskG << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedG[i]);
+    }
 
-    REQUIRE(((maskT << saBitShiftRight) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskT << saBitShiftRight - saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskT << saBitShiftRight - 2 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskT << saBitShiftRight - 3 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskT << saBitShiftRight - 4 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskT << saBitShiftRight - 5 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskT << saBitShiftRight - 6 * saCounterSize) >> saBitShiftRight) == 0x0);
+    uint64_t maskT = maskBuffer[static_cast<size_t>('T')];
+    const vector<unsigned> expectedT { 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x0 };
+    
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskT << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedT[i]);
+    }
 
     uint64_t maskN = maskBuffer[static_cast<size_t>('N')];
-
-    REQUIRE(((maskN << saBitShiftRight) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskN << saBitShiftRight - saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskN << saBitShiftRight - 2 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskN << saBitShiftRight - 3 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskN << saBitShiftRight - 4 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskN << saBitShiftRight - 5 * saCounterSize) >> saBitShiftRight) == 0x1);
-    REQUIRE(((maskN << saBitShiftRight - 6 * saCounterSize) >> saBitShiftRight) == 0x1);
+    const vector<unsigned> expectedN { 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 };
+    
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskN << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedN[i]);
+    }
 }
 
 TEST_CASE("is filling approx mask buffer correct for repeated same character in pattern", "[approx]")
 {
-    // TODO
+    for (const char c : alphabet)
+    {
+        for (int size = 1; size <= maxPatSize; ++size)
+        {
+            string pattern = "";
+            repeat(size, [c, &pattern]() { pattern += c; });
+
+            Sopang sopang;
+
+            const unsigned saCounterSize = SopangWhitebox::getSACounterSize(sopang);
+            const unsigned wordSize = SopangWhitebox::getWordSize(sopang);
+            
+            const unsigned saBitShiftRight = wordSize - saCounterSize;
+            const uint64_t *maskBuffer = SopangWhitebox::getMaskBuffer(sopang);
+
+            SopangWhitebox::fillPatternMaskBufferApprox(sopang, pattern, alphabet);
+
+            for (int shift = 0; shift < size; ++shift)
+            {
+                for (const char curC : alphabet)
+                {
+                    if (curC == c) // Corresponding occurrences should be set to 0.
+                    {
+                        REQUIRE(((maskBuffer[static_cast<size_t>(curC)] << saBitShiftRight - shift * saCounterSize) >> saBitShiftRight) == 0x0);
+                    }
+                    else
+                    {
+                        REQUIRE(((maskBuffer[static_cast<size_t>(curC)] << saBitShiftRight - shift * saCounterSize) >> saBitShiftRight) == 0x1);
+                    }
+                }
+            }
+        }
+    }
 }
 
 }
