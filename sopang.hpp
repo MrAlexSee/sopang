@@ -41,6 +41,8 @@ public:
                                         const string &pattern, const string &alphabet,
                                         unsigned k);
 private:
+    void initCounterPositionMasks();
+
     void fillPatternMaskBuffer(const string &pattern, const string &alphabet);
     void fillPatternMaskBufferApprox(const string &pattern, const string &alphabet);
 
@@ -48,13 +50,15 @@ private:
     static constexpr unsigned maskBufferSize = 91; // Buffer size for shift-or masks for the input alphabet, must be larger than the largest input character ASCII code, up to 'Z' = 90.
     static constexpr unsigned wordSize = 64; // Shift-or word size in bits.
 
-    static constexpr unsigned saCounterSize = 0x5; // Shift-add counter size in bits.
-    static constexpr unsigned saBitShiftRight = wordSize - saCounterSize;
+    static constexpr unsigned saCounterSize = 5; // Shift-add counter size in bits.
+    static constexpr unsigned maxPatternApproxSize = 12; // Maximum pattern size for approximate search.
+    
+    static constexpr uint64_t saFullCounter = 0x10ULL; // Full single shift-add counter indicating no match.
+    static constexpr uint64_t saCounterAllSet = 0x20ULL - 0x1ULL; // Single shift-add counter with all bits set.
 
     static constexpr uint64_t allOnes = ~(0x0ULL);
-    static constexpr uint64_t saFullCounter = 0x10ULL; // Full shift-add counter indicating no match.
 
-    uint64_t counterPosMasks[12];
+    uint64_t counterPosMasks[maxPatternApproxSize];
 
     uint64_t *dBuffer;
     uint64_t maskBuffer[maskBufferSize];

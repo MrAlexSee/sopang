@@ -16,6 +16,7 @@ namespace inverted_basilisk
 Sopang::Sopang()
 {
     dBuffer = new uint64_t[dBufferSize];
+    initCounterPositionMasks();
 }
 
 Sopang::~Sopang()
@@ -249,16 +250,10 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
         // As a join operation, we take the minimum (the most promising alternative) from each counter.
         for (size_t i = 0; i < pattern.size(); ++i)
         {
-            // Shift to the left is used in order to insert zeros to the left, i.e.
-            // to compare only counters corresponding to the current position in the pattern.
-            // const unsigned saBitShiftLeft = wordSize - ((i + 1) * saCounterSize);
-            
-            // uint64_t min = ((dBuffer[0] << saBitShiftLeft) >> saBitShiftRight);
             uint64_t min = (dBuffer[0] & counterPosMasks[i]);
 
             for (unsigned iD = 1; iD < segmentSizes[iS]; ++iD)
             {
-                // uint64_t cur = ((dBuffer[iD] << saBitShiftLeft) >> saBitShiftRight);
                 uint64_t cur = (dBuffer[iD] & counterPosMasks[i]);
                 
                 if (cur < min)
@@ -267,12 +262,19 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
                 }
             }
 
-            // D |= (min << (i * saCounterSize));
             D |= min;
         }
     }
 
     return res;
+}
+
+void Sopang::initCounterPositionMasks()
+{
+    for (unsigned i = 0; i < maxPatternApproxSize; ++i)
+    {
+        counterPosMasks[i] = (saCounterAllSet << (i * saCounterSize));
+    }
 }
 
 void Sopang::fillPatternMaskBuffer(const string &pattern, const string &alphabet)
@@ -314,11 +316,6 @@ void Sopang::fillPatternMaskBufferApprox(const string &pattern, const string &al
         assert(pattern[iC] > 0 and static_cast<unsigned char>(pattern[iC]) < maskBufferSize);
         // We zero the bit at the counter position corresponding to the current character in the pattern.
         maskBuffer[static_cast<unsigned char>(pattern[iC])] &= (~(0x1ULL << (iC * saCounterSize)));
-    }
-
-    for (unsigned i = 0; i < 12; ++i)
-    {
-        counterPosMasks[i] = ((0x20ULL - 1) << (i * saCounterSize));
     }
 }
 
