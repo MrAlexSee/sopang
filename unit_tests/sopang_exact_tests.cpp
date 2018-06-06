@@ -22,7 +22,7 @@ const string alphabet = "ACGTN";
 constexpr int maxPatSize = 64;
 constexpr int nRandIter = 100;
 
-constexpr int nTextRepeats = 100;
+constexpr int nTextRepeats = 1000;
 
 }
 
@@ -168,7 +168,7 @@ TEST_CASE("is matching multiple determinate segments correct for partial segment
 
     Sopang sopang;
 
-    for (const string &pattern : { "GAACTA", "AACTA", "ACTA", "CTA", "GAACT", "GAAC" })
+    for (const string &pattern : { "AACTA", "ACTA", "CTA", "GAACT", "GAAC" })
     {
         unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
         REQUIRE(res.size() == 2);
@@ -253,6 +253,23 @@ TEST_CASE("is matching single indeterminate and determinate segments for spannin
 
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(2) == 1);
+    }
+}
+
+TEST_CASE("is matching single indeterminate and determinate segments for repeated spanning multiple variants correct", "[exact]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{A,C,G,T}{AAA,CCC,GGG,TTT}{ACGT,TGCA}ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "TAAAAAC", "TAAAATG", "TCCCCAC", "TCCCCTG", "TGGGGAC", "TGGGGTG", "TTTTTAC", "TTTTTTG" })
+    {
+        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(3) == 1);
     }
 }
 

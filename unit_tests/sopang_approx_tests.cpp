@@ -21,7 +21,9 @@ namespace
 const string alphabet = "ACGTN";
 
 constexpr int maxPatSize = 12;
-constexpr int nRandIter = 10;
+constexpr int nRandIter = 100;
+
+constexpr int nTextRepeats = 1000;
 
 }
 
@@ -288,7 +290,155 @@ TEST_CASE("is approx matching multiple determinate segments correct for 2 errors
     }
 }
 
-TEST_CASE("is approx matching single indeterminate and determinate segments spanning correct for exact", "[approx]")
+TEST_CASE("is approx matching multiple determinate segments correct for whole segment match for exact for long generated text where start and end are determinate", "[approx]")
+{
+    const string det = "GAACTA";
+    string text = det;
+
+    for (int i = 0; i < nTextRepeats; ++i)
+    {
+        text += "{ANA,ATA,TATA,GATA}";
+    }
+
+    text += det;
+
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, det, alphabet, 1);
+    REQUIRE(res.size() == 2);
+
+    REQUIRE(res.count(0) == 1);
+    REQUIRE(res.count(nTextRepeats + 1) == 1);
+}
+
+TEST_CASE("is approx matching multiple determinate segments correct for partial segment match for exact for long generated text where start and end are determinate", "[approx]")
+{
+    const string det = "GAACTA";
+    string text = det;
+
+    for (int i = 0; i < nTextRepeats; ++i)
+    {
+        text += "{ANA,ATA,TATA,GATA}";
+    }
+
+    text += det;
+
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "AACTN", "NAACT" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        REQUIRE(res.size() == 2);
+
+        REQUIRE(res.count(0) == 1);
+        REQUIRE(res.count(nTextRepeats + 1) == 1);
+    }
+}
+
+TEST_CASE("is approx matching multiple determinate segments correct for whole segment match for 1 error for long generated text where start and end are determinate", "[approx]")
+{
+    const string det = "GAACTA";
+    string text = det;
+
+    for (int i = 0; i < nTextRepeats; ++i)
+    {
+        text += "{ANA,ATA,TATA,GATA}";
+    }
+
+    text += det;
+
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+
+    Sopang sopang;
+    
+    for (size_t i = 0; i < det.size(); ++i)
+    {
+        string pattern = det;
+        pattern[i] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        REQUIRE(res.size() == 2);
+
+        REQUIRE(res.count(0) == 1);
+        REQUIRE(res.count(nTextRepeats + 1) == 1);
+    }
+}
+
+TEST_CASE("is approx matching multiple determinate segments correct for whole segment match for exact for long generated text where segments are once determinate once indeterminate", "[approx]")
+{
+    const string det = "GAACTA";
+    const string ndet = "{ANA,ATA,TATA,GATA}";
+
+    string text;
+
+    for (int i = 0; i < nTextRepeats; ++i)
+    {
+        text += ndet + det;
+    }
+
+    text += ndet;
+
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, det, alphabet, 1);
+    REQUIRE(res.size() == nTextRepeats);
+
+    for (unsigned i = 1; i < 2 * nTextRepeats; i += 2)
+    {
+        REQUIRE(res.count(i) == 1);
+    }
+}
+
+TEST_CASE("is approx matching multiple determinate segments correct for whole segment match for 1 error for long generated text where segments are once determinate once indeterminate", "[approx]")
+{
+    const string det = "GAACTA";
+    const string ndet = "{ANA,ATA,TATA,GATA}";
+
+    string text;
+
+    for (int i = 0; i < nTextRepeats; ++i)
+    {
+        text += ndet + det;
+    }
+
+    text += ndet;
+
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (size_t i = 0; i < det.size(); ++i)
+    {
+        string pattern = det;
+        pattern[i] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        REQUIRE(res.size() == nTextRepeats);
+
+        for (unsigned i = 1; i < 2 * nTextRepeats; i += 2)
+        {
+            REQUIRE(res.count(i) == 1);
+        }
+    }
+}
+
+TEST_CASE("is approx matching single indeterminate and determinate segments for spanning correct for exact", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -305,7 +455,47 @@ TEST_CASE("is approx matching single indeterminate and determinate segments span
     }
 }
 
-TEST_CASE("is approx matching single indeterminate and determinate segments spanning correct for 1 error", "[approx]")
+TEST_CASE("is approx matching single indeterminate and determinate segments for repeated spanning multiple variants correct for exact", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{A,C,G,T}{AAA,CCC,GGG,TTT}{ACGT,TGCA}ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &pattern : { "TAAAAAC", "TAAAATG", "TCCCCAC", "TCCCCTG", "TGGGGAC", "TGGGGTG", "TTTTTAC", "TTTTTTG" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(3) == 1);
+    }
+}
+
+TEST_CASE("is approx matching single indeterminate and determinate segments for repeated spanning multiple variants correct for 1 error", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{A,C,G,T}{AAA,CCC,GGG,TTT}{ACGT,TGCA}ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    for (const string &basePattern : { "TAAAAAC", "TAAAATG", "TCCCCAC", "TCCCCTG", "TGGGGAC", "TGGGGTG", "TTTTTAC", "TTTTTTG" })
+    {
+        for (size_t i = 0; i < basePattern.size(); ++i)
+        {
+            string pattern = basePattern;
+            pattern[i] = 'N';
+
+            unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+            REQUIRE(res.size() == 1);
+            REQUIRE(res.count(3) == 1);
+        }
+    }
+}
+
+TEST_CASE("is approx matching single indeterminate and determinate segments for spanning correct for 1 error", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -346,7 +536,7 @@ TEST_CASE("is approx matching for contiguous indeterminate segments correct for 
     REQUIRE(res3.count(3) == 1);
 }
 
-TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple words spanning correct for 1 error", "[approx]")
+TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple words for spanning correct for 1 error", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -378,7 +568,7 @@ TEST_CASE("is approx matching multiple indeterminate and determinate segments wi
     }
 }
 
-TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple words spanning correct for 1 error for non-dna alphabet", "[approx]")
+TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple words for spanning correct for 1 error for non-dna alphabet", "[approx]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;

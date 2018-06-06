@@ -54,6 +54,8 @@ private:
     static constexpr uint64_t allOnes = ~(0x0ULL);
     static constexpr uint64_t saFullCounter = 0x10ULL; // Full shift-add counter indicating no match.
 
+    uint64_t counterPosMasks[12];
+
     uint64_t *dBuffer;
     uint64_t maskBuffer[maskBufferSize];
 
