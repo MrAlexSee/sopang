@@ -261,11 +261,23 @@ void runSopang(const string *const *segments, unsigned nSegments, const unsigned
 
     for (size_t iP = 0; iP < patterns.size(); ++iP)
     {
-        int percProg = round(static_cast<double>(iP + 1) * 100.0 / patterns.size());
-
+        double percProg = static_cast<double>(iP + 1) * 100.0 / patterns.size();
         string pattern = patterns[iP];
-        cout << endl << boost::format("Querying pattern %1%/%2% (%3%%%) = \"%4%\"") %
-                                     (iP + 1) % patterns.size() % round(percProg) % pattern << endl;
+
+        string msg;
+
+        if (params.kApprox > 0)
+        {
+            msg = (boost::format("Querying pattern %d/%d (%.2f) = \"%s\" for k = %d") %
+                (iP + 1) % patterns.size() % percProg % pattern % params.kApprox).str();
+        }
+        else
+        {
+            msg = (boost::format("Querying pattern %d/%d (%.2f%%) = \"%s\"") %
+                (iP + 1) % patterns.size() % percProg % pattern).str();
+        }
+
+        cout << endl << msg << endl;
 
         double elapsedSec = measure(segments, nSegments, segmentSizes, pattern);
         elapsedSecVec.push_back(elapsedSec);
