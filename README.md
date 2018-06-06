@@ -1,6 +1,6 @@
 ## Basic information
 
-This software is called **SOPanG** (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pangenome model). Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
+This software is called **SOPanG** (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
 
 ED text is in the following format: `{A,C,}GAAT{AT,A}ATT`. 
 Braces determine the start and end of each indeterminate segment (degenerate segments, i.e. segments having multiple variants), and commas delimit segment variants.

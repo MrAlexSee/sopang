@@ -37,7 +37,7 @@ struct Params
     const string usageInfoString = "[options] <input text file> <input pattern file>";
 
     const string verboseInfoString =
-        "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pangenome model). Authors: Aleksander Cislak, Szymon Grabowski, Jan Holub.\n"
+        "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cislak, Szymon Grabowski, Jan Holub.\n"
         "ED text is in the following format: {A,C,}GAAT{AT,A}ATT. Braces determine the start and end of each indeterminate segment (i.e. segment having multiple variants), and commas delimit segment variants.\n"
         "If a comma is not preceded by a string of letters or it is a trailing symbol in a segment, it indicates an empty word.\n"
         "To give an example, all three notations: {,A,C}, {A,,C}, and {A,C,} mean the same, which is a segment which accepts either a string A, or a string C, or an empty word.\n"

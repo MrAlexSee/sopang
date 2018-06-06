@@ -197,14 +197,14 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
                                             const string &pattern, const string &alphabet,
                                             unsigned k)
 {
-    assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
+    assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= maxPatternApproxSize);
     assert(k > 0);
 
     unordered_set<unsigned> res;
 
     fillPatternMaskBufferApprox(pattern, alphabet);
 
-    // This is the initial position of each counter, after k + 1 errors the most significant bit is set.
+    // This is the initial position of each counter, after k + 1 errors the most significant bit will be set.
     const uint64_t counterMask = 0xFULL - k;
     // Hit mask indicates whether the most significant bit in the last counter is set.
     const uint64_t hitMask = (0x1ULL << ((pattern.size() * saCounterSize) - 1));
