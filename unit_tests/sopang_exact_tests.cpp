@@ -440,60 +440,52 @@ TEST_CASE("is matching pattern equal to text correct", "[exact]")
 
 TEST_CASE("is filling mask buffer correct for a predefined pattern", "[exact]")
 {
+    const string pattern = "ACAACGT";
+
     Sopang sopang;
-    SopangWhitebox::fillPatternMaskBuffer(sopang, "ACAACGT", alphabet);
+    SopangWhitebox::fillPatternMaskBuffer(sopang, pattern, alphabet);
 
     const uint64_t *maskBuffer = SopangWhitebox::getMaskBuffer(sopang);
 
     uint64_t maskA = maskBuffer[static_cast<size_t>('A')];
+    const vector<unsigned> expectedA { 0x0, 0x1, 0x0, 0x0, 0x1, 0x1, 0x1 };
 
-    REQUIRE((maskA & 0x1ULL) == 0x0);
-    REQUIRE((maskA & (0x1ULL << 1)) != 0x0);
-    REQUIRE((maskA & (0x1ULL << 2)) == 0x0);
-    REQUIRE((maskA & (0x1ULL << 3)) == 0x0);
-    REQUIRE((maskA & (0x1ULL << 4)) != 0x0);
-    REQUIRE((maskA & (0x1ULL << 5)) != 0x0);
-    REQUIRE((maskA & (0x1ULL << 6)) != 0x0);
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskA & (0x1ULL << i)) >> i) == expectedA[i]);
+    }
 
     uint64_t maskC = maskBuffer[static_cast<size_t>('C')];
-
-    REQUIRE((maskC & 0x1ULL) != 0x0);
-    REQUIRE((maskC & (0x1ULL << 1)) == 0x0);
-    REQUIRE((maskC & (0x1ULL << 2)) != 0x0);
-    REQUIRE((maskC & (0x1ULL << 3)) != 0x0);
-    REQUIRE((maskC & (0x1ULL << 4)) == 0x0);
-    REQUIRE((maskC & (0x1ULL << 5)) != 0x0);
-    REQUIRE((maskC & (0x1ULL << 6)) != 0x0);
+    const vector<unsigned> expectedC { 0x1, 0x0, 0x1, 0x1, 0x0, 0x1, 0x1 };
+    
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskC & (0x1ULL << i)) >> i) == expectedC[i]);
+    }
 
     uint64_t maskG = maskBuffer[static_cast<size_t>('G')];
-
-    REQUIRE((maskG & 0x1ULL) != 0x0);
-    REQUIRE((maskG & (0x1ULL << 1)) != 0x0);
-    REQUIRE((maskG & (0x1ULL << 2)) != 0x0);
-    REQUIRE((maskG & (0x1ULL << 3)) != 0x0);
-    REQUIRE((maskG & (0x1ULL << 4)) != 0x0);
-    REQUIRE((maskG & (0x1ULL << 5)) == 0x0);
-    REQUIRE((maskG & (0x1ULL << 6)) != 0x0);
+    const vector<unsigned> expectedG { 0x1, 0x1, 0x1, 0x1, 0x1, 0x0, 0x1 };
+    
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskG & (0x1ULL << i)) >> i) == expectedG[i]);
+    }
 
     uint64_t maskT = maskBuffer[static_cast<size_t>('T')];
-
-    REQUIRE((maskT & 0x1ULL) != 0x0);
-    REQUIRE((maskT & (0x1ULL << 1)) != 0x0);
-    REQUIRE((maskT & (0x1ULL << 2)) != 0x0);
-    REQUIRE((maskT & (0x1ULL << 3)) != 0x0);
-    REQUIRE((maskT & (0x1ULL << 4)) != 0x0);
-    REQUIRE((maskT & (0x1ULL << 5)) != 0x0);
-    REQUIRE((maskT & (0x1ULL << 6)) == 0x0);
+    const vector<unsigned> expectedT { 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x0 };
+    
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskT & (0x1ULL << i)) >> i) == expectedT[i]);
+    }
 
     uint64_t maskN = maskBuffer[static_cast<size_t>('N')];
-
-    REQUIRE((maskN & 0x1ULL) != 0x0);
-    REQUIRE((maskN & (0x1ULL << 1)) != 0x0);
-    REQUIRE((maskN & (0x1ULL << 2)) != 0x0);
-    REQUIRE((maskN & (0x1ULL << 3)) != 0x0);
-    REQUIRE((maskN & (0x1ULL << 4)) != 0x0);
-    REQUIRE((maskN & (0x1ULL << 5)) != 0x0);
-    REQUIRE((maskN & (0x1ULL << 6)) != 0x0);
+    const vector<unsigned> expectedN { 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 };
+    
+    for (size_t i = 0; i < pattern.size(); ++i)
+    {
+        REQUIRE(((maskN & (0x1ULL << i)) >> i) == expectedN[i]);
+    }
 }
 
 TEST_CASE("is filling mask buffer correct for repeated same character in pattern", "[exact]")
