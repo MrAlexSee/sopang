@@ -303,6 +303,30 @@ TEST_CASE("is approx matching multiple short contiguous indeterminate segments c
     }
 }
 
+TEST_CASE("is approx matching multiple short contiguous indeterminate segments correct for 2 errors", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("AC{A,G,C}T{,A}{A,T}{C,GC}{A,CA,T}{CA,GG}", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    string basePattern = "CCTATGCTC";
+
+    for (size_t i = 0; i < basePattern.size(); ++i)
+    {
+        string pattern = basePattern;
+
+        pattern[i] = 'N';
+        pattern[Helpers::randIntRangeExcluded(0, pattern.size() - 1, i)] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 2);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(7) == 1);
+    }
+}
+
 TEST_CASE("is approx matching multiple determinate segments correct for 2 errors for partial segment match", "[approx]")
 {
     unsigned nSegments;
@@ -678,14 +702,14 @@ TEST_CASE("is approx matching pattern length 8 correct for 2 errors", "[approx]"
 
     Sopang sopang;
 
-    string patternBase = "ACGTACGT";
+    string basePattern = "ACGTACGT";
 
-    for (size_t i = 0; i < patternBase.size(); ++i)
+    for (size_t i = 0; i < basePattern.size(); ++i)
     {
-        string pattern = patternBase;
+        string pattern = basePattern;
         
         pattern[i] = 'N';
-        pattern[Helpers::randIntRangeExcluded(0, patternBase.size() - 1, i)] = 'N';
+        pattern[Helpers::randIntRangeExcluded(0, pattern.size() - 1, i)] = 'N';
 
         unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 2);
         REQUIRE(res.size() == 3);
