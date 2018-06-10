@@ -17,7 +17,7 @@ def main():
 
         with open(edsFile, "r") as f:
             data = f.read()
-        
+
         # The question mark allows for non-greedy matching.
         detFiltered = re.sub(r"\{.+?\}", "", data)
 
