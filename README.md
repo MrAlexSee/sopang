@@ -88,14 +88,14 @@ Parameter name   | Parameter description
 
 Parameter name   | Parameter description
 ---------------- | ---------------------
-`inputDir`       | input directory containing `.eds` input ED text files and `.txt` input pattern files
+`inputDir`       | input directory path containing `.eds` ED text files and `.txt` input pattern files
 `outFile`        | base name for output files
 
 #### ed_histogram.py (scripts folder)
 
 Parameter name         | Parameter description
 ---------------------- | ---------------------
-`inFolder`             | input folder path
+`inputDir`             | input directory path containing `.eds` ED text files
 
 #### generate_synth.py (scripts folder)
 

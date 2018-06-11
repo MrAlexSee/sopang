@@ -6,11 +6,11 @@ for all .eds files from a given folder.
 import os
 import re
 
-inFolder = "../sample" # Input folder path.
+inputDir = "../sample" # Input directory path containing `.eds` ED text files.
 
 def main():
     res = []
-    edsFiles = [os.path.join(inFolder, f) for f in os.listdir(inFolder) if f.endswith(".eds")]
+    edsFiles = [os.path.join(inputDir, f) for f in os.listdir(inputDir) if f.endswith(".eds")]
 
     for edsFile in edsFiles:
         print "Reading file: {0}".format(edsFile)
