@@ -91,7 +91,13 @@ Parameter name   | Parameter description
 `inputDir`       | input directory containing `.eds` input ED text files and `.txt` input pattern files
 `outFile`        | base name for output files
 
-#### generate_synth.py
+#### ed_histogram.py (scripts folder)
+
+Parameter name         | Parameter description
+---------------------- | ---------------------
+`inFolder`             | input folder path
+
+#### generate_synth.py (scripts folder)
 
 Parameter name         | Parameter description
 ---------------------- | ---------------------
@@ -101,3 +107,4 @@ Parameter name         | Parameter description
 `nMaxSegmentVariants`  | maximum number of variants (`a`), the number of variants for each degenerate segment will be sampled from the interval `[2, a]`
 `nMaxVariantLength`    | maximum length of each segment variant (`b`), the length for each variant will be sampled from the interval `[0, b]` (segments might contain empty words)
 `outFile`              | output file path
+
