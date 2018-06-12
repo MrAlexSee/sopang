@@ -485,7 +485,7 @@ TEST_CASE("is matching pattern length 64 correct", "[exact]")
 
 TEST_CASE("is matching pattern equal to text correct", "[exact]")
 {
-    repeat(nRandIter, []() {
+    repeat(nRandIter, [] {
         for (int size = 1; size <= maxPatSize; ++size)
         {    
             string text = Helpers::genRandomString(size, alphabet);
@@ -563,7 +563,7 @@ TEST_CASE("is filling mask buffer correct for repeated same character in pattern
         for (int size = 1; size <= maxPatSize; ++size)
         {
             string pattern = "";
-            repeat(size, [c, &pattern]() { pattern += c; });
+            repeat(size, [c, &pattern] { pattern += c; });
 
             Sopang sopang;
             SopangWhitebox::fillPatternMaskBuffer(sopang, pattern, alphabet);

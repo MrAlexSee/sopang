@@ -2,7 +2,6 @@
 #include <vector>
 
 #include "catch.hpp"
-#include "repeat.hpp"
 
 #include "../helpers.hpp"
 #include "../sopang.hpp"

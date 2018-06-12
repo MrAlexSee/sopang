@@ -70,7 +70,7 @@ TEST_CASE("is median calculation correct for randomized odd #elems", "[collectio
     mt19937 mt(rd());
     uniform_int_distribution<int> dist(minVal + 1, maxVal - 1);
 
-    repeat(nRandIter, [&dist, &mt]() {
+    repeat(nRandIter, [&dist, &mt] {
         int randMedian = dist(mt);
         vector<int> vec { randMedian };
 
@@ -93,7 +93,7 @@ TEST_CASE("is median calculation correct for randomized odd #elems", "[collectio
 
 TEST_CASE("is file dumping-reading symmetric for random file names", "[files]")
 {
-    repeat(nRandIter, []() {
+    repeat(nRandIter, [] {
         string fileName = Helpers::genRandomStringAlphNum(maxStrSize);
 
         Helpers::dumpToFile(testText, fileName);
@@ -106,7 +106,7 @@ TEST_CASE("is file dumping-reading symmetric for random file names", "[files]")
 
 TEST_CASE("is file removing correct", "[files]")
 {
-    repeat(nRandIter, []() {
+    repeat(nRandIter, [] {
         string fileName = Helpers::genRandomStringAlphNum(maxStrSize);
         Helpers::dumpToFile(testText, fileName);
 
@@ -121,7 +121,7 @@ TEST_CASE("is random generation from range without excluded correct", "[random]"
 {
     const int start = 0, end = 100;
 
-    repeat(nRandIter, []() {
+    repeat(nRandIter, [] {
         int n = Helpers::randIntRangeExcluded(start, end, -1);
         REQUIRE(n >= start);
         REQUIRE(n <= end);
@@ -130,7 +130,7 @@ TEST_CASE("is random generation from range without excluded correct", "[random]"
 
 TEST_CASE("is random generation from range with excluded correct", "[random]")
 {
-    repeat(nRandIter, []() {
+    repeat(nRandIter, [] {
         int n0 = Helpers::randIntRangeExcluded(0, 1, 1);
         REQUIRE(n0 == 0);
 
@@ -188,7 +188,7 @@ TEST_CASE("is removing empty strings correct for randomized", "[strings]")
     mt19937 mt(rd());
     uniform_int_distribution<int> dist(minVal + 1, maxVal - 1);
 
-    repeat(nRandIter, [&dist, &mt]() {
+    repeat(nRandIter, [&dist, &mt] {
         vector<string> vec;
 
         for (int i = 0; i < nVectorStrings; ++i)
@@ -210,7 +210,7 @@ TEST_CASE("is removing empty strings correct for randomized", "[strings]")
 
 TEST_CASE("is generated random alphanumeric string of correct size and sampled from correct alphabet", "[strings]")
 {
-    repeat(nRandIter, []() {
+    repeat(nRandIter, [] {
         for (int size = 0; size <= maxStrSize; ++size)
         {
             string str = Helpers::genRandomStringAlphNum(size);
@@ -229,7 +229,7 @@ TEST_CASE("is generated random string of correct size and sampled from correct a
     string alphabet = "ACGTN";
     unordered_set<char> chars(alphabet.begin(), alphabet.end());
 
-    repeat(nRandIter, [&alphabet, &chars]() {
+    repeat(nRandIter, [&alphabet, &chars] {
         for (int size = 0; size <= maxStrSize; ++size)
         {
             string str = Helpers::genRandomString(size, alphabet);
