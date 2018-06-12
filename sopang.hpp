@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace inverted_basilisk
+namespace sopang
 {
 
 class Sopang
@@ -65,6 +65,7 @@ private:
 
     SOPANG_WHITEBOX
 };
+
 }
 
 #endif // SOPANG_HPP

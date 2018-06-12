@@ -8,7 +8,7 @@
 
 #include "../sopang.hpp"
 
-namespace inverted_basilisk
+namespace sopang
 {
 
 class SopangWhitebox

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-namespace inverted_basilisk
+namespace sopang
 {
 
 Sopang::Sopang()

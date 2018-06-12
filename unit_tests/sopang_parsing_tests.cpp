@@ -9,12 +9,12 @@
 
 using namespace std;
 
-namespace inverted_basilisk
+namespace sopang
 {
 
 namespace
 {
-const string alphabet = "ACGTN";
+    const string alphabet = "ACGTN";
 }
 
 TEST_CASE("is parsing text for an empty string correct", "[parsing]")

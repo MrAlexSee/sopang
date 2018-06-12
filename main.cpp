@@ -22,18 +22,18 @@
 #include "params.hpp"
 #include "sopang.hpp"
 
-using namespace inverted_basilisk;
+using namespace sopang;
 using namespace std;
 
 namespace po = boost::program_options;
+
+namespace sopang
+{
 
 namespace
 {
     Params params;
 }
-
-namespace inverted_basilisk
-{
 
 int handleParams(int argc, const char **argv);
 bool checkInputFiles(const char *execName);
@@ -73,7 +73,7 @@ int main(int argc, const char **argv)
     return run();
 }
 
-namespace inverted_basilisk
+namespace sopang
 {
 
 int handleParams(int argc, const char **argv)
@@ -389,4 +389,5 @@ void clearMemory(const string *const *segments, unsigned nSegments, unsigned *se
 
     cout << endl << "Cleared memory" << endl;
 }
+
 }

@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace inverted_basilisk
+namespace sopang
 {
 
 namespace

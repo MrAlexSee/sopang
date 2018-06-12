@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace inverted_basilisk
+namespace sopang
 {
 
 struct Params
@@ -50,6 +50,7 @@ struct Params
         "Input pattern file (positional parameter 2 or named parameter -I or --in-pattern-file) should contain the list of patterns, each of the same length, separated with newline characters.\n"
         "Attached as part of the sopang package is a script run_all.sh, which allows for processing multiple input text (chromosome) and pattern files.";
 };
+
 }
 
 #endif // PARAMS_HPP
