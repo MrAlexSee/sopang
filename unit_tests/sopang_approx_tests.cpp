@@ -310,10 +310,10 @@ TEST_CASE("is approx matching multiple short contiguous indeterminate segments c
     const string *const *segments = Sopang::parseTextArray("AC{A,G,C}T{,A}{A,T}{C,GC}{A,CA,T}{CA,GG}", &nSegments, &segmentSizes);
 
     Sopang sopang;
-    string basePattern = "CCTATGCTC";
+    string basePattern = "ACCTATGCTCA";
 
     repeat(nRandIter, [&] {
-        for (size_t i = 0; i < basePattern.size(); ++i)
+        for (size_t i = 0; i < basePattern.size(); ++i) 
         {
             string pattern = basePattern;
 
