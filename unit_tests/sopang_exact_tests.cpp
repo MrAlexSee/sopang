@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -350,6 +351,42 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
     for (unsigned i : { 2, 4, 6, 8 })
     {
         REQUIRE(res.count(i) == 1);
+    }
+}
+
+TEST_CASE("is matching multiple indeterminate and determinate segments with multiple empty words at different positions for spanning correct", "[exact]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,AA,CC,GG}{AA,,CC,GG}{AA,CC,,GG}{AA,CC,GG,}ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    // Only letters from the first and the last segment.
+    for (const string &pattern : { "ACGTACGT", "CGTACG", "GTACGT", "GTACG", "GTAC", "TACGT", "TACG", "TAC" })
+    {
+        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(5) == 1);
+    }
+
+    // Letters from the first, the last, and one (any) of the duplicated segments located in the middle.
+    for (const string &pattern : { "ACGTAAACGT", "ACGTCCACGT", "ACGTGGACGT" })
+    {
+        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(5) == 1);
+    }
+
+    // Letters from the first, the last, and two (any) of the duplicated segments located in the middle.
+    for (const string &pattern : { "ACGTAAAAACGT", "ACGTCCCCACGT", "ACGTGGGGACGT", "ACGTAACCACGT", "ACGTCCAAACGT", "ACGTCCGGACGT", "ACGTGGCCACGT", "ACGTAAGGACGT", "ACGTGGAAACGT" })
+    {
+        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(5) == 1);
     }
 }
 

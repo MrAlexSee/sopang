@@ -310,21 +310,22 @@ TEST_CASE("is approx matching multiple short contiguous indeterminate segments c
     const string *const *segments = Sopang::parseTextArray("AC{A,G,C}T{,A}{A,T}{C,GC}{A,CA,T}{CA,GG}", &nSegments, &segmentSizes);
 
     Sopang sopang;
-
     string basePattern = "CCTATGCTC";
 
-    for (size_t i = 0; i < basePattern.size(); ++i)
-    {
-        string pattern = basePattern;
+    repeat(nRandIter, [&] {
+        for (size_t i = 0; i < basePattern.size(); ++i)
+        {
+            string pattern = basePattern;
 
-        pattern[i] = 'N';
-        pattern[Helpers::randIntRangeExcluded(0, pattern.size() - 1, i)] = 'N';
+            pattern[i] = 'N';
+            pattern[Helpers::randIntRangeExcluded(0, pattern.size() - 1, i)] = 'N';
 
-        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 2);
+            unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 2);
 
-        REQUIRE(res.size() == 1);
-        REQUIRE(res.count(7) == 1);
-    }
+            REQUIRE(res.size() == 1);
+            REQUIRE(res.count(7) == 1);
+        }
+    });
 }
 
 TEST_CASE("is approx matching multiple determinate segments correct for 2 errors for partial segment match", "[approx]")
@@ -347,6 +348,92 @@ TEST_CASE("is approx matching multiple determinate segments correct for 2 errors
         {
             REQUIRE(res.count(i) == 1);
         }            
+    }
+}
+
+TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple empty words at different positions for exact for spanning correct", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,AA,CC,GG}{AA,,CC,GG}{AA,CC,,GG}{AA,CC,GG,}ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    // Only letters from the first and the last segment.
+    unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, "ACGTACGT", alphabet, 1);
+
+    REQUIRE(res.size() == 1);
+    REQUIRE(res.count(5) == 1);
+
+    // Letters from the first, the last, and one (any) of the duplicated segments located in the middle.
+    for (const string &pattern : { "ACGTAAACGT", "ACGTCCACGT", "ACGTGGACGT" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(5) == 1);
+    }
+
+    // Letters from the first, the last, and two (any) of the duplicated segments located in the middle.
+    for (const string &pattern : { "ACGTAAAAACGT", "ACGTCCCCACGT", "ACGTGGGGACGT", "ACGTAACCACGT", "ACGTCCAAACGT", "ACGTCCGGACGT", "ACGTGGCCACGT", "ACGTAAGGACGT", "ACGTGGAAACGT" })
+    {
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(5) == 1);
+    }
+}
+
+TEST_CASE("is approx matching multiple indeterminate and determinate segments with multiple empty words at different positions for 1 error for spanning correct", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,AA,CC,GG}{AA,,CC,GG}{AA,CC,,GG}{AA,CC,GG,}ACGT", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    // Only letters from the first and the last segment.
+    string basePattern1 = "ACGTACGT";
+
+    for (size_t i = 0; i < basePattern1.size(); ++i)
+    {
+        string pattern = basePattern1;
+        pattern[i] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(5) == 1);
+    }
+
+    // Letters from the first, the last, and one (any) of the duplicated segments located in the middle.
+    for (const string &basePattern2 : { "ACGTAAACGT", "ACGTCCACGT", "ACGTGGACGT" })
+    {
+        for (size_t i = 0; i < basePattern2.size(); ++i)
+        {
+            string pattern = basePattern2;
+            pattern[i] = 'N';
+
+            unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+            REQUIRE(res.size() == 1);
+            REQUIRE(res.count(5) == 1);
+        }
+    }
+
+    // Letters from the first, the last, and two (any) of the duplicated segments located in the middle.
+    for (const string &basePattern3 : { "ACGTAAAAACGT", "ACGTCCCCACGT", "ACGTGGGGACGT", "ACGTAACCACGT", "ACGTCCAAACGT", "ACGTCCGGACGT", "ACGTGGCCACGT", "ACGTAAGGACGT", "ACGTGGAAACGT" })
+    {
+        for (size_t i = 0; i < basePattern3.size(); ++i)
+        {
+            string pattern = basePattern3;
+            pattern[i] = 'N';
+
+            unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+
+            REQUIRE(res.size() == 1);
+            REQUIRE(res.count(5) == 1);
+        }
     }
 }
 
@@ -701,24 +788,25 @@ TEST_CASE("is approx matching pattern length 8 correct for 2 errors", "[approx]"
     const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
 
     Sopang sopang;
-
     string basePattern = "ACGTACGT";
 
-    for (size_t i = 0; i < basePattern.size(); ++i)
-    {
-        string pattern = basePattern;
-        
-        pattern[i] = 'N';
-        pattern[Helpers::randIntRangeExcluded(0, pattern.size() - 1, i)] = 'N';
-
-        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 2);
-        REQUIRE(res.size() == 3);
-
-        for (unsigned i : { 2, 4, 6 })
+    repeat(nRandIter, [&] {
+        for (size_t i = 0; i < basePattern.size(); ++i)
         {
-            REQUIRE(res.count(i) == 1);
+            string pattern = basePattern;
+            
+            pattern[i] = 'N';
+            pattern[Helpers::randIntRangeExcluded(0, pattern.size() - 1, i)] = 'N';
+
+            unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 2);
+            REQUIRE(res.size() == 3);
+
+            for (unsigned i : { 2, 4, 6 })
+            {
+                REQUIRE(res.count(i) == 1);
+            }
         }
-    }
+    });
 }
 
 TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[approx]")
@@ -782,7 +870,7 @@ TEST_CASE("is filling approx mask buffer correct for repeated same character in 
         for (int size = 1; size <= maxPatSize; ++size)
         {
             string pattern = "";
-            repeat(size, [c, &pattern]() { pattern += c; });
+            repeat(size, [c, &pattern] { pattern += c; });
 
             Sopang sopang;
 
