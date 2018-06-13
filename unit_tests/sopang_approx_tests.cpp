@@ -809,6 +809,51 @@ TEST_CASE("is approx matching pattern length 8 correct for 2 errors", "[approx]"
     });
 }
 
+TEST_CASE("is approx matching pattern length 10 correct for 1 error", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,GGGG,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    string basePattern = "ACGTACGTAC";
+
+    for (size_t i = 0; i < basePattern.size(); ++i)
+    {
+        string pattern = basePattern;
+        pattern[i] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        REQUIRE(res.size() == 2);
+
+        REQUIRE(res.count(4) == 1);
+        REQUIRE(res.count(6) == 1);
+    }
+}
+
+TEST_CASE("is approx matching pattern length 12 correct for 1 error", "[approx]")
+{
+    unsigned nSegments;
+    unsigned *segmentSizes;
+    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,GGGG,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+
+    Sopang sopang;
+
+    string basePattern = "ACGTACGTACGT";
+
+    for (size_t i = 0; i < basePattern.size(); ++i)
+    {
+        string pattern = basePattern;
+        pattern[i] = 'N';
+
+        unordered_set<unsigned> res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, alphabet, 1);
+        
+        REQUIRE(res.size() == 1);
+        REQUIRE(res.count(4) == 1);
+    }
+}
+
 TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[approx]")
 {
     const string pattern = "ACAACGT";
