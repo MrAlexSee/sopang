@@ -2,11 +2,11 @@
 
 This software is called **SOPanG** (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
 
-ED text is in the following format: `{A,C,}GAAT{AT,A}ATT`. 
-Braces determine the start and end of each indeterminate segment (degenerate segments, i.e. segments having multiple variants), and commas delimit segment variants.
+ED text is in a format possibly best explained with an example: `{A,C,}GAAT{AT,A}ATT`. 
+Braces determine the start and end of each non-deterministic segment (a segment having multiple variants), and commas delimit segment variants.
 If a comma is not preceded by a string of letters or it is a trailing symbol in a segment, it indicates an empty word.
 To give an example, all three notations: `{,A,C}`, `{A,,C}`, and `{A,C,}` mean the same, which is a segment which accepts either a string `A`, or a string `C`, or an empty word.
-Determinate segments (i.e. segments having a single variant) are stored as regular contiguous strings.
+Deterministic segments (i.e. segments having a single variant) are stored as regular contiguous strings.
 Note that, e.g., `{AC,CG}` and `{AC, CG}` are not the same (the latter would expect a space in its second variant).
 Therefore, you should not use whitespaces in the ED text if not intended.
 
@@ -19,7 +19,7 @@ Add Boost library to the path for compilation by setting `BOOST_DIR` in the make
 Type `make` for optimized compile.
 Comment out `OPTFLAGS` in the makefile in order to disable optimization.
 
-Tested with gcc 64-bit 7.2.0 and Boost 1.67.0 (the latter is not time-critical, used only for parameter and data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
+Tested with gcc 64-bit 7.2.0 and Boost 1.67.0 (the latter is not performance-critical, used only for parameter and data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
 
 A binary (compiled executable) for Linux is available in the release (file name `sopang`).
 
@@ -103,8 +103,8 @@ Parameter name         | Parameter description
 ---------------------- | ---------------------
 `nSegments`            | total number of segments
 `alphabet`             | alphabet for character sampling
-`nDegeneratePositions` | number of segments (must be smaller than or equal to `nSegments`) which are degenerate (indeterminate), i.e., contain multiple variants
-`nMaxSegmentVariants`  | maximum number of variants (`a`), the number of variants for each degenerate segment will be sampled from the interval `[2, a]`
+`nDegeneratePositions` | number of segments (must be smaller than or equal to `nSegments`) which are non-deterministic, i.e., contain multiple variants
+`nMaxSegmentVariants`  | maximum number of variants (`a`), the number of variants for each non-deterministic segment will be sampled from the interval `[2, a]`
 `nMaxVariantLength`    | maximum length of each segment variant (`b`), the length for each variant will be sampled from the interval `[0, b]` (segments might contain empty words)
 `outFile`              | output file path
 

@@ -38,10 +38,10 @@ struct Params
 
     const string verboseInfoString =
         "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cislak, Szymon Grabowski, Jan Holub.\n"
-        "ED text is in the following format: {A,C,}GAAT{AT,A}ATT. Braces determine the start and end of each indeterminate segment (i.e. segment having multiple variants), and commas delimit segment variants.\n"
+        "ED text is in a format possibly best explained with an example: {A,C,}GAAT{AT,A}ATT. Braces determine the start and end of each non-deterministic segment (i.e. segment having multiple variants), and commas delimit segment variants.\n"
         "If a comma is not preceded by a string of letters or it is a trailing symbol in a segment, it indicates an empty word.\n"
         "To give an example, all three notations: {,A,C}, {A,,C}, and {A,C,} mean the same, which is a segment which accepts either a string A, or a string C, or an empty word.\n"
-        "Determinate segments (i.e. segments having a single variant) are stored as regular contiguous strings.\n"
+        "Deterministic segments (i.e. segments having a single variant) are stored as regular contiguous strings.\n"
         "Note that, e.g., {AC,CG} and {AC, CG} are not the same (the latter would expect a space in its second variant). Therefore, you should not use whitespaces in the ED text if not intended.\n"
         "SOPanG returns the end positions of pattern occurrences in the ED text. More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).";
 
