@@ -47,14 +47,14 @@ private:
     void fillPatternMaskBufferApprox(const string &pattern, const string &alphabet);
 
     static constexpr unsigned dBufferSize = 262144; // Buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants) from the input file cannot be larger than this value.
-    static constexpr unsigned maskBufferSize = 91; // Buffer size for shift-or masks for the input alphabet, must be larger than the largest input character ASCII code, up to 'Z' = 90.
-    static constexpr unsigned wordSize = 64; // Shift-or word size in bits.
+    static constexpr unsigned maskBufferSize = 91; // Buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code, up to 'Z' = 90.
+    static constexpr unsigned wordSize = 64; // Word size (in bits) used by the Shift-Or algorithm.
 
-    static constexpr unsigned saCounterSize = 5; // Shift-add counter size in bits.
+    static constexpr unsigned saCounterSize = 5; // Shift-Add counter size in bits.
     static constexpr unsigned maxPatternApproxSize = 12; // Maximum pattern size for approximate search.
     
-    static constexpr uint64_t saFullCounter = 0x10ULL; // Full single shift-add counter indicating no match.
-    static constexpr uint64_t saCounterAllSet = 0x20ULL - 0x1ULL; // Single shift-add counter with all bits set.
+    static constexpr uint64_t saFullCounter = 0x10ULL; // Full single Shift-Add counter indicating no match.
+    static constexpr uint64_t saCounterAllSet = 0x20ULL - 0x1ULL; // Single Shift-Add counter with all bits set.
 
     static constexpr uint64_t allOnes = ~(0x0ULL);
 

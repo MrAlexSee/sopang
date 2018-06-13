@@ -79,8 +79,8 @@ Parameter name  | Parameter description
 Parameter name   | Parameter description
 ---------------- | ---------------------
 `dBufferSize`    | buffer size for processing segment variants, the size of the largest segment (i.e., the number of variants) from the input file cannot be larger than this value
-`maskBufferSize` | buffer size for shift-or masks for the input alphabet, must be larger than the largest input character ASCII code
-`wordSize`       | shift-or word size in bits
+`maskBufferSize` | buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code
+`wordSize`       | word size (in bits) used by the Shift-Or algorithm
 
 ## Script parameter description
 
