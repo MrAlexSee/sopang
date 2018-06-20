@@ -210,6 +210,6 @@ inline string Helpers::genRandomStringAlphNum(int size)
     return res;
 }
 
-}
+} // namespace sopang
 
 #endif // HELPERS_HPP

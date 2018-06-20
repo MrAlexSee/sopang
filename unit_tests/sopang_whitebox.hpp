@@ -40,6 +40,6 @@ public:
     }
 };
 
-}
+} // namespace sopang
 
 #endif // SOPANG_WHITEBOX_HPP

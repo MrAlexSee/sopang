@@ -945,4 +945,4 @@ TEST_CASE("is filling approx mask buffer correct for repeated same character in 
     }
 }
 
-}
+} // namespace sopang

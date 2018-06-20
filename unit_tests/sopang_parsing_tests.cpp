@@ -13,7 +13,9 @@ namespace sopang
 
 namespace
 {
-    const string alphabet = "ACGTN";
+
+const string alphabet = "ACGTN";
+
 }
 
 TEST_CASE("is parsing text for an empty string correct", "[parsing]")
@@ -220,4 +222,4 @@ TEST_CASE("is parsing patterns correct for trailing whitespace", "[parsing]")
     REQUIRE(Helpers::join(patterns, "") == "12345");
 }
 
-}
+} // namespace sopang

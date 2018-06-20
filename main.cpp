@@ -32,7 +32,9 @@ namespace sopang
 
 namespace
 {
-    Params params;
+
+Params params;
+
 }
 
 int handleParams(int argc, const char **argv);
@@ -55,7 +57,7 @@ void dumpIndexes(const unordered_set<unsigned> &indexes);
 
 void clearMemory(const string *const *segments, unsigned nSegments, unsigned *segmentSizes);
 
-}
+} // namespace sopang
 
 int main(int argc, const char **argv)
 {
@@ -390,4 +392,4 @@ void clearMemory(const string *const *segments, unsigned nSegments, unsigned *se
     cout << endl << "Cleared memory" << endl;
 }
 
-}
+} // namespace sopang

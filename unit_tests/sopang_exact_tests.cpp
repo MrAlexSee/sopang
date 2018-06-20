@@ -590,4 +590,4 @@ TEST_CASE("is filling mask buffer correct for repeated same character in pattern
     }
 }
 
-}
+} // namespace sopang

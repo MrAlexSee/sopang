@@ -51,6 +51,6 @@ struct Params
         "Attached as part of the sopang package is a script run_all.sh, which allows for processing multiple input text (chromosome) and pattern files.";
 };
 
-}
+} // namespace sopang
 
 #endif // PARAMS_HPP

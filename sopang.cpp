@@ -319,4 +319,4 @@ void Sopang::fillPatternMaskBufferApprox(const string &pattern, const string &al
     }
 }
 
-}
+} // namespace sopang

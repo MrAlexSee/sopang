@@ -66,6 +66,6 @@ private:
     SOPANG_WHITEBOX
 };
 
-}
+} // namespace sopang
 
 #endif // SOPANG_HPP

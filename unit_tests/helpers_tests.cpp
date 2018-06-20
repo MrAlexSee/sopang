@@ -243,4 +243,4 @@ TEST_CASE("is generated random string of correct size and sampled from correct a
     });
 }
 
-}
+} // namespace sopang

@@ -16,7 +16,7 @@ all: $(EXE)
 $(EXE): $(OBJ)
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
-main.o: main.cpp helpers.hpp params.hpp
+main.o: main.cpp helpers.hpp params.hpp sopang.hpp
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c main.cpp
 
 sopang.o: sopang.cpp sopang.hpp helpers.hpp
