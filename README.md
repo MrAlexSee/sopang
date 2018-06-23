@@ -2,6 +2,8 @@
 
 This software is called **SOPanG** (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
 
+Accepted for publication in Bioinformatics journal as an applications note entitled "SOPanG: online text searching over a pan-genome".
+
 ED text is in a format possibly best explained with an example: `{A,C,}GAAT{AT,A}ATT`. 
 Braces determine the start and end of each non-deterministic segment (a segment having multiple variants), and commas delimit segment variants.
 If a comma is not preceded by a string of letters or it is a trailing symbol in a segment, it indicates an empty word.
