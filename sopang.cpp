@@ -67,7 +67,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
             if (curStr.empty() == false) // If we enter the segment from the determinate string.
             {
                 vector<string> determinate;
-                determinate.push_back(string(curStr));
+                determinate.push_back(curStr);
 
                 segments.push_back(determinate);
                 curStr.clear();
