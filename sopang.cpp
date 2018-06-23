@@ -51,7 +51,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
             {
                 if (text[i] == ',')
                 {
-                    curSegment.push_back(curStr);
+                    curSegment.emplace_back(move(curStr));
                     curStr.clear();
                 }
                 else
@@ -66,10 +66,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
 
             if (curStr.empty() == false) // If we enter the segment from the determinate string.
             {
-                vector<string> determinate;
-                determinate.push_back(curStr);
-
-                segments.push_back(determinate);
+                segments.emplace_back(vector<string> { move(curStr) });
                 curStr.clear();
             }
 
@@ -85,11 +82,11 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
                 throw runtime_error("degenerate segment cannot be empty");
             }
 
-            curSegment.push_back(curStr);
-            segments.push_back(vector<string>(curSegment));
-
-            curSegment.clear();
+            curSegment.emplace_back(move(curStr));
             curStr.clear();
+
+            segments.emplace_back(move(curSegment));
+            curSegment.clear();
 
             inSeg = false;
         }
