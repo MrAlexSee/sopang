@@ -30,17 +30,17 @@ struct Helpers
      *** FILES
      */
 
-    static bool isFileReadable(const string &filePath);
-    static string readFile(const string &filePath);
+    inline static bool isFileReadable(const string &filePath);
+    inline static string readFile(const string &filePath);
 
-    static void dumpToFile(const string &text, const string &filePath, bool newline = false);
-    static bool removeFile(const string &filePath);
-  
+    inline static void dumpToFile(const string &text, const string &filePath, bool newline = false);
+    inline static bool removeFile(const string &filePath);
+
     /*
      *** RANDOM
      */
 
-    static int randIntRangeExcluded(int start, int end, int excluded);
+    inline static int randIntRangeExcluded(int start, int end, int excluded);
 
     /*
      *** STRINGS
@@ -48,14 +48,14 @@ struct Helpers
 
     template<typename T>
     static string join(const vector<T> &vec, const string &delim);
-    static void removeEmptyStrings(vector<string> &vec);
+    inline static void removeEmptyStrings(vector<string> &vec);
 
-    static string genRandomString(int size, string alphabet);
-    static string genRandomStringAlphNum(int size);
+    inline static string genRandomString(int size, string alphabet);
+    inline static string genRandomStringAlphNum(int size);
    
 private:
     template<typename T, typename = typename enable_if<is_arithmetic<T>::value, T>::type>
-    static string toString(T val)
+    inline static string toString(T val)
     {
         return to_string(val);
     }
@@ -69,7 +69,7 @@ private:
 };
 
 template<typename T>
-inline void Helpers::calcStatsMedian(const vector<T> &throughputVec, T *throughputMedian)
+void Helpers::calcStatsMedian(const vector<T> &throughputVec, T *throughputMedian)
 {
     if (throughputVec.size() == 0)
     {
@@ -82,13 +82,13 @@ inline void Helpers::calcStatsMedian(const vector<T> &throughputVec, T *throughp
     *throughputMedian = tmp[tmp.size() / 2];
 }
 
-inline bool Helpers::isFileReadable(const string &filePath)
+bool Helpers::isFileReadable(const string &filePath)
 {
     ifstream inStream(filePath);
     return inStream.good();
 }
 
-inline string Helpers::readFile(const string &filePath)
+string Helpers::readFile(const string &filePath)
 {
     ifstream inStream(filePath);
 
@@ -100,7 +100,7 @@ inline string Helpers::readFile(const string &filePath)
     return static_cast<stringstream const&>(stringstream() << inStream.rdbuf()).str();
 }
 
-inline void Helpers::dumpToFile(const string &text, const string &filePath, bool newline)
+void Helpers::dumpToFile(const string &text, const string &filePath, bool newline)
 {
     ofstream outStream(filePath, ios_base::app);
 
@@ -117,12 +117,12 @@ inline void Helpers::dumpToFile(const string &text, const string &filePath, bool
     }
 }
 
-inline bool Helpers::removeFile(const string &filePath)
+bool Helpers::removeFile(const string &filePath)
 {
     return remove(filePath.c_str()) == 0;
 }
 
-inline int Helpers::randIntRangeExcluded(int start, int end, int excluded)
+int Helpers::randIntRangeExcluded(int start, int end, int excluded)
 {
     if (start > end or (start == end and start == excluded))
     {
@@ -144,7 +144,7 @@ inline int Helpers::randIntRangeExcluded(int start, int end, int excluded)
 }
 
 template<typename T>
-inline string Helpers::join(const vector<T> &vec, const string &delim)
+string Helpers::join(const vector<T> &vec, const string &delim)
 {
     if (vec.size() == 0)
     {
@@ -161,7 +161,7 @@ inline string Helpers::join(const vector<T> &vec, const string &delim)
     return res + toString(vec.back());
 }
 
-inline void Helpers::removeEmptyStrings(vector<string> &vec)
+void Helpers::removeEmptyStrings(vector<string> &vec)
 {
     vector<string>::iterator it = vec.begin();
 
@@ -178,7 +178,7 @@ inline void Helpers::removeEmptyStrings(vector<string> &vec)
     }
 }
 
-inline string Helpers::genRandomString(int size, string alphabet)
+string Helpers::genRandomString(int size, string alphabet)
 {   
     random_device rd;
     mt19937 mt(rd());
@@ -194,7 +194,7 @@ inline string Helpers::genRandomString(int size, string alphabet)
     return res;
 }
 
-inline string Helpers::genRandomStringAlphNum(int size)
+string Helpers::genRandomStringAlphNum(int size)
 {
     random_device rd;
     mt19937 mt(rd());
