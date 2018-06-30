@@ -62,7 +62,7 @@ Testing on human genome and synthetic data.
 
 1. Generate synthetic data by running `python generate_synth.py` (requires Python 2.7) 4 times for the number of segments (parameter `nSegments`) set to 100, 500, 1000, and 1600 thousands. Rename files as `chr24.eds`, `chr25.eds`, `chr26.eds`, `chr27.eds`.
 
-1. Set parameter `inputDir` in `run_all.sh` to the folder containing `.eds` files and pattern files (all pattern files are located in the `sample/` folder as part of this package).
+1. Set parameter `inDir` in `run_all.sh` to the folder containing `.eds` files and pattern files (all pattern files are located in the `sample/` folder as part of this package).
 
 1. Compile SoPanG (see above).
 
@@ -80,7 +80,7 @@ Parameter name  | Parameter description
 
 Parameter name   | Parameter description
 ---------------- | ---------------------
-`dBufferSize`    | buffer size for processing segment variants, the size of the largest segment (i.e., the number of variants) from the input file cannot be larger than this value
+`dBufferSize`    | buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants) from the input file cannot be larger than this value
 `maskBufferSize` | buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code
 `wordSize`       | word size (in bits) used by the Shift-Or algorithm
 
@@ -90,23 +90,23 @@ Parameter name   | Parameter description
 
 Parameter name   | Parameter description
 ---------------- | ---------------------
-`inputDir`       | input directory path containing `.eds` ED text files and `.txt` input pattern files
+`inDir`          | input directory path containing `.eds` ED text files and `.txt` input pattern files
 `outFile`        | base name for output files
 
 #### ed_histogram.py (scripts folder)
 
 Parameter name         | Parameter description
 ---------------------- | ---------------------
-`inputDir`             | input directory path containing `.eds` ED text files
+`pInDir`               | input directory path containing `.eds` ED text files
 
 #### generate_synth.py (scripts folder)
 
-Parameter name         | Parameter description
----------------------- | ---------------------
-`nSegments`            | total number of segments
-`alphabet`             | alphabet for character sampling
-`nDegeneratePositions` | number of segments (must be smaller than or equal to `nSegments`) which are non-deterministic, i.e., contain multiple variants
-`nMaxSegmentVariants`  | maximum number of variants (`a`), the number of variants for each non-deterministic segment will be sampled from the interval `[2, a]`
-`nMaxVariantLength`    | maximum length of each segment variant (`b`), the length for each variant will be sampled from the interval `[0, b]` (segments might contain empty words)
-`outFile`              | output file path
+Parameter name          | Parameter description
+----------------------- | ---------------------
+`pNSegments`            | total number of segments
+`pAlphabet`             | alphabet for character sampling
+`pNDegeneratePositions` | number of segments (must be smaller than or equal to `nSegments`) which are non-deterministic, i.e. contain multiple variants
+`pNMaxSegmentVariants`  | maximum number of variants (`a`), the number of variants for each non-deterministic segment will be sampled from the interval `[2, a]`
+`pNMaxVariantLength`    | maximum length of each segment variant (`b`), the length for each variant will be sampled from the interval `[0, b]` (segments might contain empty words)
+`pOutFile`              | output file path
 
