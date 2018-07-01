@@ -23,8 +23,9 @@ struct Helpers
      *** COLLECTIONS
      */
 
+    /** Calculates a median from [vec] and stores it in [median]. */
     template<typename T>
-    static void calcStatsMedian(const vector<T> &throughputVec, T *throughputMedian);
+    static void calcStatsMedian(const vector<T> &vec, T *median);
  
     /*
      *** FILES
@@ -33,6 +34,7 @@ struct Helpers
     inline static bool isFileReadable(const string &filePath);
     inline static string readFile(const string &filePath);
 
+    /** Appends [text] to file with [filePath] followed by an optional newline if [newline] is true. */
     inline static void dumpToFile(const string &text, const string &filePath, bool newline = false);
     inline static bool removeFile(const string &filePath);
 
@@ -40,6 +42,7 @@ struct Helpers
      *** RANDOM
      */
 
+    /** Returns a random integer from range [start, end] (both inclusive) not equal to [excluded]. */
     inline static int randIntRangeExcluded(int start, int end, int excluded);
 
     /*
@@ -69,17 +72,17 @@ private:
 };
 
 template<typename T>
-void Helpers::calcStatsMedian(const vector<T> &throughputVec, T *throughputMedian)
+void Helpers::calcStatsMedian(const vector<T> &vec, T *median)
 {
-    if (throughputVec.size() == 0)
+    if (vec.size() == 0)
     {
         return;
     }
 
-    vector<T> tmp = throughputVec;
+    vector<T> tmp = vec;
 
     sort(tmp.begin(), tmp.end());
-    *throughputMedian = tmp[tmp.size() / 2];
+    *median = tmp[tmp.size() / 2];
 }
 
 bool Helpers::isFileReadable(const string &filePath)

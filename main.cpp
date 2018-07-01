@@ -1,6 +1,6 @@
 /*
  ***
- SOPanG, a simple tool for exact pattern matching over an elastic-degenerate string, a recently proposed simplified model for the pan-genome.
+ SOPanG, a simple tool for pattern matching over an elastic-degenerate string, a recently proposed simplified model for the pan-genome.
  ***
  Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub. License: GNU LGPL v3.
  ***
@@ -37,18 +37,23 @@ Params params;
 
 }
 
+/** Handles cmd-line parameters, returns -1 if program execution should continue. */
 int handleParams(int argc, const char **argv);
+/** Returns true if input files are readable, false otherwise. */
 bool checkInputFiles(const char *execName);
+/** Runs the main program and returns the program exit code. */
 int run();
 
 string readInputText();
 vector<string> readPatterns();
 
+/** Runs sopang for [nSegments] [segments], where each segment size is stored in [segmentSizes], and searches for [patterns]. */
 void runSopang(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
                const vector<string> &patterns);
-
+/** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segments]. */
 void calcTextSize(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
                   int *textSize, double *textSizeMB);
+/** Searches for [pattern] in [segments] and returns elapsed time in seconds. */
 double measure(const string *const *segments, unsigned nSegments,
                const unsigned *segmentSizes, const string &pattern);
 

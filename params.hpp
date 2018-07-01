@@ -11,29 +11,48 @@ namespace sopang
 
 struct Params
 {
-    // COMPILE-TIME PARAMS
+    /* 
+     *** COMPILE-TIME PARAMS
+     */
 
-    const string alphabet = "ACGTNUVISMEL<>:0123456789"; // Matches all characters in EDSO (Grossi et al. CPM '17) tool output.
+    /** A set of symbols occurring in input (ED) text file or input pattern file. Matches all characters in EDSO (Grossi et al. CPM '17) tool output. */
+    const string alphabet = "ACGTNUVISMEL<>:0123456789";
 
-    // COMMAND-LINE PARAMS
+    /*
+     *** COMMAND-LINE PARAMS
+     */
+
     // These parameters are set by handleParams() in main.cpp after parsing command line args.
 
-    bool dumpToFile = false; // Dump input file info and throughput to output file (outFile). Cmd arg -d.
-    bool dumpIndexes = false; // Dump resulting indexes (full results) to stdout. Cmd arg -D.
+    /** Dump input file info and throughput to output file (outFile). Cmd arg -d. */
+    bool dumpToFile = false;
+    /** Dump resulting indexes (full results) to stdout. Cmd arg -D. */
+    bool dumpIndexes = false;
 
-    int kApprox = noValue; // Number of errors for approximate search (Hamming). noValue = perform exact search. Cmd arg -k.
-    int nPatterns = noValue; // Maximum number of patterns read from top of the patterns file; noValue = ignore the pattern count limit. Cmd arg -p.
+    /** Number of errors for approximate search (Hamming distance). noValue = perform exact search. Cmd arg -k. */
+    int kApprox = noValue;
+    /** Maximum number of patterns read from top of the patterns file. noValue = ignore the pattern count limit. Cmd arg -p. */
+    int nPatterns = noValue;
 
-    string inTextFile = ""; // Input text file path (positional arg 1).
-    string inPatternFile = ""; // Input pattern file path (positional arg 2).
+    /** Input text file path (positional arg 1). */
+    string inTextFile = "";
+    /** Input pattern file path (positional arg 2). */
+    string inPatternFile = "";
 
-    string outFile = "res.txt"; // Output file path.
+    /** Output file path. */
+    string outFile = "res.txt";
 
-    // CONSTANTS
-    static constexpr int errorExitCode = 1; // Returned from main on failure.
-    static constexpr int noValue = -1; // Indicates that a given non-negative integer is not set.
+    /*
+     *** CONSTANTS
+     */
 
-    const string versionInfo = "sopang v1.3.0"; // Current version: major.minor.patch
+    /** Returned from main on failure. */
+    static constexpr int errorExitCode = 1;
+    /** Indicates that a given non-negative integer is not set. */
+    static constexpr int noValue = -1;
+
+    /** Current version: major.minor.patch */
+    const string versionInfo = "sopang v1.3.1";
     const string usageInfoString = "[options] <input text file> <input pattern file>";
 
     const string verboseInfoString =

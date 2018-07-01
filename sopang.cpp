@@ -36,7 +36,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
 
     for (size_t i = 0; text[i] != '\0'; ++i)
     {
-        if (text[i] != '{' and text[i] != '}') // Inside a string or segment: comma or string character
+        if (text[i] != '{' and text[i] != '}') // Inside a string or segment: comma or string character.
         {
             if (inSeg == false)
             {
@@ -60,7 +60,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
                 }
             }
         }
-        else if (text[i] == '{') // Segment start
+        else if (text[i] == '{') // Segment start.
         {
             assert(inSeg == false and curSegment.size() == 0);
 
