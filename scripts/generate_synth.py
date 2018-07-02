@@ -1,24 +1,15 @@
 """
-Grossi et al., On-line pattern matching on similar texts, CPM'17
-
-page 11:
-Synthetic data. Synthetic ED texts were created randomly (uniform distribution over
-the DNA alphabet) with n ranging from 100,000 to 1,600,000; and the percentage of
-degenerate positions was set to 10%. For each degenerate position within the synthetic ED
-texts, the number of strings was chosen randomly, with an upper bound set to 10. The
-length of each string of a degenerate position was chosen randomly, with an upper bound
-again set to 10. Every non-degenerate position within the synthetic ED texts contained a
-single letter. Four different patterns of length m = 8, 16, 32, or 64 were given as input to all
-three programs, along with the aforementioned synthetic ED texts, resulting in four sets of
-output.
+Generates synthetic elastic-degenerate text.
 """
 
 import random
 
-pNSegments = 100 * 1000 # Total number of segments: 100, 500, 1000, 1600 thousands segments.
-pAlphabet = "ACGTN" # Alphabet for character sampling.
+# Total number of segments: 100, 500, 1000, 1600 thousands segments.
+pNSegments = 100 * 1000
+# Alphabet for character sampling.
+pAlphabet = "ACGTN"
 
-# Number of segments (must be smaller than or equal to nSegments) which are non-deterministic,
+# Number of segments (must be smaller than or equal to pNSegments) which are non-deterministic,
 # i.e. contain multiple variants.
 pNDegeneratePositions = int(0.1 * pNSegments) # 10% of the text as in Grossi et al.
 
@@ -30,7 +21,8 @@ pNMaxSegmentVariants = 10
 # will be sampled from the interval [0, b] (segments might contain empty words).
 pNMaxVariantLength = 10
 
-pOutFile = "text.eds" # Output file path.
+# Output file path.
+pOutFile = "text.eds"
 
 def main():
     textSizeMB = round(pNSegments / 1000.0 / 1000.0, 3)

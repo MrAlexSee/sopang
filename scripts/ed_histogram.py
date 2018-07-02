@@ -1,12 +1,13 @@
 """
-Prints the histogram of character counts in determinate/indeterminate segments 
+Prints the histogram of character counts in deterministic/non-deterministic segments 
 for all .eds files from a given folder.
 """
 
 import os
 import re
 
-pInDir = "../sample" # Input directory path containing `.eds` ED text files.
+# Input directory path containing .eds ED text files.
+pInDir = "../sample"
 
 def main():
     res = []
