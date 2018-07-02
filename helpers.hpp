@@ -42,7 +42,7 @@ struct Helpers
      *** RANDOM
      */
 
-    /** Returns a random integer from range [start, end] (both inclusive) not equal to [excluded]. */
+    /** Returns a random integer from range [start] to [end] (both inclusive) not equal to [excluded]. */
     inline static int randIntRangeExcluded(int start, int end, int excluded);
 
     /*
@@ -53,7 +53,9 @@ struct Helpers
     static string join(const vector<T> &vec, const string &delim);
     inline static void removeEmptyStrings(vector<string> &vec);
 
+    /** Returns a random string having [size] characters sampled uniformly from [alphabet]. */
     inline static string genRandomString(int size, string alphabet);
+    /** Returns a random alphanumeric string having [size] characters. */
     inline static string genRandomStringAlphNum(int size);
    
 private:
@@ -67,7 +69,9 @@ private:
         return str;
     }
 
+    /** Lookup table for alphanumeric characters. */
     static constexpr const char *alnumLUT = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    /** Size of alnumLUT exluding the terminating '\0'. */
     static constexpr int alnumLUTSize = 62;
 };
 
