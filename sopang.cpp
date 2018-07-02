@@ -72,7 +72,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
 
             inSeg = true;
         }
-        else // Segment end
+        else // Segment end.
         {
             assert(text[i] == '}');
             assert(inSeg == true and curSegment.size() >= 1);
