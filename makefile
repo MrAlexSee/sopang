@@ -14,7 +14,7 @@ OBJ       = main.o sopang.o
 all: $(EXE)
 
 $(EXE): $(OBJ)
-	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) $(LDFLAGS) $^ -o $@ $(LDLIBS)
+	$(CC) $(CCFLAGS) $(OPTFLAGS) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
 main.o: main.cpp helpers.hpp params.hpp sopang.hpp
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c main.cpp
