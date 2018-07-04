@@ -46,9 +46,11 @@ private:
     void fillPatternMaskBuffer(const string &pattern, const string &alphabet);
     void fillPatternMaskBufferApprox(const string &pattern, const string &alphabet);
 
-    /** Buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants) from the input file cannot be larger than this value. */
+    /** Buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants) 
+     * from the input file cannot be larger than this value. */
     static constexpr unsigned dBufferSize = 262144;
-    /** Buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code, up to 'Z' = 90. */
+    /** Buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code, 
+     * up to 'Z' = 90. */
     static constexpr unsigned maskBufferSize = 91;
     /** Word size (in bits) used by the Shift-Or algorithm. */
     static constexpr unsigned wordSize = 64;
