@@ -52,7 +52,7 @@ struct Params
     static constexpr int noValue = -1;
 
     /** Current version: major.minor.patch */
-    const string versionInfo = "sopang v1.3.1";
+    const string versionInfo = "sopang v1.3.2";
     const string usageInfoString = "[options] <input text file> <input pattern file>";
 
     const string verboseInfoString =
