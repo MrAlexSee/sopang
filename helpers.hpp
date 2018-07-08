@@ -54,7 +54,7 @@ struct Helpers
     inline static void removeEmptyStrings(vector<string> &vec);
 
     /** Returns a random string having [size] characters sampled uniformly from [alphabet]. */
-    inline static string genRandomString(int size, string alphabet);
+    inline static string genRandomString(int size, const string &alphabet);
     /** Returns a random alphanumeric string having [size] characters. */
     inline static string genRandomStringAlphNum(int size);
    
@@ -185,7 +185,7 @@ void Helpers::removeEmptyStrings(vector<string> &vec)
     }
 }
 
-string Helpers::genRandomString(int size, string alphabet)
+string Helpers::genRandomString(int size, const string &alphabet)
 {   
     random_device rd;
     mt19937 mt(rd());
