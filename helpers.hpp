@@ -15,8 +15,9 @@ using namespace std;
 namespace sopang
 {
 
-struct Helpers
+class Helpers
 {
+public:
     Helpers() = delete;
 
     /*
