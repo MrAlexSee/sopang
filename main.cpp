@@ -232,7 +232,7 @@ vector<string> readPatterns()
 
     vector<string> patterns = Sopang::parsePatterns(patternsStr);
 
-    if (params.nPatterns > 0)
+    if (params.nPatterns > 0 and static_cast<size_t>(params.nPatterns) < patterns.size())
     {
         patterns.resize(params.nPatterns);
     }
