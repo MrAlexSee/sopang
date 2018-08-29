@@ -33,6 +33,7 @@ Input text file (positional parameter 1 or named parameter `-i` or `--in-text-fi
 Input pattern file (positional parameter 2 or named parameter `-I` or `--in-pattern-file`) should contain the list of patterns, each of the same length, separated with newline characters.
 Attached as part of this package is a script `run_all.sh`, which allows for processing multiple input text (chromosome) and pattern files.
 
+End-to-end tests are located in the `end_to_end_tests` folder and they can be run using the `run_tests.sh` script in that folder.
 Unit tests are located in the `unit_tests` folder and they can be run by issuing the `make run` command in that folder.
 
 #### Command-line parameter description
