@@ -7,7 +7,7 @@ import sys
 pInFile = "res.txt"
 
 def readMatchesFromFile(inFile):
-    with open(pInFile, "r") as f:
+    with open(inFile, "r") as f:
         data = f.read()
 
     lines = data.split("\n")
