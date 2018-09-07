@@ -10,8 +10,6 @@
 #include <sstream>
 #include <type_traits>
 
-using namespace std;
-
 namespace sopang
 {
 
@@ -26,18 +24,18 @@ public:
 
     /** Calculates a median from [vec] and stores it in [median]. */
     template<typename T>
-    static void calcStatsMedian(const vector<T> &vec, T *median);
+    static void calcStatsMedian(const std::vector<T> &vec, T *median);
  
     /*
      *** FILES
      */
 
-    inline static bool isFileReadable(const string &filePath);
-    inline static string readFile(const string &filePath);
+    inline static bool isFileReadable(const std::string &filePath);
+    inline static std::string readFile(const std::string &filePath);
 
     /** Appends [text] to file with [filePath] followed by an optional newline if [newline] is true. */
-    inline static void dumpToFile(const string &text, const string &filePath, bool newline = false);
-    inline static bool removeFile(const string &filePath);
+    inline static void dumpToFile(const std::string &text, const std::string &filePath, bool newline = false);
+    inline static bool removeFile(const std::string &filePath);
 
     /*
      *** RANDOM
@@ -51,21 +49,21 @@ public:
      */
 
     template<typename T>
-    static string join(const vector<T> &vec, const string &delim);
-    inline static void removeEmptyStrings(vector<string> &vec);
+    static std::string join(const std::vector<T> &vec, const std::string &delim);
+    inline static void removeEmptyStrings(std::vector<std::string> &vec);
 
     /** Returns a random string having [size] characters sampled uniformly from [alphabet]. */
-    inline static string genRandomString(int size, const string &alphabet);
+    inline static std::string genRandomString(int size, const std::string &alphabet);
     /** Returns a random alphanumeric string having [size] characters. */
-    inline static string genRandomStringAlphNum(int size);
+    inline static std::string genRandomStringAlphNum(int size);
    
 private:
-    template<typename T, typename = typename enable_if<is_arithmetic<T>::value, T>::type>
-    inline static string toString(T val)
+    template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+    inline static std::string toString(T val)
     {
         return to_string(val);
     }
-    inline static string toString(const string &str)
+    inline static std::string toString(const std::string &str)
     {
         return str;
     }
@@ -77,27 +75,29 @@ private:
 };
 
 template<typename T>
-void Helpers::calcStatsMedian(const vector<T> &vec, T *median)
+void Helpers::calcStatsMedian(const std::vector<T> &vec, T *median)
 {
     if (vec.size() == 0)
     {
         return;
     }
 
-    vector<T> tmp = vec;
+    std::vector<T> tmp = vec;
 
-    sort(tmp.begin(), tmp.end());
+    std::sort(tmp.begin(), tmp.end());
     *median = tmp[tmp.size() / 2];
 }
 
-bool Helpers::isFileReadable(const string &filePath)
+bool Helpers::isFileReadable(const std::string &filePath)
 {
-    ifstream inStream(filePath);
+    std::ifstream inStream(filePath);
     return inStream.good();
 }
 
-string Helpers::readFile(const string &filePath)
+std::string Helpers::readFile(const std::string &filePath)
 {
+    using namespace std;
+
     ifstream inStream(filePath);
 
     if (!inStream)
@@ -108,30 +108,32 @@ string Helpers::readFile(const string &filePath)
     return static_cast<stringstream const&>(stringstream() << inStream.rdbuf()).str();
 }
 
-void Helpers::dumpToFile(const string &text, const string &filePath, bool newline)
+void Helpers::dumpToFile(const std::string &text, const std::string &filePath, bool newline)
 {
-    ofstream outStream(filePath, ios_base::app);
+    std::ofstream outStream(filePath, std::ios_base::app);
 
     if (!outStream)
     {
-        throw runtime_error("failed to write file (insufficient permisions?): " + filePath);
+        throw std::runtime_error("failed to write file (insufficient permisions?): " + filePath);
     }
 
     outStream << text;
 
     if (newline)
     {
-        outStream << endl;
+        outStream << std::endl;
     }
 }
 
-bool Helpers::removeFile(const string &filePath)
+bool Helpers::removeFile(const std::string &filePath)
 {
     return remove(filePath.c_str()) == 0;
 }
 
 int Helpers::randIntRangeExcluded(int start, int end, int excluded)
 {
+    using namespace std;
+
     if (start > end or (start == end and start == excluded))
     {
         throw invalid_argument("range is empty");
@@ -152,14 +154,14 @@ int Helpers::randIntRangeExcluded(int start, int end, int excluded)
 }
 
 template<typename T>
-string Helpers::join(const vector<T> &vec, const string &delim)
+std::string Helpers::join(const std::vector<T> &vec, const std::string &delim)
 {
     if (vec.size() == 0)
     {
         return "";
     }
 
-    string res = "";
+    std::string res = "";
 
     for (size_t i = 0; i < vec.size() - 1; ++i)
     {
@@ -169,9 +171,9 @@ string Helpers::join(const vector<T> &vec, const string &delim)
     return res + toString(vec.back());
 }
 
-void Helpers::removeEmptyStrings(vector<string> &vec)
+void Helpers::removeEmptyStrings(std::vector<std::string> &vec)
 {
-    vector<string>::iterator it = vec.begin();
+    std::vector<std::string>::iterator it = vec.begin();
 
     for ( ; it != vec.end(); )
     {
@@ -186,8 +188,10 @@ void Helpers::removeEmptyStrings(vector<string> &vec)
     }
 }
 
-string Helpers::genRandomString(int size, const string &alphabet)
+std::string Helpers::genRandomString(int size, const std::string &alphabet)
 {   
+    using namespace std;
+
     random_device rd;
     mt19937 mt(rd());
     uniform_int_distribution<int> dist(0, alphabet.size() - 1);
@@ -202,8 +206,10 @@ string Helpers::genRandomString(int size, const string &alphabet)
     return res;
 }
 
-string Helpers::genRandomStringAlphNum(int size)
+std::string Helpers::genRandomStringAlphNum(int size)
 {
+    using namespace std;
+
     random_device rd;
     mt19937 mt(rd());
     uniform_int_distribution<int> dist(0, alnumLUTSize - 1);

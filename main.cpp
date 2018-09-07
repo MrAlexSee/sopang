@@ -31,9 +31,12 @@ namespace
 
 Params params;
 
+/** Indicates that program execution should continue after checking parameters. */
+constexpr int paramsResContinue = -1;
+
 }
 
-/** Handles cmd-line parameters, returns -1 if program execution should continue. */
+/** Handles cmd-line parameters, returns paramsResContinue if program execution should continue. */
 int handleParams(int argc, const char **argv);
 /** Returns true if input files are readable, false otherwise. */
 bool checkInputFiles(const char *execName);
@@ -63,7 +66,7 @@ void clearMemory(const string *const *segments, unsigned nSegments, unsigned *se
 int main(int argc, const char **argv)
 {
     int paramsRes = handleParams(argc, argv);
-    if (paramsRes != -1)
+    if (paramsRes != paramsResContinue)
     {
         return paramsRes;
     }
@@ -150,7 +153,7 @@ int handleParams(int argc, const char **argv)
         params.dumpIndexes = true;
     }
 
-    return -1;
+    return paramsResContinue;
 }
 
 bool checkInputFiles(const char *execName)
