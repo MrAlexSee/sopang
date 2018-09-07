@@ -61,7 +61,7 @@ private:
     template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
     inline static std::string toString(T val)
     {
-        return to_string(val);
+        return std::to_string(val);
     }
     inline static std::string toString(const std::string &str)
     {
