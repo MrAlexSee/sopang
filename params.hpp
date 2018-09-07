@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 namespace sopang
 {
 
@@ -16,7 +14,7 @@ struct Params
      */
 
     /** A set of symbols occurring in input (ED) text file or input pattern file. Matches all characters in EDSO (Grossi et al. CPM '17) tool output. */
-    const string alphabet = "ACGTNUVISMEL<>:0123456789";
+    const std::string alphabet = "ACGTNUVISMEL<>:0123456789";
 
     /*
      *** COMMAND-LINE PARAMS
@@ -35,12 +33,12 @@ struct Params
     int nPatterns = noValue;
 
     /** Input text file path (positional arg 1). */
-    string inTextFile = "";
+    std::string inTextFile = "";
     /** Input pattern file path (positional arg 2). */
-    string inPatternFile = "";
+    std::string inPatternFile = "";
 
     /** Output file path. */
-    string outFile = "res.txt";
+    std::string outFile = "res.txt";
 
     /*
      *** CONSTANTS
@@ -52,10 +50,10 @@ struct Params
     static constexpr int noValue = -1;
 
     /** Current version: major.minor.patch */
-    const string versionInfo = "sopang v1.3.2";
-    const string usageInfoString = "[options] <input text file> <input pattern file>";
+    const std::string versionInfo = "sopang v1.3.2";
+    const std::string usageInfoString = "[options] <input text file> <input pattern file>";
 
-    const string verboseInfoString =
+    const std::string verboseInfoString =
         "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cislak, Szymon Grabowski, Jan Holub.\n"
         "ED text is in a format possibly best explained with an example: {A,C,}GAAT{AT,A}ATT. Braces determine the start and end of each non-deterministic segment (i.e. segment having multiple variants), and commas delimit segment variants.\n"
         "If a comma is not preceded by a string of letters or it is a trailing symbol in a segment, it indicates an empty word.\n"
@@ -64,7 +62,7 @@ struct Params
         "Note that, e.g., {AC,CG} and {AC, CG} are not the same (the latter would expect a space in its second variant). Therefore, you should not use whitespaces in the ED text if not intended.\n"
         "SOPanG returns the end positions of pattern occurrences in the ED text. More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).";
 
-    const string verboseParamsString =
+    const std::string verboseParamsString =
         "Input text file (positional parameter 1 or named parameter -i or --in-text-file) should contain the elastic-degenerate text in the format {A,C,}GAAT{AT,A}ATT.\n"
         "Input pattern file (positional parameter 2 or named parameter -I or --in-pattern-file) should contain the list of patterns, each of the same length, separated with newline characters.\n"
         "Attached as part of the sopang package is a script run_all.sh, which allows for processing multiple input text (chromosome) and pattern files.";

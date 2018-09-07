@@ -10,8 +10,6 @@
 #define SOPANG_WHITEBOX
 #endif
 
-using namespace std;
-
 namespace sopang
 {
 
@@ -25,26 +23,26 @@ public:
      *** PARSING
      */
 
-    static const string *const *parseTextArray(string text, unsigned *nSegments, unsigned **segmentSizes);
-    static vector<string> parsePatterns(string patternsStr);
+    static const std::string *const *parseTextArray(std::string text, unsigned *nSegments, unsigned **segmentSizes);
+    static std::vector<std::string> parsePatterns(std::string patternsStr);
 
     /*
      *** MATCHING
      */
 
-    unordered_set<unsigned> match(const string *const *segments,
-                                  unsigned nSegments, const unsigned *segmentSizes,
-                                  const string &pattern, const string &alphabet);
+    std::unordered_set<unsigned> match(const std::string *const *segments,
+        unsigned nSegments, const unsigned *segmentSizes,
+        const std::string &pattern, const std::string &alphabet);
 
-    unordered_set<unsigned> matchApprox(const string *const *segments,
-                                        unsigned nSegments, const unsigned *segmentSizes,
-                                        const string &pattern, const string &alphabet,
-                                        unsigned k);
+    std::unordered_set<unsigned> matchApprox(const std::string *const *segments,
+        unsigned nSegments, const unsigned *segmentSizes,
+        const std::string &pattern, const std::string &alphabet, 
+        unsigned k);
 private:
     void initCounterPositionMasks();
 
-    void fillPatternMaskBuffer(const string &pattern, const string &alphabet);
-    void fillPatternMaskBufferApprox(const string &pattern, const string &alphabet);
+    void fillPatternMaskBuffer(const std::string &pattern, const std::string &alphabet);
+    void fillPatternMaskBufferApprox(const std::string &pattern, const std::string &alphabet);
 
     /** Buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants) 
      * from the input file cannot be larger than this value. */
