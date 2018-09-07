@@ -16,7 +16,9 @@ SOPanG returns the end positions of pattern occurrences in the ED text. More pre
 
 ## Compilation
 
-Add Boost library to the path for compilation by setting `BOOST_DIR` in the makefile. Requires Boost program options module to be compiled for static linking.
+Add Boost library to the path for compilation by setting `BOOST_DIR` in the makefile. 
+Requires Boost program options module to be compiled for static linking.
+Requires support for the C++11 standard.
 
 Type `make` for optimized compile.
 Comment out `OPTFLAGS` in the makefile in order to disable optimization.
