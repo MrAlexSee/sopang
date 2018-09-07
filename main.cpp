@@ -135,7 +135,7 @@ int handleParams(int argc, const char **argv)
 
         po::notify(vm);
     }
-    catch (const po::error& e)
+    catch (const po::error &e)
     {
         cerr << "Usage: " << argv[0] << " " << params.usageInfoString << endl << endl;
         cerr << options << endl;
