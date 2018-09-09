@@ -33,12 +33,12 @@ struct Params
     int nPatterns = noValue;
 
     /** Input text file path (positional arg 1). */
-    std::string inTextFile = "";
+    std::string inTextFile;
     /** Input pattern file path (positional arg 2). */
-    std::string inPatternFile = "";
+    std::string inPatternFile;
 
     /** Output file path. */
-    std::string outFile = "res.txt";
+    std::string outFile;
 
     /*
      *** CONSTANTS

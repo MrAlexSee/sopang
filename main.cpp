@@ -93,7 +93,7 @@ int handleParams(int argc, const char **argv)
        ("in-text-file,i", po::value<string>(&params.inTextFile)->required(), "input text file path (positional arg 1)")
        ("in-pattern-file,I", po::value<string>(&params.inPatternFile)->required(), "input pattern file path (positional arg 2)")
        ("approx,k", po::value<int>(&params.kApprox), "perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12)")
-       ("out-file,o", po::value<string>(&params.outFile), "output file path")
+       ("out-file,o", po::value<string>(&params.outFile)->default_value("res.txt"), "output file path")
        ("pattern-count,p", po::value<int>(&params.nPatterns), "maximum number of patterns read from top of the patterns file (non-positive values are ignored)")
        ("version,v", "display version info");
 
