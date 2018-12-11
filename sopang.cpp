@@ -161,6 +161,11 @@ vector<vector<vector<int>>> Sopang::parseSources(string text)
                 {
                     inSourcesForVariant = false;
 
+                    if (curNumber.empty())
+                    {
+                        throw runtime_error("bad empty variant, index = " + to_string(i));
+                    }
+
                     curVariant.push_back(stoi(curNumber));
                     curNumber.clear();
 
@@ -172,6 +177,11 @@ vector<vector<vector<int>>> Sopang::parseSources(string text)
 
                 if (text[i] == ',')
                 {
+                    if (curNumber.empty())
+                    {
+                        throw runtime_error("bad empty variant, index = " + to_string(i));
+                    }
+
                     curVariant.push_back(stoi(curNumber));
                     curNumber.clear();
                 }
@@ -217,6 +227,11 @@ vector<vector<vector<int>>> Sopang::parseSources(string text)
                     % text[i] % i).str());
             }
         }
+    }
+
+    if (inSourcesForSegment or inSourcesForVariant)
+    {
+        throw runtime_error("last segment is not closed with \"}\"");
     }
 
     return sources;
