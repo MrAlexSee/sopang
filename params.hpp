@@ -36,6 +36,8 @@ struct Params
     std::string inTextFile;
     /** Input pattern file path (positional arg 2). */
     std::string inPatternFile;
+    /** Input sources file path. */
+    std::string inSourcesFile;
 
     /** Output file path. */
     std::string outFile;

@@ -39,12 +39,13 @@ constexpr int paramsResContinue = -1;
 /** Handles cmd-line parameters, returns paramsResContinue if program execution should continue. */
 int handleParams(int argc, const char **argv);
 /** Returns true if input files are readable, false otherwise. */
-bool checkInputFiles(const char *execName);
+bool checkInputFiles();
 /** Runs the main program and returns the program exit code. */
 int run();
 
 string readInputText();
 vector<string> readPatterns();
+vector<vector<vector<int>>> readSources();
 
 /** Runs sopang for [nSegments] [segments], where each segment size is stored in [segmentSizes], and searches for [patterns]. */
 void runSopang(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
@@ -71,8 +72,9 @@ int main(int argc, const char **argv)
         return paramsRes;
     }
 
-    if (checkInputFiles(argv[0]) == false)
+    if (not checkInputFiles())
     {
+        cerr << "Run " << argv[0] << " -h for more information" << endl << endl;
         return params.errorExitCode;
     }
 
@@ -92,6 +94,7 @@ int handleParams(int argc, const char **argv)
        ("help-verbose", "display verbose help message")
        ("in-text-file,i", po::value<string>(&params.inTextFile)->required(), "input text file path (positional arg 1)")
        ("in-pattern-file,I", po::value<string>(&params.inPatternFile)->required(), "input pattern file path (positional arg 2)")
+       ("in-sources-file,S", po::value<string>(&params.inSourcesFile), "input sources file path")
        ("approx,k", po::value<int>(&params.kApprox), "perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12)")
        ("out-file,o", po::value<string>(&params.outFile)->default_value("res.txt"), "output file path")
        ("pattern-count,p", po::value<int>(&params.nPatterns), "maximum number of patterns read from top of the patterns file (non-positive values are ignored)")
@@ -156,21 +159,24 @@ int handleParams(int argc, const char **argv)
     return paramsResContinue;
 }
 
-bool checkInputFiles(const char *execName)
+bool checkInputFiles()
 {
-    if (Helpers::isFileReadable(params.inTextFile) == false)
+    if (not Helpers::isFileReadable(params.inTextFile))
     {
         cerr << "Cannot access input text file (doesn't exist or insufficient permissions): " << params.inTextFile << endl;
-        cerr << "Run " << execName << " -h for more information" << endl << endl;
-
         return false;
     }
 
-    if (Helpers::isFileReadable(params.inPatternFile) == false)
+    if (not Helpers::isFileReadable(params.inPatternFile))
     {
         cerr << "Cannot access input patterns file (doesn't exist or insufficient permissions): " << params.inPatternFile << endl;
-        cerr << "Run " << execName << " -h for more information" << endl << endl;
+        return false;
+    }
 
+    if (not params.inSourcesFile.empty() and
+        not Helpers::isFileReadable(params.inSourcesFile))
+    {
+        cerr << "Cannot access input sources file (doesn't exist or insufficient permissions): " << params.inSourcesFile << endl;
         return false;
     }
 
@@ -198,6 +204,11 @@ int run()
         }
 
         vector<string> patterns = readPatterns();
+
+        if (not params.inSourcesFile.empty())
+        {
+            vector<vector<vector<int>>> sources = readSources();
+        }
 
         runSopang(segments, nSegments, segmentSizes, patterns);
         clearMemory(segments, nSegments, segmentSizes);
@@ -250,6 +261,21 @@ vector<string> readPatterns()
     return patterns;
 }
 
+vector<vector<vector<int>>> readSources()
+{
+    string sourcesStr = Helpers::readFile(params.inSourcesFile);
+    cout << "Read sources, #chars = " << sourcesStr.size() << endl;
+
+    vector<vector<vector<int>>> sources = Sopang::parseSources(sourcesStr);
+    cout << "Parsed sources for non-deterministic #segments = " << sources.size() << endl;
+
+    if (sources.empty())
+    {
+        throw runtime_error("cannot run for empty sources");
+    }
+
+    return sources;
+}
 
 void runSopang(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
                const vector<string> &patterns)

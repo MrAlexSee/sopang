@@ -38,11 +38,11 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
     {
         if (text[i] != '{' and text[i] != '}') // Inside a string or segment: comma or string character.
         {
-            if (inSeg == false)
+            if (not inSeg)
             {
                 if (text[i] == ',')
                 {
-                    throw runtime_error("bad input text formatting: comma outside segment");
+                    throw runtime_error("bad input text formatting: comma outside segment: char index = " + to_string(i));
                 }
 
                 curStr += text[i];
@@ -62,9 +62,9 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
         }
         else if (text[i] == '{') // Segment start.
         {
-            assert(inSeg == false and curSegment.size() == 0);
+            assert(not inSeg and curSegment.size() == 0);
 
-            if (curStr.empty() == false) // If we enter the segment from the determinate string.
+            if (not curStr.empty()) // If we enter the segment from the determinate string.
             {
                 segments.emplace_back(vector<string> { move(curStr) });
                 curStr.clear();
@@ -79,7 +79,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
 
             if (curSegment.empty())
             {
-                throw runtime_error("degenerate segment cannot be empty");
+                throw runtime_error("degenerate segment cannot be empty: char index = " + to_string(i));
             }
 
             curSegment.emplace_back(move(curStr));
@@ -92,9 +92,9 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
         }
     }
 
-    if (curStr.empty() == false) // If the file ended with a determinate segment.
+    if (not curStr.empty()) // If the file ended with a determinate segment.
     {
-        assert(inSeg == false and curSegment.empty());
+        assert(not inSeg and curSegment.empty());
 
         curSegment.push_back(curStr);
         segments.push_back(vector<string>(curSegment));
@@ -136,6 +136,90 @@ vector<string> Sopang::parsePatterns(string patternsStr)
 
     Helpers::removeEmptyStrings(splitRes);
     return splitRes;
+}
+
+vector<vector<vector<int>>> Sopang::parseSources(string text)
+{
+    boost::trim(text);
+    vector<vector<vector<int>>> sources;
+
+    bool inSourcesForSegment = false;
+    bool inSourcesForVariant = false;
+
+    vector<vector<int>> curSegment;
+    vector<int> curVariant;
+
+    string curNumber;
+
+    for (size_t i = 0; text[i] != '\0'; ++i)
+    {
+        if (inSourcesForSegment)
+        {
+            if (inSourcesForVariant)
+            {
+                if (text[i] == '}')
+                {
+                    inSourcesForVariant = false;
+
+                    curVariant.push_back(stoi(curNumber));
+                    curNumber.clear();
+
+                    curSegment.emplace_back(move(curVariant));
+                    curVariant.clear();
+
+                    continue;
+                }
+
+                if (text[i] == ',')
+                {
+                    curVariant.push_back(stoi(curNumber));
+                    curNumber.clear();
+                }
+                else if (isdigit(text[i]))
+                {
+                    curNumber.push_back(text[i]);
+                }
+                else
+                {
+                    throw runtime_error((boost::format("bad character (not digit or comma in variant) = %1%, index = %2%") 
+                        % text[i] % i).str());
+                }
+            }
+            else // not in variant
+            {
+                if (text[i] == '{')
+                {
+                    inSourcesForVariant = true;
+                }
+                else if (text[i] == '}')
+                {
+                    inSourcesForSegment = false;
+
+                    sources.emplace_back(move(curSegment));
+                    curSegment.clear();
+                }
+                else
+                {
+                    throw runtime_error((boost::format("bad character (not in variant) = %1%, index = %2%") 
+                        % text[i] % i).str());
+                }
+            }
+        }
+        else // not in segment
+        {
+            if (text[i] == '{')
+            {
+                inSourcesForSegment = true;
+            }
+            else
+            {
+                throw runtime_error((boost::format("bad character (not in segment) = %1%, index = %2%") 
+                    % text[i] % i).str());
+            }
+        }
+    }
+
+    return sources;
 }
 
 unordered_set<unsigned> Sopang::match(const string *const *segments,
