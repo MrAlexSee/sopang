@@ -75,14 +75,14 @@ def dumpSources(sources, outFilePath):
 
     with open(outFilePath, "w") as f:
         f.write(text)
-        print("Dumped sources for #segments = {0} to: {1}".format(len(sources), outFilePath))
+
+    print("Dumped sources to: {0} for #segments = {1}".format(outFilePath, len(sources)))
 
 def main():
     segments = readEDSegments(pInEDTextFilePath)
     sources = generateSources(segments, pNSources, pMaxNSources)
 
     dumpSources(sources, pOutEDSourcesFilePath)
-    print(sources)
 
 if __name__ == "__main__":
     main()
