@@ -121,7 +121,7 @@ TEST_CASE("is random generation from range without excluded correct", "[random]"
 {
     const int start = 0, end = 100;
 
-    repeat(nRandIter, [] {
+    repeat(nRandIter, [start, end] {
         int n = Helpers::randIntRangeExcluded(start, end, -1);
         REQUIRE(n >= start);
         REQUIRE(n <= end);

@@ -872,7 +872,7 @@ TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[ap
 
     for (size_t i = 0; i < pattern.size(); ++i)
     {
-        REQUIRE(((maskA << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedA[i]);
+        REQUIRE(((maskA << (saBitShiftRight - i * saCounterSize)) >> saBitShiftRight) == expectedA[i]);
     }
 
     uint64_t maskC = maskBuffer[static_cast<size_t>('C')];
@@ -880,7 +880,7 @@ TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[ap
     
     for (size_t i = 0; i < pattern.size(); ++i)
     {
-        REQUIRE(((maskC << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedC[i]);
+        REQUIRE(((maskC << (saBitShiftRight - i * saCounterSize)) >> saBitShiftRight) == expectedC[i]);
     }
 
     uint64_t maskG = maskBuffer[static_cast<size_t>('G')];
@@ -888,7 +888,7 @@ TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[ap
     
     for (size_t i = 0; i < pattern.size(); ++i)
     {
-        REQUIRE(((maskG << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedG[i]);
+        REQUIRE(((maskG << (saBitShiftRight - i * saCounterSize)) >> saBitShiftRight) == expectedG[i]);
     }
 
     uint64_t maskT = maskBuffer[static_cast<size_t>('T')];
@@ -896,7 +896,7 @@ TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[ap
     
     for (size_t i = 0; i < pattern.size(); ++i)
     {
-        REQUIRE(((maskT << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedT[i]);
+        REQUIRE(((maskT << (saBitShiftRight - i * saCounterSize)) >> saBitShiftRight) == expectedT[i]);
     }
 
     uint64_t maskN = maskBuffer[static_cast<size_t>('N')];
@@ -904,7 +904,7 @@ TEST_CASE("is filling approx mask buffer correct for a predefined pattern", "[ap
     
     for (size_t i = 0; i < pattern.size(); ++i)
     {
-        REQUIRE(((maskN << saBitShiftRight - i * saCounterSize) >> saBitShiftRight) == expectedN[i]);
+        REQUIRE(((maskN << (saBitShiftRight - i * saCounterSize)) >> saBitShiftRight) == expectedN[i]);
     }
 }
 
@@ -933,11 +933,11 @@ TEST_CASE("is filling approx mask buffer correct for repeated same character in 
                 {
                     if (curC == c) // Corresponding occurrences should be set to 0.
                     {
-                        REQUIRE(((maskBuffer[static_cast<size_t>(curC)] << saBitShiftRight - shift * saCounterSize) >> saBitShiftRight) == 0x0);
+                        REQUIRE(((maskBuffer[static_cast<size_t>(curC)] << (saBitShiftRight - shift * saCounterSize)) >> saBitShiftRight) == 0x0);
                     }
                     else
                     {
-                        REQUIRE(((maskBuffer[static_cast<size_t>(curC)] << saBitShiftRight - shift * saCounterSize) >> saBitShiftRight) == 0x1);
+                        REQUIRE(((maskBuffer[static_cast<size_t>(curC)] << (saBitShiftRight - shift * saCounterSize)) >> saBitShiftRight) == 0x1);
                     }
                 }
             }
