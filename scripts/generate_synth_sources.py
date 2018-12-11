@@ -63,8 +63,11 @@ def generateSources(segments, nSources, maxNSources):
     return sources
 
 def dumpSources(sources, outFilePath):
+    if not sources:
+        return
+
     text = ""
-    
+
     for sourcesForSegment in sources:
         textsForSegment = []
 
