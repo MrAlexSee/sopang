@@ -222,4 +222,46 @@ TEST_CASE("is parsing patterns correct for trailing whitespace", "[parsing]")
     REQUIRE(Helpers::join(patterns, "") == "12345");
 }
 
+TEST_CASE("is parsing sources for an empty string correct", "[parsing]")
+{
+    const auto empty = Sopang::parseSources("");
+    REQUIRE(empty.size() == 0);
+}
+
+TEST_CASE("is parsing sources for a single segment correct", "[parsing]")
+{
+    const auto sources = Sopang::parseSources("{{6,4}{7,9,1}{8}}");
+    REQUIRE(sources.size() == 1);
+
+    const auto variants = sources[0];
+    REQUIRE(variants.size() == 3);
+
+    REQUIRE(variants[0] == vector<int>{ 6, 4 });
+    REQUIRE(variants[1] == vector<int>{ 7, 9, 1 });
+    REQUIRE(variants[2] == vector<int>{ 8 });
+}
+
+TEST_CASE("is parsing sources correct for a single segment with leading and trailing whitespace correct", "[parsing]")
+{
+    const auto sources = Sopang::parseSources("    \t    {{6,4}{7,9,1}{8}}  \t ");
+    REQUIRE(sources.size() == 1);
+
+    const auto variants = sources[0];
+    REQUIRE(variants.size() == 3);
+
+    REQUIRE(variants[0] == vector<int>{ 6, 4 });
+    REQUIRE(variants[1] == vector<int>{ 7, 9, 1 });
+    REQUIRE(variants[2] == vector<int>{ 8 });
+}
+
+TEST_CASE("is parsing sources for multiple segments correct", "[parsing]")
+{
+    const auto sources = Sopang::parseSources("{{6,4}{7,9,1}{8}}{{1,2}{2}}{{3,4,5,6}{1}}");
+    REQUIRE(sources.size() == 3);
+
+    REQUIRE(sources[0] == vector<vector<int>>{{ 6, 4 }, { 7, 9, 1 }, { 8 }});
+    REQUIRE(sources[1] == vector<vector<int>>{{ 1, 2 }, { 2 }});
+    REQUIRE(sources[2] == vector<vector<int>>{{ 3, 4, 5, 6 }, { 1 }});
+}
+
 } // namespace sopang
