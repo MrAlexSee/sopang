@@ -191,11 +191,11 @@ vector<vector<vector<int>>> Sopang::parseSources(string text)
                 }
                 else
                 {
-                    throw runtime_error((boost::format("bad character (not digit or comma in variant) = %1%, index = %2%") 
+                    throw runtime_error((boost::format("bad character (not a digit or comma in a variant) = %1%, index = %2%")
                         % text[i] % i).str());
                 }
             }
-            else // not in variant
+            else // not in a variant
             {
                 if (text[i] == '{')
                 {
@@ -210,12 +210,12 @@ vector<vector<vector<int>>> Sopang::parseSources(string text)
                 }
                 else
                 {
-                    throw runtime_error((boost::format("bad character (not in variant) = %1%, index = %2%") 
+                    throw runtime_error((boost::format("bad character (not in a variant) = %1%, index = %2%")
                         % text[i] % i).str());
                 }
             }
         }
-        else // not in segment
+        else // not in a segment
         {
             if (text[i] == '{')
             {
@@ -223,7 +223,7 @@ vector<vector<vector<int>>> Sopang::parseSources(string text)
             }
             else
             {
-                throw runtime_error((boost::format("bad character (not in segment) = %1%, index = %2%") 
+                throw runtime_error((boost::format("bad character (not in a segment) = %1%, index = %2%") 
                     % text[i] % i).str());
             }
         }

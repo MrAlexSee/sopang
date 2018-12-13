@@ -45,7 +45,7 @@ int run();
 
 string readInputText();
 vector<string> readPatterns();
-vector<vector<vector<int>>> readSources();
+vector<vector<vector<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes);
 
 /** Runs sopang for [nSegments] [segments], where each segment size is stored in [segmentSizes], and searches for [patterns]. */
 void runSopang(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
@@ -207,7 +207,7 @@ int run()
 
         if (not params.inSourcesFile.empty())
         {
-            vector<vector<vector<int>>> sources = readSources();
+            vector<vector<vector<int>>> sources = readSources(nSegments, segmentSizes);
         }
 
         runSopang(segments, nSegments, segmentSizes, patterns);
@@ -261,7 +261,7 @@ vector<string> readPatterns()
     return patterns;
 }
 
-vector<vector<vector<int>>> readSources()
+vector<vector<vector<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes)
 {
     string sourcesStr = Helpers::readFile(params.inSourcesFile);
     cout << "Read sources, #chars = " << sourcesStr.size() << endl;
@@ -272,6 +272,35 @@ vector<vector<vector<int>>> readSources()
     if (sources.empty())
     {
         throw runtime_error("cannot run for empty sources");
+    }
+
+    // We check whether source counts match the segments in text.
+    size_t iSource = 0;
+
+    for (unsigned i = 0; i < nSegments; ++i)
+    {
+        if (segmentSizes[i] == 1)
+        {
+            continue;
+        }
+
+        if (segmentSizes[i] != sources[iSource].size())
+        {
+            throw runtime_error("source segment variant count does not match text segment variant count, source segment index = "
+                + to_string(iSource));
+        }
+
+        iSource += 1;
+
+        if (iSource > sources.size())
+        {
+            throw runtime_error("there are fewer source segments than non-deterministic segments in text");
+        }
+    }
+
+    if (iSource < sources.size())
+    {
+        throw runtime_error("there are more source segments than non-deterministic segments in text");
     }
 
     return sources;
