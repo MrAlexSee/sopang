@@ -1,12 +1,12 @@
 """
-Generates synthetic sources file for elastic-degenerate text.
+Generates a synthetic sources file for elastic-degenerate text.
 """
 
 import random
 import re
 
 # Path to the input file with elastic degenerate text for which the sources will be generated.
-pInEDTextFilePath = "../end_to_end_tests/text_test.eds"
+pInEDTextFilePath = "../sample/chr1337.eds"
 
 # Path to the output sources file.
 pOutEDSourcesFilePath = "sources.edss"
@@ -25,15 +25,19 @@ def readEDSegments(inFilePath):
     segments = []
 
     for part in data.split("{"):
+        # This is a deterministic segment.
         if "}" not in part:
             segments += [[part]]
         else:
             curParts = part.split("}")
             assert len(curParts) == 2
 
+            # This is a non-deterministic segment.
             assert "," in curParts[0]
             segments += [curParts[0].split(",")]
 
+            # This is either a deterministic segment or an empty string
+            # when non-deterministic segments are contiguous.
             assert "," not in curParts[1]
             if curParts[1]:
                 segments += [[curParts[1]]]
