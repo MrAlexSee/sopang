@@ -399,14 +399,14 @@ double measure(const SegmentData &segmentData, const vector<vector<vector<int>>>
             start = std::clock();
             res = sopang.match(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
                 pattern, params.alphabet);
-            end = std::clock();    
+            end = std::clock();
         }
         else
         {
             start = std::clock();
             res = sopang.matchSources(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
                 sources, pattern, params.alphabet);
-            end = std::clock();    
+            end = std::clock();
         }
     }
     
