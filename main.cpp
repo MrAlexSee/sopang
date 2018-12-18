@@ -36,6 +36,13 @@ constexpr int paramsResContinue = -1;
 
 }
 
+struct SegmentData
+{
+    const string *const *segments;
+    unsigned nSegments; // Number of segments.
+    const unsigned *segmentSizes; // Size of each segment (number of variants).
+};
+
 /** Handles cmd-line parameters, returns paramsResContinue if program execution should continue. */
 int handleParams(int argc, const char **argv);
 /** Returns true if input files are readable, false otherwise. */
@@ -47,20 +54,21 @@ string readInputText();
 vector<string> readPatterns();
 vector<vector<vector<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes);
 
-/** Runs sopang for [nSegments] [segments], where each segment size is stored in [segmentSizes], and searches for [patterns]. */
-void runSopang(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
-               const vector<string> &patterns);
-/** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segments]. */
-void calcTextSize(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
-                  int *textSize, double *textSizeMB);
-/** Searches for [pattern] in [segments] and returns elapsed time in seconds. */
-double measure(const string *const *segments, unsigned nSegments,
-               const unsigned *segmentSizes, const string &pattern);
+/** Runs sopang for [segmentData] and [sources] (which may be empty), searching for [patterns]. */
+void runSopang(const SegmentData &segmentData, const vector<vector<vector<int>>> &sources,
+    const vector<string> &patterns);
+
+/** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segmentData]. */
+void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSizeMB);
+
+/** Searches for [pattern] in [segmentData] and [sources] (which may be empty) and returns elapsed time in seconds. */
+double measure(const SegmentData &segmentData, const vector<vector<vector<int>>> &sources,
+    const string &pattern);
 
 void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
 void dumpIndexes(const unordered_set<unsigned> &indexes);
 
-void clearMemory(const string *const *segments, unsigned nSegments, unsigned *segmentSizes);
+void clearMemory(SegmentData &segmentData);
 
 } // namespace sopang
 
@@ -205,13 +213,16 @@ int run()
 
         vector<string> patterns = readPatterns();
 
+        SegmentData segmentData{ segments, nSegments, segmentSizes };
+        vector<vector<vector<int>>> sources;
+
         if (not params.inSourcesFile.empty())
         {
-            vector<vector<vector<int>>> sources = readSources(nSegments, segmentSizes);
+            sources = readSources(nSegments, segmentSizes);
         }
 
-        runSopang(segments, nSegments, segmentSizes, patterns);
-        clearMemory(segments, nSegments, segmentSizes);
+        runSopang(segmentData, sources, patterns);
+        clearMemory(segmentData);
     }
     catch (const exception &e)
     {
@@ -221,7 +232,6 @@ int run()
 
     return 0;
 }
-
 
 string readInputText()
 {
@@ -306,17 +316,19 @@ vector<vector<vector<int>>> readSources(unsigned nSegments, const unsigned *segm
     return sources;
 }
 
-void runSopang(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
-               const vector<string> &patterns)
+void runSopang(const SegmentData &segmentData, const vector<vector<vector<int>>> &sources, 
+    const vector<string> &patterns)
 {
-    assert(segments != nullptr and segmentSizes != nullptr and nSegments > 0);
+    assert(segmentData.nSegments > 0);
+    assert(segmentData.segments != nullptr and segmentData.segmentSizes != nullptr);
     assert(patterns.size() > 0);
 
     int textSize;
     double textSizeMB;
 
-    calcTextSize(segments, nSegments, segmentSizes, &textSize, &textSizeMB);
-    cout << boost::format("EDS length = %1%, EDS size = %2% (%3% MB)") % nSegments % textSize % textSizeMB << endl;
+    calcTextSize(segmentData, &textSize, &textSizeMB);
+    cout << boost::format("EDS length = %1%, EDS size = %2% (%3% MB)") 
+        % segmentData.nSegments % textSize % textSizeMB << endl;
 
     vector<double> elapsedSecVec;
 
@@ -340,7 +352,7 @@ void runSopang(const string *const *segments, unsigned nSegments, const unsigned
 
         cout << endl << msg << endl;
 
-        double elapsedSec = measure(segments, nSegments, segmentSizes, pattern);
+        double elapsedSec = measure(segmentData, sources, pattern);
         elapsedSecVec.push_back(elapsedSec);
     }
 
@@ -350,24 +362,23 @@ void runSopang(const string *const *segments, unsigned nSegments, const unsigned
     }
 }
 
-void calcTextSize(const string *const *segments, unsigned nSegments, const unsigned *segmentSizes,
-                  int *textSize, double *textSizeMB)
+void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSizeMB)
 {
     *textSize = 0;
 
-    for (unsigned iS = 0; iS < nSegments; ++iS)
+    for (unsigned iS = 0; iS < segmentData.nSegments; ++iS)
     {
-        for (unsigned iSS = 0; iSS < segmentSizes[iS]; ++iSS)
+        for (unsigned iSS = 0; iSS < segmentData.segmentSizes[iS]; ++iSS)
         {
-            *textSize += segments[iS][iSS].size();
+            *textSize += segmentData.segments[iS][iSS].size();
         }
     }
 
     *textSizeMB = static_cast<double>(*textSize) / 1000.0 / 1000.0;
 }
 
-double measure(const string *const *segments, unsigned nSegments,
-               const unsigned *segmentSizes, const string &pattern)
+double measure(const SegmentData &segmentData, const vector<vector<vector<int>>> &sources,
+    const string &pattern)
 {
     Sopang sopang;
     
@@ -377,14 +388,26 @@ double measure(const string *const *segments, unsigned nSegments,
     if (params.kApprox > 0)
     {
         start = std::clock();
-        res = sopang.matchApprox(segments, nSegments, segmentSizes, pattern, params.alphabet, params.kApprox);
+        res = sopang.matchApprox(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
+            pattern, params.alphabet, params.kApprox);
         end = std::clock();
     }
     else 
     {
-        start = std::clock();
-        res = sopang.match(segments, nSegments, segmentSizes, pattern, params.alphabet);
-        end = std::clock();
+        if (sources.empty())
+        {
+            start = std::clock();
+            res = sopang.match(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
+                pattern, params.alphabet);
+            end = std::clock();    
+        }
+        else
+        {
+            start = std::clock();
+            res = sopang.matchSources(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
+                sources, pattern, params.alphabet);
+            end = std::clock();    
+        }
     }
     
     // Make sure that the number of results is printed in order to
@@ -436,17 +459,18 @@ void dumpIndexes(const unordered_set<unsigned> &indexes)
     cout << endl;
 }
 
-void clearMemory(const string *const *segments, unsigned nSegments, unsigned *segmentSizes)
+void clearMemory(SegmentData &segmentData)
 {
-    assert(segments != nullptr and segmentSizes != nullptr and nSegments > 0);
+    assert(segmentData.nSegments > 0);
+    assert(segmentData.segments != nullptr and segmentData.segmentSizes != nullptr);
 
-    for (unsigned iSeg = 0; iSeg < nSegments; ++iSeg)
+    for (unsigned iSeg = 0; iSeg < segmentData.nSegments; ++iSeg)
     {
-        delete[] segments[iSeg];
+        delete[] segmentData.segments[iSeg];
     }
 
-    delete[] segments;
-    delete[] segmentSizes;
+    delete[] segmentData.segments;
+    delete[] segmentData.segmentSizes;
 
     cout << endl << "Cleared memory" << endl;
 }

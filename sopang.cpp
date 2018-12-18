@@ -365,6 +365,19 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
     return res;
 }
 
+unordered_set<unsigned> Sopang::matchSources(const string *const *segments,
+        unsigned nSegments, const unsigned *segmentSizes,
+        const vector<vector<vector<int>>> &sources,
+        const string &pattern, const string &alphabet)
+{
+    assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
+    assert(sources.size() > 0);
+
+    unordered_set<unsigned> res;
+
+    return res;
+}
+
 void Sopang::initCounterPositionMasks()
 {
     for (unsigned i = 0; i < maxPatternApproxSize; ++i)

@@ -39,6 +39,11 @@ public:
         unsigned nSegments, const unsigned *segmentSizes,
         const std::string &pattern, const std::string &alphabet, 
         unsigned k);
+
+    std::unordered_set<unsigned> matchSources(const std::string *const *segments,
+        unsigned nSegments, const unsigned *segmentSizes,
+        const std::vector<std::vector<std::vector<int>>> &sources,
+        const std::string &pattern, const std::string &alphabet);
 private:
     void initCounterPositionMasks();
 
