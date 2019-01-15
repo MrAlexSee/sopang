@@ -380,36 +380,38 @@ void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSiz
 double measure(const SegmentData &segmentData, const vector<vector<vector<int>>> &sources,
     const string &pattern)
 {
-    Sopang sopang;
-    
-    clock_t start, end;
     unordered_set<unsigned> res;
+    clock_t start, end;
 
-    if (params.kApprox > 0)
     {
-        start = std::clock();
-        res = sopang.matchApprox(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
-            pattern, params.alphabet, params.kApprox);
-        end = std::clock();
-    }
-    else 
-    {
-        if (sources.empty())
+        Sopang sopang;
+
+        if (params.kApprox > 0)
         {
             start = std::clock();
-            res = sopang.match(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
-                pattern, params.alphabet);
+            res = sopang.matchApprox(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
+                pattern, params.alphabet, params.kApprox);
             end = std::clock();
         }
         else
         {
-            start = std::clock();
-            res = sopang.matchSources(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
-                sources, pattern, params.alphabet);
-            end = std::clock();
+            if (sources.empty())
+            {
+                start = std::clock();
+                res = sopang.match(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
+                    pattern, params.alphabet);
+                end = std::clock();
+            }
+            else
+            {
+                start = std::clock();
+                res = sopang.matchSources(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
+                    sources, pattern, params.alphabet);
+                end = std::clock();
+            }
         }
     }
-    
+
     // Make sure that the number of results is printed in order to
     // prevent the compiler from overoptimizing unused results.
     cout << "#results = " << res.size() << endl;
