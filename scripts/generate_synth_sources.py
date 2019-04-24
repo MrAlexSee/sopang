@@ -91,7 +91,7 @@ def generateSources(segments, nSources):
     return sources
 
 def dumpSources(sources, outFilePath):
-    text = ""
+    text = "{0}\n".format(pNSources)
 
     for sourcesForSegment in sources:
         textsForSegment = []
