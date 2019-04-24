@@ -1,6 +1,7 @@
 """
 Generates a synthetic sources file for elastic-degenerate text.
 Each source (input individual) is associated with exactly one variant from each non-deterministic segment.
+Each variant is associated with some sources.
 """
 
 import random
@@ -13,6 +14,9 @@ pOutEDSourcesFilePath = "sources.edss"
 
 # Total number of sources (input individuals). Must be at least as large as the maximum number of variants in a non-deterministic segment in the input elastic-degenerate text.
 pNSources = 10
+
+# Does not dump sources for the last sequence in order to have a shorter sources file.
+pIgnoreLastSequence = True
 
 def readEDSegments(inFilePath):
     with open(inFilePath, "r") as f:
@@ -65,13 +69,22 @@ def generateSources(segments, nSources):
             if iVariant != len(segment) - 1:
                 sourcesForVariant = sourcesToSelect[iStart : iStart + iStep]
             else:
-                sourcesForVariant = sourcesToSelect[iStart : ]
+                if not pIgnoreLastSequence:
+                    sourcesForVariant = sourcesToSelect[iStart : ]
+                else:
+                    sourcesForVariant = None
 
-            sourcesForSegment += [sourcesForVariant]
+            if sourcesForVariant:
+                sourcesForSegment += [sourcesForVariant]
+
             iStart += iStep
 
-        assert len(sourcesForSegment) == len(segment)
-        assert sum([len(s) for s in sourcesForSegment]) == nSources
+        if not pIgnoreLastSequence:
+            assert len(sourcesForSegment) == len(segment)
+            assert sum([len(s) for s in sourcesForSegment]) == nSources
+        else:
+            assert len(sourcesForSegment) == len(segment) - 1
+            assert sum([len(s) for s in sourcesForSegment]) < nSources
 
         sources += [sourcesForSegment]
 
