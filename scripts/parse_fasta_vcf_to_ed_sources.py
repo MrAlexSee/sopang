@@ -4,12 +4,12 @@ Usage: parse_fasta_vcf_to_ed_sources.py <input_chr.fa> <input_variants.vcf> <out
 
 Arguments:
   <input_chr.fa>         path to the input fasta (reference) file
-  <input_variants.vcf>   path to the input vcf (variants) file
+  <input_variants.vcf>   path to the input VCF (variants) file
   <output_chr.eds>       path to the output elastic-degenerate text file
   <output_sources.edss>  path to the output sources file
 
 Options:
-  --ignore-ref-sources   does not dump the sources for a reference sequence for a shorter sources file
+  --ignore-ref-sources   does not dump sources for a reference sequence in order to have a shorter sources file
   -h --help              show this screen
   -v --version           show version
 """
