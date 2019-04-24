@@ -18,23 +18,7 @@ from docopt import docopt
 import itertools
 import vcf # Requires the package "pyvcf".
 
-def readFastaFile(inFastaFilePath):
-    print "Reading the entire fasta file from: {0}".format(inFastaFilePath)
-    text = ""
-
-    with open(inFastaFilePath, "r") as f:
-        for line in f:
-            if line[0] == ">":
-                continue
-
-            text += line[ : -1].upper()
-
-    textMB = float(len(text)) / 1000.0 / 1000.0
-    print "Read input fasta text, MB = {0:.2f}".format(textMB)
-
-    return text
-
-def getSourcesMapFromVCF(vcfReader):
+def getSourcesMapFromVcfReader(vcfReader):
     nProcessedEntries, nIgnoredEntries = 0, 0
     ret = {}
 
@@ -83,8 +67,10 @@ def getSourcesMapFromVCF(vcfReader):
                 assert 1 <= altIndex <= len(record.ALT)
                 altIndex -= 1
 
-                if record.ALT[altIndex] not in curSources:
-                    curSources[record.ALT[altIndex]] = []
+                altSequence = record.ALT[altIndex].sequence
+
+                if altSequence not in curSources:
+                    curSources[altSequence] = []
 
                 sampleName = sample.sample
 
@@ -92,9 +78,13 @@ def getSourcesMapFromVCF(vcfReader):
                     sampleNameToIndex[sampleName] = nextSampleIndex
                     nextSampleIndex += 1
 
-                curSources[record.ALT[altIndex]] += [sampleNameToIndex[sampleName]]
-
+                curSources[altSequence] += [sampleNameToIndex[sampleName]]
+            
         if curSources:
+            for kv in curSources.iteritems():
+                # We ensure that there are no duplicates.
+                assert len(kv[1]) == len(set(kv[1]))
+
             if record.POS in ret:
                 ret[record.POS].update(curSources)
             else:
@@ -102,122 +92,63 @@ def getSourcesMapFromVCF(vcfReader):
 
         nProcessedEntries += 1
 
-    print "Processed vcf #entries = {0}, ignored #entries = {1}".format(nProcessedEntries, nIgnoredEntries)
+    print("Processed vcf #entries = {0}, ignored #entries = {1}".format(nProcessedEntries, nIgnoredEntries))
     return ret, nextSampleIndex
 
-def fastaAndSourcesMapToSegments(fastaText, sourcesMap, nSources):
-    segments, sources = [], []
+def parseFastaFile(inFastaFilePath, outTextFilePath, outSourcesFilePath, sourcesMap, nSources):
+    inFileHandle = open(inFastaFilePath, "r")
+    outTextFileHandle, outSourcesFileHandle = open(outTextFilePath, "w"), open(outSourcesFilePath, "w")
 
-    for charIdx in xrange(len(fastaText)):
-        if charIdx in sourcesMap:
-            curSegment, curSources = [], []
-            usedSources = set()
-
-            for kv in sourcesMap[charIdx].iteritems():
-                curSegment += [kv[0]]
-                curSources += [kv[1]]
-
-                usedSources.update(set(kv[1]))
-
-            # We associate the reference sequence with the remaining sources.
-            curSources += [[s for s in xrange(nSources) if s not in usedSources]]
-
-            curSegment = [[fastaText[charIdx]]]
-
-            segments += [curSegment]
-            sources += [curSources]
-        else:
-            segments += [[fastaText[charIdx]]]
-
-    return segments, sources
-
-def parseFastaAndVCF(inFastaFilePath, inVCFFilePath):
-    fastaText = readFastaFile(inFastaFilePath)
-    vcfReader = vcf.Reader(open(inVCFFilePath, "r"))
-
-    print "Starting buffered processing of vcf file from: {0}".format(inVCFFilePath)
-    sourcesMap, nSources = getSourcesMapFromVCF(vcfReader)
-
-    return fastaAndSourcesMapToSegments(fastaText, sourcesMap, nSources)
-
-def sanityCheck(segments, sources):
-    assert segments and sources
-
-    sourceIdx = 0
-    nNonDeterministicSegments = 0
+    charIdx = 0
     
-    for segment in segments:
-        assert len(segment) > 0
+    text, sourcesText = "", ""
+    step = 500
 
-        if len(segment) == 1:
+    for line in inFileHandle:
+        if line[0] == ">":
             continue
+    
+        for curChar in line[ : -1].upper():
+            if charIdx in sourcesMap:
+                usedSources = set()
 
-        assert len(segment) == len(sources[sourceIdx])
+                text += "{"
+                sourcesText += "{"
 
-        # Make sure that the are no duplicates in all sublists.
-        allSources = list(itertools.chain(*sources[sourceIdx]))
-        assert len(allSources) == len(set(allSources))
+                for kv in sourcesMap[charIdx].iteritems():
+                    text += kv[0] + ","
+                    sourcesText += "{" + ",".join([str(i) for i in sorted(kv[1])]) + "}"
 
-        sourceIdx += 1
-        nNonDeterministicSegments += 1
+                    usedSources.update(set(kv[1]))
 
-    assert nNonDeterministicSegments == len(sources)
-    print "Sanity check passed"
+                text += curChar + "}"
 
-def dumpEDText(segments, outFilePath):
-    text = ""
-    step = 100
+                # We associate the reference sequence with the remaining sources.
+                curSources = [s for s in xrange(nSources) if s not in usedSources]
+                sourcesText += "{" + ",".join([str(i) for i in sorted(curSources)]) + "}}"
+            else:
+                text += curChar
 
-    print "Buffered dumping of ED text to: {0} for #segments = {1} with step = {2}".format(outFilePath, len(segments), step)
-    fileHandle = open(outFilePath, "a")
+            charIdx += 1
 
-    fileHandle.truncate()
-
-    for segmentIdx, segment in enumerate(segments):
-        if segmentIdx != 0 and segmentIdx % step == 0:
-            fileHandle.write(text)
-            text = ""
-
-        if len(segment) == 1:
-            text += "{" + segment[0] + "}"
-        else:
-            text += "{" + ",".join(segment) + "}"
-
-    fileHandle.close()
-    print "Finished"
-
-def dumpSources(sources, outFilePath):
-    text = ""
-    step = 100
-
-    print "Buffered dumping of sources to: {0} for non-det #segments = {1} with step = {2}".format(outFilePath, len(sources), step)
-    fileHandle = open(outFilePath, "a")
-
-    fileHandle.truncate()
-
-    for sourcesIdx, sourcesForSegment in enumerate(sources):
-        if segmentIdx != 0 and segmentIdx % step == 0:
-            fileHandle.write(text)
-            text = ""
-
-        textForSegment = []
-
-        for sourcesForVariant in sourcesForSegment:
-            textForSegment += ["{" + ",".join([str(v) for v in sourcesForVariant]) + "}"]
-
-        text += "{" + "".join(textForSegment) + "}"
-
-    fileHandle.close()
-    print "Finished"
+        if len(text) > step:
+            outTextFileHandle.write(text)
+            outSourcesFileHandle.write(sourcesText)
+            text, sourcesText = "", ""
 
 def main():
     args = docopt(__doc__, version="0.1.0")
 
-    segments, sources = parseFastaAndVCF(args["<input_chr.fa>"], args["<input_variants.vcf>"])
-    sanityCheck(segments, sources)
+    print("Starting buffered processing of vcf file from: {0}".format(args["<input_variants.vcf>"]))
+    print("This might take a very long time...")
 
-    dumpEDText(segments, args["<output_chr.eds>"])
-    dumpSources(sources, args["<output_sources.edss>"])
+    vcfReader = vcf.Reader(open(args["<input_variants.vcf>"], "r"))
+    sourcesMap, nSources = getSourcesMapFromVcfReader(vcfReader)
+
+    print("Sources map: variant #positions = {0}, #sources = {1}".format(len(sourcesMap), nSources))
+
+    print("\nParsing fasta file from: {0}".format(args["<input_chr.fa>"]))
+    parseFastaFile(args["<input_chr.fa>"], args["<output_chr.eds>"], args["<output_sources.edss>"], sourcesMap, nSources)
 
 if __name__ == "__main__":
     main()
