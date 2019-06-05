@@ -19,6 +19,7 @@ def readEDSegments(inFilePath):
         text = f.read()
 
     ret = []
+    detCharacterCount = 0
 
     for part in text.split("{"):
         if "}" in part:
@@ -27,17 +28,20 @@ def readEDSegments(inFilePath):
 
             # This is a non-deterministic segment.
             assert "," in parts[0]
+
             ret += [parts[0].split(",")]
 
             # This is either a deterministic segment or an empty string
             # when non-deterministic segments are contiguous.
             assert "," not in parts[1]
+
             if parts[1]:
                 ret += [[parts[1]]]
+                detCharacterCount += len(parts[1])
         else:
             ret += [[part]]
 
-    print("Parsed #segments = {0}".format(len(ret)))
+    print("Parsed #segments = {0}, deterministic #characters = {1}".format(len(ret), detCharacterCount))
     return ret
 
 def generateSources(segments, sourceCount, includeLast):
