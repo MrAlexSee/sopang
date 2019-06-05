@@ -1,17 +1,18 @@
 """
 Parses a fasta and VCF file pair in order to obtain elastic-degenerate text with sources.
-Usage: parse_fasta_vcf_to_ed_sources.py <input_chr.fa> <input_variants.vcf> <output_chr.eds> <output_sources.edss> [options]
+
+Usage: parse_fasta_vcf_to_ed_sources.py <input-chr.fa> <input-variants.vcf> <output-chr.eds> <output-sources.edss> [options]
 
 Arguments:
-  <input_chr.fa>         path to the input fasta (reference) file
-  <input_variants.vcf>   path to the input VCF (variants) file
-  <output_chr.eds>       path to the output elastic-degenerate text file
-  <output_sources.edss>  path to the output sources file
+  <input-chr.fa>             path to the input fasta (reference) file
+  <input-variants.vcf>       path to the input VCF (variants) file
+  <output-chr.eds>           path to the output elastic-degenerate text file
+  <output-sources.edss>      path to the output sources file
 
 Options:
-  --ignore-ref-sources   does not dump sources for a reference sequence in order to have a shorter sources file
-  -h --help              show this screen
-  -v --version           show version
+  --include-ref-sources      dumps sources for a reference sequence (results in a longer but explicit sources file)
+  -h --help                  show this screen
+  -v --version               show version
 """
 
 from docopt import docopt
@@ -37,120 +38,174 @@ def shouldProcessRecord(record):
     return True
 
 def getSourcesMapFromVcfReader(vcfReader):
-    nProcessed, nIgnored = 0, 0
+    processedCount, ignoredCount = 0, 0
+
+    # The returned structure is a map: [position] -> [source map].
     ret = {}
 
     sampleNameToIndex = {}
     nextSampleIndex = 0
 
+    chromosomeId = None
+
     for record in vcfReader:
         if not shouldProcessRecord(record):
-            nIgnored += 1
+            ignoredCount += 1
             continue
 
+        if not chromosomeId:
+            chromosomeId = record.CHROM
+        else:
+            if chromosomeId != record.CHROM:
+                print("Mismatching chromosome IDs: {0} <> {1}".format(chromosomeId, record.CHROM))
+                return None
+
         # We shall store only the sources where the variation (alt) occurs.
+        # This is a map [alternative sequence] -> [source indexes].
         curSources = {}
 
         for sample in record.samples:
-            # We always take only the 1st index of the diploid.
-            altIndex = int(sample.data.GT.split("|")[0])
+            indexes = [int(i) for i in sample.data.GT.split("|")]
+            assert len(indexes) == 2
 
-            if altIndex != 0:
+            # We take the 1st index of the diploid as one source and the 2nd index as another source.
+            for diploidIndex, altIndex in enumerate(indexes):
+                if altIndex == 0:
+                    continue
+
                 assert 1 <= altIndex <= len(record.ALT)
-                altIndex -= 1
-
-                altSequence = record.ALT[altIndex].sequence
+                altSequence = record.ALT[altIndex - 1].sequence
 
                 if altSequence not in curSources:
-                    curSources[altSequence] = []
+                    curSources[altSequence] = set()
 
-                sampleName = sample.sample
+                sampleName = sample.sample + "_" + str(diploidIndex)
 
                 if sampleName not in sampleNameToIndex:
                     sampleNameToIndex[sampleName] = nextSampleIndex
                     nextSampleIndex += 1
 
-                curSources[altSequence] += [sampleNameToIndex[sampleName]]
-            
-        if curSources:
-            for kv in curSources.iteritems():
-                # We ensure that there are no duplicates.
-                assert len(kv[1]) == len(set(kv[1]))
+                curSources[altSequence].add(sampleNameToIndex[sampleName])
 
+        if curSources:
             if record.POS in ret:
                 ret[record.POS].update(curSources)
             else:
                 ret[record.POS] = curSources
 
-        nProcessed += 1
+        processedCount += 1
 
-    print("Processed VCF #records = {0}, ignored #records = {1}".format(nProcessed, nIgnored))
-    return ret, nextSampleIndex
+    print("Processed VCF #records = {0}, ignored #records = {1}".format(processedCount, ignoredCount))
+    return ret, nextSampleIndex, chromosomeId
 
-def parseFastaFile(args, sourcesMap, nSources):
-    inFileHandle = open(args["<input_chr.fa>"], "r")
-    outTextFileHandle = open(args["<output_chr.eds>"], "w")
-    outSourcesFileHandle = open(args["<output_sources.edss>"], "w")
+def processLine(line, charIdx, sourcesMap, sourceCount):
+    text, sourcesText = "", ""
+    processedVcfPositionsCount = 0
 
-    ignoreRefSources = args["--ignore-ref-sources"]
-    charIdx = 0
+    for curChar in line[ : -1].upper():
+        if charIdx in sourcesMap:
+            text += "{"
+
+            if sourceCount or len(sourcesMap[charIdx]) > 1:
+                sourcesText += "{"
+
+            usedSources = set()
+
+            for altSequence, sourceIndexes in sourcesMap[charIdx].items():
+                text += altSequence + ","
+                sourcesText += "{" + ",".join([str(i) for i in sorted(sourceIndexes)]) + "}"
+
+                usedSources.update(sourceIndexes)
+
+            text += curChar + "}"
+ 
+            if sourceCount:
+                assert len(usedSources) < sourceCount
+
+            # We associate the reference sequence with the remaining sources.
+            if sourceCount:
+                curSources = [s for s in range(sourceCount) if s not in usedSources]
+                sourcesText += "{" + ",".join([str(i) for i in sorted(curSources)]) + "}"
+
+            if sourceCount or len(sourcesMap[charIdx]) > 1:
+                sourcesText += "}"
+
+            processedVcfPositionsCount += 1
+        else:
+            text += curChar
+
+        charIdx += 1
+
+    return text, sourcesText, processedVcfPositionsCount
+
+def parseFastaFile(args, sourcesMap, sourceCount, searchedChromosomeId):
+    includeRefSources = args["--include-ref-sources"]
+
+    inFileHandle = open(args["<input-chr.fa>"], "r")
+    outTextFileHandle = open(args["<output-chr.eds>"], "w")
+    outSourcesFileHandle = open(args["<output-sources.edss>"], "w")
     
     text = ""
-    sourcesText = "{0}\n".format(nSources)
+    sourcesText = "{0}\n".format(sourceCount)
 
-    step = 1000
+    charIdx = 0
+    inGenome = False
 
-    for line in inFileHandle:
+    outBufferSize = 1000
+    sourceCountForLine = sourceCount if includeRefSources else 0
+
+    bufferedWritesCount, processedVcfPositionsCount, processedLinesCount = 0, 0, 0
+
+    for lineIdx, line in enumerate(inFileHandle, 1):
         if line[0] == ">":
+            if inGenome:
+                print("Exited genome: {0} at line: {1}".format(searchedChromosomeId, lineIdx))
+                break
+
+            curChromosomeId = line[1 : ].split()[0]
+
+            if curChromosomeId == searchedChromosomeId:
+                inGenome = True
+                print("Entered genome: {0} at line: {1}".format(searchedChromosomeId, lineIdx))
+                continue
+
+        if not inGenome:
             continue
-    
-        for curChar in line[ : -1].upper():
-            if charIdx in sourcesMap:
-                text += "{"
 
-                if not ignoreRefSources or len(sourcesMap[charIdx]) > 1:
-                    sourcesText += "{"
+        curText, curSourcesText, curProcessedVcfPositionsCount = processLine(line, charIdx, sourcesMap, sourceCountForLine)
 
-                usedSources = set()
+        text += curText
+        sourcesText += curSourcesText
+        processedVcfPositionsCount += curProcessedVcfPositionsCount
 
-                for kv in sourcesMap[charIdx].iteritems():
-                    text += kv[0] + ","
-                    sourcesText += "{" + ",".join([str(i) for i in sorted(kv[1])]) + "}"
+        charIdx += len(line) - 1
+        processedLinesCount += 1
 
-                    usedSources.update(set(kv[1]))
-
-                text += curChar + "}"
-
-                if not ignoreRefSources:
-                    # We associate the reference sequence with the remaining sources.
-                    curSources = [s for s in xrange(nSources) if s not in usedSources]
-                    sourcesText += "{" + ",".join([str(i) for i in sorted(curSources)]) + "}"
-
-                if not ignoreRefSources or len(sourcesMap[charIdx]) > 1:
-                    sourcesText += "}"
-            else:
-                text += curChar
-
-            charIdx += 1
-
-        if len(text) > step:
+        if len(text) > outBufferSize:
             outTextFileHandle.write(text)
             outSourcesFileHandle.write(sourcesText)
+
             text, sourcesText = "", ""
+            bufferedWritesCount += 1
+
+    print("\nFinished parsing the fasta file")
+    print("Dumped ED text to: {0} and ED sources to: {1}, performed #writes = {2}".format(args["<output-chr.eds>"], args["<output-sources.edss>"], bufferedWritesCount))
+    print("Processed VCF #positions = {0}, processed genome #lines = {1}".format(processedVcfPositionsCount, processedLinesCount))
 
 def main():
     args = docopt(__doc__, version="0.1.0")
 
-    print("Starting buffered processing of VCF file from: {0}".format(args["<input_variants.vcf>"]))
+    print("Starting buffered processing of VCF file from: {0}".format(args["<input-variants.vcf>"]))
     print("This might take a very long time...")
 
-    vcfReader = vcf.Reader(open(args["<input_variants.vcf>"], "r"))
-    sourcesMap, nSources = getSourcesMapFromVcfReader(vcfReader)
+    vcfReader = vcf.Reader(open(args["<input-variants.vcf>"], "r"))
+    sourcesMap, sourceCount, chromosomeId = getSourcesMapFromVcfReader(vcfReader)
 
-    print("Sources map: variant #positions = {0}, #sources = {1}".format(len(sourcesMap), nSources))
+    print("Sources map: variant #positions = {0}, #sources = {1}".format(len(sourcesMap), sourceCount))
+    print("Current chromosome: {0}".format(chromosomeId))
 
-    print("\nParsing fasta file from: {0}".format(args["<input_chr.fa>"]))
-    parseFastaFile(args, sourcesMap, nSources)
+    print("\nParsing fasta file from: {0}".format(args["<input-chr.fa>"]))
+    parseFastaFile(args, sourcesMap, sourceCount, chromosomeId)
 
 if __name__ == "__main__":
     main()
