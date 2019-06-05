@@ -1,36 +1,50 @@
 """
-Prints the histogram of character counts in deterministic/non-deterministic segments 
-for all .eds files from a given folder.
+Prints the histogram of character counts in deterministic/non-deterministic segments.
+
+Usage: ed_histogram.py <input-dir> [options]
+
+Arguments:
+  <input-dir>       path to the input directory containing .eds files
+
+Options:
+  -h --help         show this screen
+  -v --version      show version
 """
+
+from docopt import docopt
 
 import os
 import re
 
-# Input directory path containing .eds ED text files.
-pInDir = "../sample"
+def processFile(filePath, sizes):
+    print("Reading file: {0}".format(filePath))
+
+    with open(filePath, "r") as f:
+        text = f.read()
+
+    # The question mark allows for non-greedy matching.
+    detSegmentsText = re.sub(r"\{.+?\}", "", text)
+
+    detSizeMB = len(detSegmentsText) / (2 ** 20)
+    totalSizeMB = len(text) / (2 ** 20)
+    ratio = detSizeMB / totalSizeMB
+
+    sizes += [(filePath, [round(v, 3) for v in (detSizeMB, totalSizeMB, ratio)])]
 
 def main():
-    res = []
-    edsFiles = [os.path.join(pInDir, f) for f in os.listdir(pInDir) if f.endswith(".eds")]
+    args = docopt(__doc__, version="0.1.0")
+    inputDirPath = args["<input-dir>"]
 
-    for edsFile in edsFiles:
-        print "Reading file: {0}".format(edsFile)
+    edsFileNames = [fileName for fileName in os.listdir(inputDirPath) if fileName.endswith(".eds")]
+    edsFilePaths = [os.path.join(inputDirPath, fileName) for fileName in edsFileNames]
 
-        with open(edsFile, "r") as f:
-            data = f.read()
+    sizes = []
 
-        # The question mark allows for non-greedy matching.
-        detFiltered = re.sub(r"\{.+?\}", "", data)
+    for edsFilePath in edsFilePaths:
+        processFile(edsFilePath, sizes)
 
-        sizeMB = len(data) / 1024.0 / 1024.0
-        sizeFiltMB = len(detFiltered) / 1024.0 / 1024.0
-        ratio = sizeFiltMB / sizeMB
-
-        res += [(edsFile, round(sizeFiltMB, 2), round(sizeMB, 2), round(ratio, 2))]
-        res.sort(key = lambda t: t[0])
-
-    for t in res:
-        print t
+    for item in sorted(sizes):
+        print(item)
 
 if __name__ == "__main__":
     main()

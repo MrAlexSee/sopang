@@ -1,90 +1,85 @@
 """
 Generates synthetic elastic-degenerate text.
+
+Usage: generate_synth_ed_text.py <output-file> [options]
+
+Arguments:
+  <output-file>                        output file path
+
+Options:
+  --alphabet arg                       alphabet used for character sampling [default: ACGTN]
+  --degenerate-positions-factor arg    number of segments which are non-deterministic (contain multiple variants), e.g., 0.5 = half of all segments [default: 0.1]
+  --max-segment-variants arg           maximum number of variants (a), the number of variants for each non-deterministic segment will be sampled from the interval [2, a] [default: 10]
+  --max-variant-size arg               maximum size of each segment variant (b), the size for each variant will be sampled from the interval [0, b] (segments might contain empty words) [default: 10]
+  --segment-count arg                  total number of segments [default: 10000]
+  -h --help                            show this screen
+  -v --version                         show version
 """
+
+from docopt import docopt
 
 import random
 
-# Total number of segments: 100, 500, 1000, 1600 thousands segments.
-pNSegments = 100 * 1000
-# Alphabet for character sampling.
-pAlphabet = "ACGTN"
+def randomString(alphabet, size):
+    sigma = len(alphabet)
+    return "".join(alphabet[random.randint(0, sigma - 1)] for _ in range(size))
 
-# Number of segments (must be smaller than or equal to pNSegments) which are non-deterministic,
-# i.e. contain multiple variants.
-pNDegeneratePositions = int(0.1 * pNSegments) # 10% of the text as in Grossi et al.
+def transformTextToED(text, degenerateStrings):
+    ret = ""
 
-# Maximum number of variants (a), the number of variants for each non-deterministic segment
-# will be sampled from the interval [2, a].
-pNMaxSegmentVariants = 10
+    for charIdx in range(len(text)):
+        if charIdx in degenerateStrings:
+            variants = degenerateStrings[charIdx]
+            assert len(variants) > 1
 
-# Maximum length of each segment variant (b), the length for each variant 
-# will be sampled from the interval [0, b] (segments might contain empty words).
-pNMaxVariantLength = 10
+            ret += "{" + ",".join(variants) + "}"
+        else:
+            ret += text[charIdx]
 
-# Output file path.
-pOutFile = "text.eds"
+    return ret
 
-def main():
-    textSizeMB = round(pNSegments / 1000.0 / 1000.0, 3)
-    print "Started, alph = \"{0}\", text size = {1}m".format(pAlphabet, textSizeMB)
+def generateDegenerateStrings(degenerateSegmentCount, totalSegmentCount, args):
+    degeneratePositions = random.sample(range(totalSegmentCount), degenerateSegmentCount)
+    ret = {}
 
-    text = randomString(pAlphabet, pNSegments)
-
-    # Randomly drawn degenerate positions.
-    degenPosList = random.sample(xrange(pNSegments), pNDegeneratePositions)
-    # Dictionary: position in text -> list of a few strings.
-    degenStrings = {}
-
-    print "Generating degenerate strings for #positions = {0}k".format(pNDegeneratePositions / 1000.0)
-
-    for curPos in degenPosList:
+    for position in degeneratePositions:
         # Degenerate letter is defined as a "non-empty set of strings".
-        howMany = random.randint(2, pNMaxSegmentVariants)
+        variantCount = random.randint(2, int(args["--max-segment-variants"]))
         curSet = set()
 
-        while len(curSet) < howMany:
-            curLen = random.randint(0, pNMaxVariantLength) # Includes empty strings.
-            curStr = randomString(pAlphabet, curLen)
+        while len(curSet) < variantCount:
+            curLen = random.randint(0, int(args["--max-variant-size"])) # Includes empty strings.
+            curStr = randomString(args["--alphabet"], curLen)
+
             curSet.add(curStr)
 
-        degenStrings[curPos] = curSet
+        ret[position] = curSet
 
-    assert len(degenPosList) == len(degenStrings) == pNDegeneratePositions
-    dumpToFile(text, set(degenPosList), degenStrings)
+    return ret    
 
-def randomString(alph, size):
-    sigma = len(alph)
-    return "".join(alph[random.randint(0, sigma - 1)] for _ in xrange(size))
+def main():
+    args = docopt(__doc__, version="0.1.0")
+    totalSegmentCount = int(args["--segment-count"])
 
-def dumpToFile(text, degenPosSet, degenStrings):
-    print "Generating output elastic-degenerate text..."
-    outStr = ""
+    textSizeMB = totalSegmentCount / (2 ** 20)
+    print("Started, alphabet = \"{0}\", text size = {1:.3f} MB".format(args["--alphabet"], textSizeMB))
 
-    for i in xrange(len(text)):
-        if i not in degenPosSet:
-            outStr += text[i]
-        else:
-            curStrings = list(degenStrings[i])
-            assert curStrings
+    text = randomString(args["--alphabet"], totalSegmentCount)
 
-            if len(curStrings) == 1:
-                outStr += curStrings[0]
-                continue
-            else:
-                curRun = "{"
+    degenerateSegmentCount = int(float(args["--degenerate-positions-factor"]) * totalSegmentCount)
 
-                for iD in xrange(len(curStrings)):
-                    curRun += curStrings[iD]
+    ratio = degenerateSegmentCount / totalSegmentCount
+    print("Generating: degenerate/total counts = {0}/{1}, ratio = {2:.3f}".format(degenerateSegmentCount, totalSegmentCount, ratio))
 
-                    if iD != len(curStrings) - 1:
-                        curRun += ","
+    degenerateStrings = generateDegenerateStrings(degenerateSegmentCount, totalSegmentCount, args)
+    edText = transformTextToED(text, degenerateStrings)
 
-                outStr += curRun + "}"
+    outputFilePath = args["<output-file>"]
 
-    with open(pOutFile, "w") as f:
-        f.write(outStr)
+    with open(outputFilePath, "w") as f:
+        f.write(edText)
 
-    print "Dumped to file: {0}".format(pOutFile)
+    print("Dumped to file: {0}".format(outputFilePath))
 
 if __name__ == "__main__":
     main()
