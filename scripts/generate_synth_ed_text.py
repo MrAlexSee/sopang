@@ -69,8 +69,9 @@ def main():
     degenerateSegmentCount = int(float(args["--degenerate-positions-factor"]) * totalSegmentCount)
 
     ratio = degenerateSegmentCount / totalSegmentCount
-    print("Generating: degenerate/total counts = {0}/{1}, ratio = {2:.3f}".format(degenerateSegmentCount, totalSegmentCount, ratio))
+    print("Generating: degenerate/total counts = {0}/{1}, ratio = {2:.2f}".format(degenerateSegmentCount, totalSegmentCount, ratio))
 
+    # This is a map [position] -> [set of variant strings].
     degenerateStrings = generateDegenerateStrings(degenerateSegmentCount, totalSegmentCount, args)
     edText = transformTextToED(text, degenerateStrings)
 
