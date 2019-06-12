@@ -133,7 +133,8 @@ def processLine(line, charIdx, sourcesMap, sourceCount):
 
         text += curChar + "}"
 
-        # We associate the reference sequence with the remaining sources.
+        # We associate the reference sequence with the remaining sources only if the source count is provided,
+        # i.e. when the explicit sources file has been requested.
         if sourceCount:
             assert len(usedSources) < sourceCount
 
