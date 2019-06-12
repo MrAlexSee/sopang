@@ -55,8 +55,8 @@ Short name | Long name               | Parameter description
 `-i`       | `--in-text-file arg`    | input text file path (positional arg 1)
 `-I`       | `--in-pattern-file arg` | input pattern file path (positional arg 2)
 `-S`       | `--in-sources-file arg` | input sources file path
-`-k`       | `--approx arg`          | perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12)
-`-o`       | `--out-file arg`        | output file path (default = res.txt)
+`-k`       | `--approx arg`          | perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12, not compatible with matching with sources)
+`-o`       | `--out-file arg`        | output file path (default = timings.txt)
 `-p`       | `--pattern-count arg`   | maximum number of patterns read from top of the patterns file
 `-v`       | `--version`             | display version info
 
