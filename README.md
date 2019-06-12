@@ -2,7 +2,8 @@
 
 This software is called **SOPanG** (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
 
-Published in Bioinformatics journal as an applications note entitled *SOPanG: online text searching over a pan-genome*. DOI: https://doi.org/10.1093/bioinformatics/bty506
+Published as an applications note entitled *SOPanG: online text searching over a pan-genome* (Cisłak, Grabowski, Holub), Bioinformatics, Vol. 34, Issue 24, 12/2018, pp. 4290-4292.
+DOI link: https://doi.org/10.1093/bioinformatics/bty506.
 
 ED text is in a format possibly best explained with an example: `{A,C,}GAAT{AT,A}ATT`. 
 Braces determine the start and end of each non-deterministic segment (a segment having multiple variants), and commas delimit segment variants.
@@ -35,8 +36,13 @@ Input text file (positional parameter 1 or named parameter `-i` or `--in-text-fi
 Input pattern file (positional parameter 2 or named parameter `-I` or `--in-pattern-file`) should contain the list of patterns, each of the same length, separated with newline characters.
 Attached as part of this package is a script `run_all.sh`, which allows for processing multiple input text (chromosome) and pattern files.
 
-End-to-end tests are located in the `end_to_end_tests` folder and they can be run using the `run_tests.sh` script in that folder.
-Unit tests are located in the `unit_tests` folder and they can be run by issuing the `make run` command in that folder.
+* End-to-end tests are located in the `end_to_end_tests` folder and they can be run using the `run_tests.sh` script in that folder.
+
+* Performance testing tools are located in the `performance_tests` folder, see below for details.
+
+* Python tools are located in the `scripts` folder, see below for details.
+
+* Unit tests are located in the `unit_tests` folder and they can be run by issuing the `make run` command in that folder.
 
 #### Command-line parameter description
 
@@ -54,24 +60,6 @@ Short name | Long name               | Parameter description
 `-p`       | `--pattern-count arg`   | maximum number of patterns read from top of the patterns file
 `-v`       | `--version`             | display version info
 
-## Testing
-
-Testing on human genome and synthetic data.
-
-1. Download [EDSO](https://github.com/webmasterar/edso/) by Ahmad Retha.
-
-1. Download data from the 1000 Genomes project: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/.
-
-1. Run EDSO for each chromosome and variants file. Rename resulting files as `chr1.eds`, `chr2.eds`, ..., `chr23.eds`.
-
-1. Generate synthetic data by running `python generate_synth.py` (requires Python 2.7) 4 times for the number of segments (parameter `pNSegments`) set to 100, 500, 1000, and 1600 thousands. Rename files as `chr24.eds`, `chr25.eds`, `chr26.eds`, `chr27.eds`.
-
-1. Set parameter `inDir` in `run_all.sh` to the folder containing `.eds` files and pattern files (all pattern files are located in the `sample/` folder as part of this package).
-
-1. Compile SoPanG (see above).
-
-1. Run `run_all.sh`.
-
 ## Compile-time parameter description
 
 #### params.hpp
@@ -88,29 +76,37 @@ Parameter name   | Parameter description
 `maskBufferSize` | buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code
 `wordSize`       | word size (in bits) used by the Shift-Or algorithm
 
-## Script parameter description
+## Testing
 
-#### run_all.sh
+Testing can be automated with the use of scripts from the `performance_tests` folder.
 
-Parameter name   | Parameter description
----------------- | ---------------------
-`inDir`          | input directory path containing `.eds` ED text files and `.txt` input pattern files
-`outFile`        | base name for output files
+Script name                     | Description
+------------------------------- | ------------------------------
+`generate_real_source_data.sh`  | Generates ED-text and source files for the reference .fasta file and a set .vcf variant files.
+`generate_synthetic_data.sh`    | Generates synthetic ED-text and source files for various output file sizes.
+`run_all.sh`                    | Performs experiments for regular ED-text matching and ED-text matching with sources.
 
-#### ed_histogram.py (scripts folder)
+A complete testing procedure is as follows.
 
-Parameter name         | Parameter description
----------------------- | ---------------------
-`pInDir`               | input directory path containing `.eds` ED text files
+1. Run `generate_synthetic_data.sh`.
 
-#### generate_synth.py (scripts folder)
+1. Download data from the 1000 Genomes project: [FTP server](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/).
 
-Parameter name          | Parameter description
------------------------ | ---------------------
-`pNSegments`            | total number of segments
-`pAlphabet`             | alphabet for character sampling
-`pNDegeneratePositions` | number of segments (must be smaller than or equal to `nSegments`) which are non-deterministic, i.e. contain multiple variants
-`pNMaxSegmentVariants`  | maximum number of variants (`a`), the number of variants for each non-deterministic segment will be sampled from the interval `[2, a]`
-`pNMaxVariantLength`    | maximum length of each segment variant (`b`), the length for each variant will be sampled from the interval `[0, b]` (segments might contain empty words)
-`pOutFile`              | output file path
+1. Move the reference `hs37d5.fa` file to the `data` folder. Move all .vcf files to the `data` folder, rename them as `chr1.vcf`, `chr2.vcf`, ..., `chr24.vcf`.
 
+1. Run `generate_real_source_data.sh`. For all chromosomes, this will take a very, very long time (days), however, it only needs to be performed once in order to obtain elastic-degenerate data with sources.
+
+1. Compile SoPanG (see above).
+
+1. Run `run_all.sh`.
+
+## Scripts
+
+All Python (Python 3, tested with Python 3.6.8) scripts are located in the `scripts` folder. Their command line parameters are described as docopt interfaces at the top of each file.
+
+Script name                         | Description
+----------------------------------- | ------------------------------
+`ed_histogram.py`                   | Prints the histogram of character counts in deterministic/non-deterministic segments.
+`generate_synth_ed_text.py`         | Generates synthetic elastic-degenerate text.
+`generate_synth_sources.py`         | Generates a synthetic sources file for elastic-degenerate text.
+`parse_fasta_vcf_to_ed_sources.py`  | Parses a .fasta and .vcf file pair in order to obtain elastic-degenerate text with sources.
