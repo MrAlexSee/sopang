@@ -18,6 +18,8 @@ Options:
 from docopt import docopt
 
 import itertools
+import sys
+
 import vcf # Requires the package "pyvcf".
 
 def shouldProcessRecord(record):
@@ -37,7 +39,7 @@ def shouldProcessRecord(record):
 
     return True
 
-def getSourcesMapFromVcfReader(vcfReader):
+def getSourcesMapFromVcfReader(vcfReader, lineCount):
     processedCount, ignoredCount = 0, 0
 
     # The returned structure is a map: [position] -> [source map].
@@ -48,7 +50,12 @@ def getSourcesMapFromVcfReader(vcfReader):
 
     chromosomeId = None
 
-    for record in vcfReader:
+    for recordIdx, record in enumerate(vcfReader, 1):
+        processedPercentage = 100 * recordIdx / lineCount
+
+        sys.stdout.write("\rRough progress: {0:.2f}%".format(processedPercentage))
+        sys.stdout.flush()
+
         if not shouldProcessRecord(record):
             ignoredCount += 1
             continue
@@ -70,7 +77,7 @@ def getSourcesMapFromVcfReader(vcfReader):
 
             # We take the 1st index of the diploid as one source and the 2nd index as another source.
             for diploidIndex, altIndex in enumerate(indexes):
-                if altIndex == 0:
+                if altIndex == 0: # 0 indicates the reference sequence.
                     continue
 
                 assert 1 <= altIndex <= len(record.ALT)
@@ -95,7 +102,7 @@ def getSourcesMapFromVcfReader(vcfReader):
 
         processedCount += 1
 
-    print("Processed VCF #records = {0}, ignored #records = {1}".format(processedCount, ignoredCount))
+    print("\nProcessed VCF #records = {0}, ignored #records = {1}".format(processedCount, ignoredCount))
     return ret, nextSampleIndex, chromosomeId
 
 def processLine(line, charIdx, sourcesMap, sourceCount):
@@ -103,38 +110,41 @@ def processLine(line, charIdx, sourcesMap, sourceCount):
     processedVcfPositionsCount = 0
 
     for curChar in line[ : -1].upper():
-        if charIdx in sourcesMap:
-            text += "{"
-
-            if sourceCount or len(sourcesMap[charIdx]) > 1:
-                sourcesText += "{"
-
-            usedSources = set()
-
-            for altSequence, sourceIndexes in sourcesMap[charIdx].items():
-                text += altSequence + ","
-                sourcesText += "{" + ",".join([str(i) for i in sorted(sourceIndexes)]) + "}"
-
-                usedSources.update(sourceIndexes)
-
-            text += curChar + "}"
- 
-            if sourceCount:
-                assert len(usedSources) < sourceCount
-
-            # We associate the reference sequence with the remaining sources.
-            if sourceCount:
-                curSources = [s for s in range(sourceCount) if s not in usedSources]
-                sourcesText += "{" + ",".join([str(i) for i in sorted(curSources)]) + "}"
-
-            if sourceCount or len(sourcesMap[charIdx]) > 1:
-                sourcesText += "}"
-
-            processedVcfPositionsCount += 1
-        else:
+        if charIdx not in sourcesMap:
             text += curChar
+            charIdx += 1
+            continue
+
+        assert len(sourcesMap[charIdx]) > 0
+        text += "{"
+
+        # If there will be more than one sources sequence for the current position,
+        # we need to enclose them with additional brackets.
+        if sourceCount or len(sourcesMap[charIdx]) > 1:
+            sourcesText += "{"
+
+        usedSources = set()
+
+        for altSequence, sourceIndexes in sourcesMap[charIdx].items():
+            text += altSequence + ","
+            sourcesText += "{" + ",".join([str(i) for i in sorted(sourceIndexes)]) + "}"
+
+            usedSources.update(sourceIndexes)
+
+        text += curChar + "}"
+
+        # We associate the reference sequence with the remaining sources.
+        if sourceCount:
+            assert len(usedSources) < sourceCount
+
+            curSources = [s for s in range(sourceCount) if s not in usedSources]
+            sourcesText += "{" + ",".join([str(i) for i in sorted(curSources)]) + "}"
+
+        if sourceCount or len(sourcesMap[charIdx]) > 1:
+            sourcesText += "}"
 
         charIdx += 1
+        processedVcfPositionsCount += 1
 
     return text, sourcesText, processedVcfPositionsCount
 
@@ -158,7 +168,7 @@ def parseFastaFile(args, sourcesMap, sourceCount, searchedChromosomeId):
 
     for lineIdx, line in enumerate(inFileHandle, 1):
         if line[0] == ">":
-            if inGenome:
+            if inGenome: # Encountered the next genome -> finish processing.
                 print("Exited genome: {0} at line: {1}".format(searchedChromosomeId, lineIdx))
                 break
 
@@ -198,8 +208,13 @@ def main():
     print("Starting buffered processing of VCF file from: {0}".format(args["<input-variants.vcf>"]))
     print("This might take a very long time...")
 
-    vcfReader = vcf.Reader(open(args["<input-variants.vcf>"], "r"))
-    sourcesMap, sourceCount, chromosomeId = getSourcesMapFromVcfReader(vcfReader)
+    inputFileHandle = open(args["<input-variants.vcf>"], "r")
+    lineCount = sum(1 for line in inputFileHandle if not line.startswith("#"))
+
+    inputFileHandle.seek(0)
+    vcfReader = vcf.Reader(inputFileHandle)
+
+    sourcesMap, sourceCount, chromosomeId = getSourcesMapFromVcfReader(vcfReader, lineCount)
 
     print("Sources map: variant #positions = {0}, #sources = {1}".format(len(sourcesMap), sourceCount))
     print("Current chromosome: {0}".format(chromosomeId))
