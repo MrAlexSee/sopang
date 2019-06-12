@@ -4,7 +4,7 @@ dataDirPath="data"
 outputFileName="results"
 sopangExe="sopang"
 
-maxChromosomeId=27
+maxChromosomeId=28
 
 cd ..
 

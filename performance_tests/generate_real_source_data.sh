@@ -4,7 +4,7 @@ dataDirPath="data"
 scriptsDirPath="scripts"
 
 inputFastaFileName="hs37d5.fa"
-maxChromosomeId=22
+maxChromosomeId=24
 
 cd ..
 
