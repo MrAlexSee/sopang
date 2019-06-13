@@ -305,14 +305,7 @@ vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segment
                 + to_string(sourceIdx));
         }
 
-        sourceIdx += 1;
-
-        if (sourceIdx > sources.size())
-        {
-            throw runtime_error("there are fewer source segments than non-deterministic segments in text");
-        }
-
-        // We check whether all sources are present for each segment.
+        // We check whether all sources are present for the current segment.
         set<int> sourcesForSegment;
 
         for (const set<int> &sourcesForVariant : sources[sourceIdx])
@@ -322,7 +315,14 @@ vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segment
 
         if (sourcesForSegment.size() != static_cast<size_t>(sourceCount))
         {
-            throw runtime_error("not all sources are presented for segment: " + to_string(sourceIdx));
+            throw runtime_error("not all sources are present for segment: " + to_string(sourceIdx));
+        }
+
+        sourceIdx += 1;
+
+        if (sourceIdx > sources.size())
+        {
+            throw runtime_error("there are fewer source segments than non-deterministic segments in text");
         }
     }
 

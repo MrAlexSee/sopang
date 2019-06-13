@@ -322,4 +322,19 @@ TEST_CASE("is parsing sources for multiple segments correct", "[parsing]")
     REQUIRE(sources[2][3] == set<int>{ 3, 4 });
 }
 
+TEST_CASE("is parsing sources for multiple segments correct 2", "[parsing]")
+{
+    int sourceCount;
+    const auto sources = Sopang::parseSources("10\n{{3}{7}{8}{1}{2}}{{6}{7}{0}{4}{1}{8}}", sourceCount);
+
+    REQUIRE(sourceCount == 10);
+    REQUIRE(sources.size() == 2);
+
+    REQUIRE(sources[0].size() == 6);
+    REQUIRE(sources[1].size() == 7);
+
+    REQUIRE(sources[0] == vector<set<int>>{ { 3 }, { 7 }, { 8 }, { 1 }, { 2 }, { 0, 4, 5, 6, 9 } });
+    REQUIRE(sources[1] == vector<set<int>>{ { 6 }, { 7 }, { 0 }, { 4 }, { 1 }, { 8 }, { 2, 3, 5, 9 } });
+}
+
 } // namespace sopang
