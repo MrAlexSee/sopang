@@ -216,7 +216,7 @@ void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, 
 
 }
 
-vector<vector<set<int>>> Sopang::parseSources(string text)
+vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
 {
     if (text.empty())
     {
@@ -238,7 +238,7 @@ vector<vector<set<int>>> Sopang::parseSources(string text)
     string curNumber;
 
     size_t startIdx;
-    const int sourceCount = parseSourceCount(text, startIdx);
+    sourceCount = parseSourceCount(text, startIdx);
 
     for (size_t charIdx = startIdx; text[charIdx] != '\0'; ++charIdx)
     {
@@ -289,7 +289,8 @@ vector<vector<set<int>>> Sopang::parseSources(string text)
                     charIdx += 1;
                 }
                 else if (curChar == '}') // Variant end.
-                {
+                {    
+                    handleSourceNumberEnd(curNumber, curVariant, charIdx);
                     handleSourceVariantEnd(curVariant, curSegment);
                 }
                 else if (curChar != '{')

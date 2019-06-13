@@ -183,7 +183,7 @@ TEST_CASE("is parsing text with spaces correct", "[parsing]")
 TEST_CASE("is parsing patterns for an empty string correct", "[parsing]")
 {
     vector<string> empty = Sopang::parsePatterns("");
-    REQUIRE(empty.size() == 0);
+    REQUIRE(empty.empty());
 }
 
 TEST_CASE("is parsing patterns for a single pattern correct", "[parsing]")
@@ -224,44 +224,102 @@ TEST_CASE("is parsing patterns correct for trailing whitespace", "[parsing]")
 
 TEST_CASE("is parsing sources for an empty string correct", "[parsing]")
 {
-    const auto empty = Sopang::parseSources("");
-    REQUIRE(empty.size() == 0);
+    int sourceCount;
+    const auto empty = Sopang::parseSources("", sourceCount);
+
+    REQUIRE(empty.empty());
+}
+
+TEST_CASE("does parsing sources throw for bad strings", "[parsing]")
+{
+    int sourceCount;
+
+    for (const string &sources : vector<string>{ "{{0,1,2}{3,5}{7}}", "5\n{{0,X,2}{3,5}{7}}",
+        "5\n{{0,1,2}{3,5}{7}", "5\n{{0;2}{3,5}{7}" })
+    {
+        REQUIRE_THROWS_AS(Sopang::parseSources(sources, sourceCount), runtime_error);
+    }
 }
 
 TEST_CASE("is parsing sources for a single segment correct", "[parsing]")
 {
-    const auto sources = Sopang::parseSources("{{6,4}{7,9,1}{8}}");
+    int sourceCount;
+    const auto sources = Sopang::parseSources("8\n{{0,1,2}{3,5}{7}}", sourceCount);
+    
+    REQUIRE(sourceCount == 8);
     REQUIRE(sources.size() == 1);
 
     const auto variants = sources[0];
-    REQUIRE(variants.size() == 3);
+    REQUIRE(variants.size() == 4);
 
-    REQUIRE(variants[0] == vector<int>{ 6, 4 });
-    REQUIRE(variants[1] == vector<int>{ 7, 9, 1 });
-    REQUIRE(variants[2] == vector<int>{ 8 });
+    REQUIRE(variants[0] == set<int>{ 0, 1, 2 });
+    REQUIRE(variants[1] == set<int>{ 3, 5 });
+    REQUIRE(variants[2] == set<int>{ 7 });
+    REQUIRE(variants[3] == set<int>{ 4, 6 }); // Reference sequence = remaining sources.
 }
 
 TEST_CASE("is parsing sources correct for a single segment with leading and trailing whitespace correct", "[parsing]")
 {
-    const auto sources = Sopang::parseSources("    \t    {{6,4}{7,9,1}{8}}  \t ");
+    int sourceCount;
+    const auto sources = Sopang::parseSources("    \t    \t\t   8\n{{0,1,2}{3,5}{7}}            \t", sourceCount);
+
+    REQUIRE(sourceCount == 8);
     REQUIRE(sources.size() == 1);
 
     const auto variants = sources[0];
-    REQUIRE(variants.size() == 3);
+    REQUIRE(variants.size() == 4);
 
-    REQUIRE(variants[0] == vector<int>{ 6, 4 });
-    REQUIRE(variants[1] == vector<int>{ 7, 9, 1 });
-    REQUIRE(variants[2] == vector<int>{ 8 });
+    REQUIRE(variants[0] == set<int>{ 0, 1, 2 });
+    REQUIRE(variants[1] == set<int>{ 3, 5 });
+    REQUIRE(variants[2] == set<int>{ 7 });
+    REQUIRE(variants[3] == set<int>{ 4, 6 }); // Reference sequence = remaining sources.
+}
+
+TEST_CASE("is parsing sources for multiple single segments correct", "[parsing]")
+{
+    int sourceCount;
+    const auto sources = Sopang::parseSources("3\n{0,2}{0}{1,2}", sourceCount);
+
+    REQUIRE(sourceCount == 3);
+    REQUIRE(sources.size() == 3);
+
+    REQUIRE(sources[0].size() == 2);
+    REQUIRE(sources[1].size() == 2);
+    REQUIRE(sources[2].size() == 2);
+
+    REQUIRE(sources[0][0] == set<int>{ 0, 2 });
+    REQUIRE(sources[0][1] == set<int>{ 1 });
+
+    REQUIRE(sources[1][0] == set<int>{ 0 });
+    REQUIRE(sources[1][1] == set<int>{ 1, 2 });
+
+    REQUIRE(sources[2][0] == set<int>{ 1, 2 });
+    REQUIRE(sources[2][1] == set<int>{ 0 });
 }
 
 TEST_CASE("is parsing sources for multiple segments correct", "[parsing]")
 {
-    const auto sources = Sopang::parseSources("{{6,4}{7,9,1}{8}}{{1,2}{2}}{{3,4,5,6}{1}}");
+    int sourceCount;
+    const auto sources = Sopang::parseSources("5\n{{1,2}{0}}{0}{{0}{1}{2}}", sourceCount);
+
+    REQUIRE(sourceCount == 5);
     REQUIRE(sources.size() == 3);
 
-    REQUIRE(sources[0] == vector<vector<int>>{{ 6, 4 }, { 7, 9, 1 }, { 8 }});
-    REQUIRE(sources[1] == vector<vector<int>>{{ 1, 2 }, { 2 }});
-    REQUIRE(sources[2] == vector<vector<int>>{{ 3, 4, 5, 6 }, { 1 }});
+    REQUIRE(sources[0].size() == 3);
+    REQUIRE(sources[1].size() == 2);
+    REQUIRE(sources[2].size() == 4);
+
+    REQUIRE(sources[0][0] == set<int>{ 1, 2 });
+    REQUIRE(sources[0][1] == set<int>{ 0 });
+    REQUIRE(sources[0][2] == set<int>{ 3, 4 });
+
+    REQUIRE(sources[1][0] == set<int>{ 0 });
+    REQUIRE(sources[1][1] == set<int>{ 1, 2, 3, 4 });
+
+    REQUIRE(sources[2][0] == set<int>{ 0 });
+    REQUIRE(sources[2][1] == set<int>{ 1 });
+    REQUIRE(sources[2][2] == set<int>{ 2 });
+    REQUIRE(sources[2][3] == set<int>{ 3, 4 });
 }
 
 } // namespace sopang

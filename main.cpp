@@ -278,8 +278,11 @@ vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segment
     string sourcesStr = Helpers::readFile(params.inSourcesFile);
     cout << "Read sources, #chars = " << sourcesStr.size() << endl;
 
-    vector<vector<set<int>>> sources = Sopang::parseSources(sourcesStr);
+    int sourceCount;
+    vector<vector<set<int>>> sources = Sopang::parseSources(sourcesStr, sourceCount);
+
     cout << "Parsed sources for non-deterministic #segments = " << sources.size() << endl;
+    cout << "Source count = " << sourceCount << endl;
 
     if (sources.empty())
     {
@@ -307,6 +310,19 @@ vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segment
         if (sourceIdx > sources.size())
         {
             throw runtime_error("there are fewer source segments than non-deterministic segments in text");
+        }
+
+        // We check whether all sources are present for each segment.
+        set<int> sourcesForSegment;
+
+        for (const set<int> &sourcesForVariant : sources[sourceIdx])
+        {
+            sourcesForSegment.insert(sourcesForVariant.begin(), sourcesForVariant.end());
+        }
+
+        if (sourcesForSegment.size() != static_cast<size_t>(sourceCount))
+        {
+            throw runtime_error("not all sources are presented for segment: " + to_string(sourceIdx));
         }
     }
 
