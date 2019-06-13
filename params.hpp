@@ -13,8 +13,8 @@ struct Params
      *** COMPILE-TIME PARAMS
      */
 
-    /** A set of symbols occurring in input (ED) text file or input pattern file. Matches all characters in EDSO (Grossi et al. CPM '17) tool output. */
-    const std::string alphabet = "ACGTNUVISMEL<>:0123456789";
+    /** A set of symbols occurring in input (ED) text file or input pattern file. Restricted to DNA characters, matches the output of the data generation tools from the scripts folder. */
+    const std::string alphabet = "ACGTN";
 
     /*
      *** COMMAND-LINE PARAMS
@@ -36,10 +36,10 @@ struct Params
     std::string inTextFile;
     /** Input pattern file path (positional arg 2). */
     std::string inPatternFile;
-    /** Input sources file path. */
+    /** Input sources file path. Cmd arg -S. */
     std::string inSourcesFile;
 
-    /** Output file path. */
+    /** Output file path. Cmd arg -o. */
     std::string outFile;
 
     /*
@@ -56,13 +56,15 @@ struct Params
     const std::string usageInfoString = "[options] <input text file> <input pattern file>";
 
     const std::string verboseInfoString =
-        "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cislak, Szymon Grabowski.\n"
+        "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model).\n"
+        "Authors for the current release version: Aleksander Cislak, Szymon Grabowski. Authors of the SOPang algorithm: Aleksander Cislak, Szymon Grabowski, Jan Holub.\n"
         "ED text is in a format possibly best explained with an example: {A,C,}GAAT{AT,A}ATT. Braces determine the start and end of each non-deterministic segment (i.e. segment having multiple variants), and commas delimit segment variants.\n"
         "If a comma is not preceded by a string of letters or it is a trailing symbol in a segment, it indicates an empty word.\n"
         "To give an example, all three notations: {,A,C}, {A,,C}, and {A,C,} mean the same, which is a segment which accepts either a string A, or a string C, or an empty word.\n"
         "Deterministic segments (i.e. segments having a single variant) are stored as regular contiguous strings.\n"
         "Note that, e.g., {AC,CG} and {AC, CG} are not the same (the latter would expect a space in its second variant). Therefore, you should not use whitespaces in the ED text if not intended.\n"
-        "SOPanG returns the end positions of pattern occurrences in the ED text. More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).";
+        "SOPanG returns the end positions of pattern occurrences in the ED text. More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).\n"
+        "See README.md for more information.";
 
     const std::string verboseParamsString =
         "Input text file (positional parameter 1 or named parameter -i or --in-text-file) should contain the elastic-degenerate text in the format {A,C,}GAAT{AT,A}ATT.\n"

@@ -60,10 +60,10 @@ private:
     /** Word size (in bits) used by the Shift-Or algorithm. */
     static constexpr unsigned wordSize = 64;
 
-    /** Shift-Add counter size in bits. */
-    static constexpr unsigned saCounterSize = 5;
     /** Maximum pattern size for approximate search. */
     static constexpr unsigned maxPatternApproxSize = 12;
+    /** Shift-Add counter size in bits. */
+    static constexpr unsigned saCounterSize = 5;
     
     /** Full single Shift-Add counter indicating no match. */
     static constexpr uint64_t saFullCounter = 0x10ULL;
