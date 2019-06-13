@@ -218,6 +218,11 @@ void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, 
 
 vector<vector<set<int>>> Sopang::parseSources(string text)
 {
+    if (text.empty())
+    {
+        return {};
+    }
+
     // We will return a vector with size equal to the number of non-deterministic segments.
     // For each segment, we will store a vector with size equal to the number of variants.
     // For each variant, we will store a set with source indexes, with reference sources stored in the last set.
