@@ -12,8 +12,28 @@ To give an example, all three notations: `{,A,C}`, `{A,,C}`, and `{A,C,}` mean t
 Deterministic segments (i.e. segments having a single variant) are stored as regular contiguous strings.
 Note that, e.g., `{AC,CG}` and `{AC, CG}` are not the same (the latter would expect a space in its second variant).
 Therefore, you should not use whitespaces in the ED text if not intended.
+For more information regarding this format, consult, e.g., *Efficient pattern matching in elastic-degenerate texts* (Iliopoulos et al., 2017).
 
 SOPanG returns the end positions of pattern occurrences in the ED text. More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).
+
+#### Sources
+
+The elastic-degenerate format which, in its original form, might contain paths not appearing in the genome can be extended with the sources file.
+Sources describe which individuals are associated with a given variant from the ED text.
+
+For instance, for 4 sources (individuals), we might have the elastic-degenerate text `AA{AG,G}{CG,N,TT}` and the corresponding sources text `{0}{{0,2}{3}}`.
+Note that the sources are 0-indexed.
+We assume that the last variant of each segment (in the above example: `G` and `TT`) describes the reference sequence.
+This indicates the following.
+
+* For the 1st segment, `AG` is associated with source `0`, and `G` (the reference sequence) is associated with the remaining sources `1`, `2` and `3`.
+
+* For the 2nd segment, `CG` is associated with sources `0` and `2`, `N` with source `3`, and `TT` (the reference sequence) is associated with the remaining source `1`.
+
+In every segment, each variant is associated with some sources. Moreover, each source must be associated with exactly one variant from every segment.
+The format of the sources data was described in such a way as to be consistent with the ED text, that is, it also consists of curly braces and commas as delimiters.
+We choose the following naming convention: `.eds` for ED text and `.edss` for the corresponding sources file.
+In order to use SOPanG for matching with sources, supply the path to the sources file in the format described above via the parameter `-S`.
 
 ## Compilation
 
@@ -66,15 +86,17 @@ Short name | Long name               | Parameter description
 
 Parameter name  | Parameter description
 --------------- | ---------------------
-`alphabet`      | a set of symbols occurring in input (ED) text file or input pattern file
+`alphabet`      | A set of symbols occurring in input (ED) text file or input pattern file.
 
 #### sopang.hpp
 
-Parameter name   | Parameter description
----------------- | ---------------------
-`dBufferSize`    | buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants) from the input file cannot be larger than this value
-`maskBufferSize` | buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code
-`wordSize`       | word size (in bits) used by the Shift-Or algorithm
+Parameter name         | Parameter description
+---------------------- | ---------------------
+`dBufferSize`          | Buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants) from the input file cannot be larger than this value.
+`maskBufferSize`       | Buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code.
+`wordSize`             | Word size (in bits) used by the Shift-Or algorithm.
+`maxPatternApproxSize` | Maximum pattern size for approximate search.
+`saCounterSize`        | Shift-Add counter size in bits.
 
 ## Testing
 
@@ -82,7 +104,7 @@ Testing can be automated with the use of scripts from the `performance_tests` fo
 
 Script name                     | Description
 ------------------------------- | ------------------------------
-`generate_real_source_data.sh`  | Generates ED-text and source files for the reference .fasta file and a set .vcf variant files.
+`generate_real_source_data.sh`  | Generates ED-text and source files for the reference .fasta file and a set of .vcf variant files.
 `generate_synthetic_data.sh`    | Generates synthetic ED-text and source files for various output file sizes.
 `run_all.sh`                    | Performs experiments for regular ED-text matching and ED-text matching with sources.
 
@@ -90,9 +112,9 @@ A complete testing procedure is as follows.
 
 1. Run `generate_synthetic_data.sh`.
 
-1. Download data from the 1000 Genomes project: [FTP server](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/).
+1. Download data from the 1000 Genomes project: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/.
 
-1. Move the reference `hs37d5.fa` file to the `data` folder. Move all .vcf files to the `data` folder, rename them as `chr1.vcf`, `chr2.vcf`, ..., `chr24.vcf`.
+1. Move the reference file `hs37d5.fa` to the `data` folder. Move all .vcf files to the `data` folder, rename them as `chr1.vcf`, `chr2.vcf`, ..., `chr24.vcf`.
 
 1. Run `generate_real_source_data.sh`. For all chromosomes, this will take a very, very long time (days), however, it only needs to be performed once in order to obtain elastic-degenerate data with sources.
 
