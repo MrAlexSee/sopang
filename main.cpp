@@ -1,6 +1,8 @@
 /*
  *** SOPanG, a simple tool for pattern matching over an elastic-degenerate string, a recently proposed simplified model for the pan-genome.
- *** Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub. License: GNU LGPL v3.
+ *** Authors for release versions before 1.4.0: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
+ *** Authors for release versions after (including) 1.4.0: Aleksander Cisłak, Szymon Grabowski.
+ *** License: GNU LGPL v3.
  *** Set BOOST_DIR in makefile and type "make" for optimized compile.
  */
 
@@ -52,17 +54,17 @@ int run();
 
 string readInputText();
 vector<string> readPatterns();
-vector<vector<vector<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes);
+vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes);
 
 /** Runs sopang for [segmentData] and [sources] (which may be empty), searching for [patterns]. */
-void runSopang(const SegmentData &segmentData, const vector<vector<vector<int>>> &sources,
+void runSopang(const SegmentData &segmentData, const vector<vector<set<int>>> &sources,
     const vector<string> &patterns);
 
 /** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segmentData]. */
 void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSizeMB);
 
 /** Searches for [pattern] in [segmentData] and [sources] (which may be empty) and returns elapsed time in seconds. */
-double measure(const SegmentData &segmentData, const vector<vector<vector<int>>> &sources,
+double measure(const SegmentData &segmentData, const vector<vector<set<int>>> &sources,
     const string &pattern);
 
 void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
@@ -103,8 +105,8 @@ int handleParams(int argc, const char **argv)
        ("in-text-file,i", po::value<string>(&params.inTextFile)->required(), "input text file path (positional arg 1)")
        ("in-pattern-file,I", po::value<string>(&params.inPatternFile)->required(), "input pattern file path (positional arg 2)")
        ("in-sources-file,S", po::value<string>(&params.inSourcesFile), "input sources file path")
-       ("approx,k", po::value<int>(&params.kApprox), "perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12)")
-       ("out-file,o", po::value<string>(&params.outFile)->default_value("res.txt"), "output file path")
+       ("approx,k", po::value<int>(&params.kApprox), "perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12, not compatible with matching with sources)")
+       ("out-file,o", po::value<string>(&params.outFile)->default_value("timings.txt"), "output file path")
        ("pattern-count,p", po::value<int>(&params.nPatterns), "maximum number of patterns read from top of the patterns file (non-positive values are ignored)")
        ("version,v", "display version info");
 
@@ -214,7 +216,7 @@ int run()
         vector<string> patterns = readPatterns();
 
         SegmentData segmentData{ segments, nSegments, segmentSizes };
-        vector<vector<vector<int>>> sources;
+        vector<vector<set<int>>> sources;
 
         if (not params.inSourcesFile.empty())
         {
@@ -271,12 +273,12 @@ vector<string> readPatterns()
     return patterns;
 }
 
-vector<vector<vector<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes)
+vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes)
 {
     string sourcesStr = Helpers::readFile(params.inSourcesFile);
     cout << "Read sources, #chars = " << sourcesStr.size() << endl;
 
-    vector<vector<vector<int>>> sources = Sopang::parseSources(sourcesStr);
+    vector<vector<set<int>>> sources = Sopang::parseSources(sourcesStr);
     cout << "Parsed sources for non-deterministic #segments = " << sources.size() << endl;
 
     if (sources.empty())
@@ -284,39 +286,40 @@ vector<vector<vector<int>>> readSources(unsigned nSegments, const unsigned *segm
         throw runtime_error("cannot run for empty sources");
     }
 
-    // We check whether source counts match the segments in text.
-    size_t iSource = 0;
+    // We check whether the source counts match the segments in text.
+    size_t sourceIdx = 0;
 
-    for (unsigned i = 0; i < nSegments; ++i)
+    for (unsigned segmentIdx = 0; segmentIdx < nSegments; ++segmentIdx)
     {
-        if (segmentSizes[i] == 1)
+        if (segmentSizes[segmentIdx] == 1)
         {
             continue;
         }
 
-        if (segmentSizes[i] != sources[iSource].size())
+        if (segmentSizes[segmentIdx] != sources[sourceIdx].size())
         {
             throw runtime_error("source segment variant count does not match text segment variant count, source segment index = "
-                + to_string(iSource));
+                + to_string(sourceIdx));
         }
 
-        iSource += 1;
+        sourceIdx += 1;
 
-        if (iSource > sources.size())
+        if (sourceIdx > sources.size())
         {
             throw runtime_error("there are fewer source segments than non-deterministic segments in text");
         }
     }
 
-    if (iSource < sources.size())
+    if (sourceIdx < sources.size())
     {
         throw runtime_error("there are more source segments than non-deterministic segments in text");
     }
 
+    cout << "Sanity check for sources passed" << endl;
     return sources;
 }
 
-void runSopang(const SegmentData &segmentData, const vector<vector<vector<int>>> &sources, 
+void runSopang(const SegmentData &segmentData, const vector<vector<set<int>>> &sources, 
     const vector<string> &patterns)
 {
     assert(segmentData.nSegments > 0);
@@ -377,7 +380,7 @@ void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSiz
     *textSizeMB = static_cast<double>(*textSize) / 1000.0 / 1000.0;
 }
 
-double measure(const SegmentData &segmentData, const vector<vector<vector<int>>> &sources,
+double measure(const SegmentData &segmentData, const vector<vector<set<int>>> &sources,
     const string &pattern)
 {
     unordered_set<unsigned> res;
@@ -388,6 +391,11 @@ double measure(const SegmentData &segmentData, const vector<vector<vector<int>>>
 
         if (params.kApprox > 0)
         {
+            if (not sources.empty())
+            {
+                throw runtime_error("matching with sources is not supported for approximate matching");
+            }
+
             start = std::clock();
             res = sopang.matchApprox(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
                 pattern, params.alphabet, params.kApprox);
@@ -405,7 +413,7 @@ double measure(const SegmentData &segmentData, const vector<vector<vector<int>>>
             else
             {
                 start = std::clock();
-                res = sopang.matchSources(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
+                res = sopang.matchWithSources(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
                     sources, pattern, params.alphabet);
                 end = std::clock();
             }

@@ -2,6 +2,7 @@
 #define SOPANG_HPP
 
 #include <map>
+#include <set>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -25,7 +26,7 @@ public:
 
     static const std::string *const *parseTextArray(std::string text, unsigned *nSegments, unsigned **segmentSizes);
     static std::vector<std::string> parsePatterns(std::string patternsStr);
-    static std::vector<std::vector<std::vector<int>>> parseSources(std::string sourcesStr);
+    static std::vector<std::vector<std::set<int>>> parseSources(std::string sourcesStr);
 
     /*
      *** MATCHING
@@ -40,9 +41,9 @@ public:
         const std::string &pattern, const std::string &alphabet, 
         unsigned k);
 
-    std::unordered_set<unsigned> matchSources(const std::string *const *segments,
+    std::unordered_set<unsigned> matchWithSources(const std::string *const *segments,
         unsigned nSegments, const unsigned *segmentSizes,
-        const std::vector<std::vector<std::vector<int>>> &sources,
+        const std::vector<std::vector<std::set<int>>> &sources,
         const std::string &pattern, const std::string &alphabet);
 private:
     void initCounterPositionMasks();

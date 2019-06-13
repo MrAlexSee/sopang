@@ -1,7 +1,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <cstdint>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -29,20 +28,20 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
     boost::trim(text);
 
     vector<vector<string>> segments;
-    bool inSeg = false;
+    bool inSegment = false;
 
     vector<string> curSegment;
     string curStr = "";
 
     for (size_t i = 0; text[i] != '\0'; ++i)
     {
-        if (text[i] != '{' and text[i] != '}') // Inside a string or segment: comma or string character.
+        if (text[i] != '{' and text[i] != '}') // Inside a string or a segment: comma or string character.
         {
-            if (not inSeg)
+            if (not inSegment)
             {
                 if (text[i] == ',')
                 {
-                    throw runtime_error("bad input text formatting: comma outside segment: char index = " + to_string(i));
+                    throw runtime_error("bad input text formatting: comma outside a segment: char index = " + to_string(i));
                 }
 
                 curStr += text[i];
@@ -62,7 +61,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
         }
         else if (text[i] == '{') // Segment start.
         {
-            assert(not inSeg and curSegment.size() == 0);
+            assert(not inSegment and curSegment.size() == 0);
 
             if (not curStr.empty()) // If we enter the segment from the determinate string.
             {
@@ -70,12 +69,12 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
                 curStr.clear();
             }
 
-            inSeg = true;
+            inSegment = true;
         }
         else // Segment end.
         {
             assert(text[i] == '}');
-            assert(inSeg == true and curSegment.size() >= 1);
+            assert(inSegment == true and curSegment.size() >= 1);
 
             if (curSegment.empty())
             {
@@ -88,13 +87,13 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
             segments.emplace_back(move(curSegment));
             curSegment.clear();
 
-            inSeg = false;
+            inSegment = false;
         }
     }
 
     if (not curStr.empty()) // If the file ended with a determinate segment.
     {
-        assert(not inSeg and curSegment.empty());
+        assert(not inSegment and curSegment.empty());
 
         curSegment.push_back(curStr);
         segments.push_back(vector<string>(curSegment));
@@ -138,103 +137,200 @@ vector<string> Sopang::parsePatterns(string patternsStr)
     return splitRes;
 }
 
-vector<vector<vector<int>>> Sopang::parseSources(string text)
+namespace // Contains helpers for parsing sources.
 {
+
+int parseSourceCount(const string &text, size_t &startIdx)
+{
+    string numberStr = "";
+
+    for (startIdx = 0; text[startIdx] != '\n'; ++startIdx)
+    {
+        if (not isdigit(text[startIdx]))
+        {
+            throw runtime_error("bad source count formatting, index = " + to_string(startIdx));
+        }
+
+        numberStr += text[startIdx];
+    }
+
+    startIdx += 1;
+    return stoi(numberStr);
+}
+
+void handleSourceNumberEnd(string &curNumber, set<int> &curVariant, size_t charIdx)
+{
+    if (curNumber.empty())
+    {
+        throw runtime_error("bad empty number, index = " + to_string(charIdx));
+    }
+
+    const int sourceIdx = stoi(curNumber);
+
+    if (curVariant.count(sourceIdx) > 0)
+    {
+        throw runtime_error((boost::format("duplicate source index = %1%, text index = %2%")
+            % sourceIdx % charIdx).str());
+    }
+
+    curVariant.insert(sourceIdx);
+    curNumber.clear();
+}
+
+void handleSourceVariantEnd(set<int> &curVariant, vector<set<int>> &curSegment)
+{
+    curSegment.emplace_back(move(curVariant));
+    curVariant.clear();
+}
+
+void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, string &curNumber, vector<vector<set<int>>> &sources, int sourceCount, size_t charIdx)
+{
+    handleSourceNumberEnd(curNumber, curVariant, charIdx);
+    handleSourceVariantEnd(curVariant, curSegment);
+
+    // We add a set with the remaining (reference) sources.
+    for (int sourceIdx = 0; sourceIdx < sourceCount; ++sourceIdx)
+    {
+        bool exists = false;
+
+        for (const set<int> &variant : curSegment)
+        {
+            if (variant.count(sourceIdx) > 0)
+            {
+                exists = true;
+                break;
+            }
+        }
+
+        if (not exists)
+        {
+            curVariant.insert(sourceIdx);
+        }
+    }
+
+    handleSourceVariantEnd(curVariant, curSegment);
+
+    sources.emplace_back(move(curSegment));
+    curSegment.clear();
+}
+
+}
+
+vector<vector<set<int>>> Sopang::parseSources(string text)
+{
+    // We will return a vector with size equal to the number of non-deterministic segments.
+    // For each segment, we will store a vector with size equal to the number of variants.
+    // For each variant, we will store a set with source indexes, with reference sources stored in the last set.
     boost::trim(text);
-    vector<vector<vector<int>>> sources;
 
-    bool inSourcesForSegment = false;
-    bool inSourcesForVariant = false;
+    bool inSegment = false;
+    bool inSingleVariant = false;
+    bool inMultipleVariants = false;
 
-    vector<vector<int>> curSegment;
-    vector<int> curVariant;
-
+    vector<vector<set<int>>> ret;
+    vector<set<int>> curSegment;
+    set<int> curVariant;
     string curNumber;
 
-    for (size_t i = 0; text[i] != '\0'; ++i)
+    size_t startIdx;
+    const int sourceCount = parseSourceCount(text, startIdx);
+
+    for (size_t charIdx = startIdx; text[charIdx] != '\0'; ++charIdx)
     {
-        if (inSourcesForSegment)
+        const char curChar = text[charIdx];
+
+        if (inSegment)
         {
-            if (inSourcesForVariant)
+            if (inSingleVariant)
             {
-                if (text[i] == '}')
+                if (isdigit(curChar))
                 {
-                    inSourcesForVariant = false;
-
-                    if (curNumber.empty())
-                    {
-                        throw runtime_error("bad empty variant, index = " + to_string(i));
-                    }
-
-                    curVariant.push_back(stoi(curNumber));
-                    curNumber.clear();
-
-                    curSegment.emplace_back(move(curVariant));
-                    curVariant.clear();
-
-                    continue;
+                    curNumber += curChar;
                 }
-
-                if (text[i] == ',')
+                else if (curChar == ',')
                 {
-                    if (curNumber.empty())
-                    {
-                        throw runtime_error("bad empty variant, index = " + to_string(i));
-                    }
-
-                    curVariant.push_back(stoi(curNumber));
-                    curNumber.clear();
+                    handleSourceNumberEnd(curNumber, curVariant, charIdx);
                 }
-                else if (isdigit(text[i]))
+                else if (curChar == '}')
                 {
-                    curNumber.push_back(text[i]);
+                    handleSourceSegmentEnd(curSegment, curVariant, curNumber, ret, sourceCount, charIdx);
+                    
+                    inSingleVariant = false;
+                    inSegment = false;
                 }
                 else
                 {
-                    throw runtime_error((boost::format("bad character (not a digit or comma in a variant) = %1%, index = %2%")
-                        % text[i] % i).str());
+                    throw runtime_error((boost::format("bad character (in a single source variant) = %1%, index = %2%")
+                        % curChar % charIdx).str());
                 }
             }
-            else // not in a variant
+            else if (inMultipleVariants)
             {
-                if (text[i] == '{')
+                if (isdigit(curChar))
                 {
-                    inSourcesForVariant = true;
+                    curNumber += curChar;
                 }
-                else if (text[i] == '}')
+                else if (curChar == ',')
                 {
-                    inSourcesForSegment = false;
+                    handleSourceNumberEnd(curNumber, curVariant, charIdx);
+                }
+                else if (curChar == '}' and text[charIdx + 1] == '}') // Segment end.
+                {
+                    handleSourceSegmentEnd(curSegment, curVariant, curNumber, ret, sourceCount, charIdx);
+                    
+                    inMultipleVariants = false;
+                    inSegment = false;
 
-                    sources.emplace_back(move(curSegment));
-                    curSegment.clear();
+                    charIdx += 1;
+                }
+                else if (curChar == '}') // Variant end.
+                {
+                    handleSourceVariantEnd(curVariant, curSegment);
+                }
+                else if (curChar != '{')
+                {
+                    throw runtime_error((boost::format("bad character (in multiple source variants) = %1%, index = %2%")
+                        % curChar % charIdx).str());
+                }
+            }
+            else // Not in any variant.
+            {
+                if (curChar == '{')
+                {
+                    inMultipleVariants = true;
+                }
+                else if (isdigit(curChar))
+                {
+                    curNumber += curChar;
+                    inSingleVariant = true;
                 }
                 else
                 {
-                    throw runtime_error((boost::format("bad character (not in a variant) = %1%, index = %2%")
-                        % text[i] % i).str());
+                    throw runtime_error((boost::format("bad character (not in a source variant) = %1%, index = %2%")
+                        % curChar % charIdx).str());
                 }
             }
         }
-        else // not in a segment
+        else // Not in a segment.
         {
-            if (text[i] == '{')
+            if (curChar == '{')
             {
-                inSourcesForSegment = true;
+                inSegment = true;
             }
             else
             {
-                throw runtime_error((boost::format("bad character (not in a segment) = %1%, index = %2%") 
-                    % text[i] % i).str());
+                throw runtime_error((boost::format("bad character (not in a source segment) = %1%, index = %2%") 
+                    % curChar % charIdx).str());
             }
         }
     }
 
-    if (inSourcesForSegment or inSourcesForVariant)
+    if (inSegment or inSingleVariant or inMultipleVariants)
     {
-        throw runtime_error("last segment is not closed with \"}\"");
+        throw runtime_error("the last segment is not closed with \"}\"");
     }
 
-    return sources;
+    return ret;
 }
 
 unordered_set<unsigned> Sopang::match(const string *const *segments,
@@ -365,9 +461,9 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
     return res;
 }
 
-unordered_set<unsigned> Sopang::matchSources(const string *const *segments,
+unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
         unsigned nSegments, const unsigned *segmentSizes,
-        const vector<vector<vector<int>>> &sources,
+        const vector<vector<set<int>>> &sources,
         const string &pattern, const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);

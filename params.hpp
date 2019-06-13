@@ -52,11 +52,11 @@ struct Params
     static constexpr int noValue = -1;
 
     /** Current version: major.minor.patch */
-    const std::string versionInfo = "sopang v1.3.2";
+    const std::string versionInfo = "sopang v1.4.0";
     const std::string usageInfoString = "[options] <input text file> <input pattern file>";
 
     const std::string verboseInfoString =
-        "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cislak, Szymon Grabowski, Jan Holub.\n"
+        "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cislak, Szymon Grabowski.\n"
         "ED text is in a format possibly best explained with an example: {A,C,}GAAT{AT,A}ATT. Braces determine the start and end of each non-deterministic segment (i.e. segment having multiple variants), and commas delimit segment variants.\n"
         "If a comma is not preceded by a string of letters or it is a trailing symbol in a segment, it indicates an empty word.\n"
         "To give an example, all three notations: {,A,C}, {A,,C}, and {A,C,} mean the same, which is a segment which accepts either a string A, or a string C, or an empty word.\n"
@@ -67,7 +67,7 @@ struct Params
     const std::string verboseParamsString =
         "Input text file (positional parameter 1 or named parameter -i or --in-text-file) should contain the elastic-degenerate text in the format {A,C,}GAAT{AT,A}ATT.\n"
         "Input pattern file (positional parameter 2 or named parameter -I or --in-pattern-file) should contain the list of patterns, each of the same length, separated with newline characters.\n"
-        "Attached as part of the sopang package is a script run_all.sh, which allows for processing multiple input text (chromosome) and pattern files.";
+        "Attached as part of the sopang package is a folder performance_tests, which allows for generating and processing multiple input text (chromosome) and pattern files.";
 };
 
 } // namespace sopang
