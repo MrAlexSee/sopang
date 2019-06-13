@@ -18,7 +18,7 @@ SOPanG returns the end positions of pattern occurrences in the ED text. More pre
 
 #### Sources
 
-The elastic-degenerate format which, in its original form, might contain paths not appearing in the genome can be extended with the sources file.
+The elastic-degenerate format which, in its original form, might contain paths not appearing in any genome can be extended with the sources file.
 Sources describe which individuals are associated with a given variant from the ED text.
 
 For instance, for 4 sources (individuals), we might have the elastic-degenerate text `AA{AG,G}{CG,N,TT}` and the corresponding sources text `{0}{{0,2}{3}}`.
