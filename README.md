@@ -23,7 +23,7 @@ Sources describe which individuals are associated with a given variant from the 
 
 For instance, for 4 sources (individuals), we might have the elastic-degenerate text `AA{AG,G}{CG,N,TT}` and the corresponding sources text `{0}{{0,2}{3}}`.
 Note that the sources are 0-indexed.
-We assume that the last variant of each segment (in the above example: `G` and `TT`) describes the reference sequence.
+We assume that the last variant of each segment (in the above example: `G` and `TT`, respectively) describes the reference sequence.
 This indicates the following.
 
 * For the 1st segment, `AG` is associated with source `0`, and `G` (the reference sequence) is associated with the remaining sources `1`, `2` and `3`.
@@ -31,7 +31,8 @@ This indicates the following.
 * For the 2nd segment, `CG` is associated with sources `0` and `2`, `N` with source `3`, and `TT` (the reference sequence) is associated with the remaining source `1`.
 
 In every segment, each variant is associated with some sources. Moreover, each source must be associated with exactly one variant from every segment.
-The format of the sources data was described in such a way as to be consistent with the ED text, that is, it also consists of curly braces and commas as delimiters.
+The proposed format of the sources data was described in such a way as to be consistent with the ED text, that is, it also consists of curly braces and commas as delimiters.
+Other formats could be also defined.
 We choose the following naming convention: `.eds` for ED text and `.edss` for the corresponding sources file.
 In order to use SOPanG for matching with sources, supply the path to the sources file in the format described above via the parameter `-S`.
 
@@ -54,7 +55,7 @@ Basic usage: `./sopang [options] <input text file> <input pattern file>`
 
 Input text file (positional parameter 1 or named parameter `-i` or `--in-text-file`) should contain the elastic-degenerate text in the format `{A,C,}GAAT{AT,A}ATT`.
 Input pattern file (positional parameter 2 or named parameter `-I` or `--in-pattern-file`) should contain the list of patterns, each of the same length, separated with newline characters.
-Attached as part of this package is a script `run_all.sh`, which allows for processing multiple input text (chromosome) and pattern files.
+This package contains a script `run_all.sh`, which allows for processing multiple input text (chromosome) and pattern files.
 
 * End-to-end tests are located in the `end_to_end_tests` folder and they can be run using the `run_tests.sh` script in that folder.
 
@@ -77,7 +78,7 @@ Short name | Long name               | Parameter description
 `-S`       | `--in-sources-file arg` | input sources file path
 `-k`       | `--approx arg`          | perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12, not compatible with matching with sources)
 `-o`       | `--out-file arg`        | output file path (default = timings.txt)
-`-p`       | `--pattern-count arg`   | maximum number of patterns read from top of the patterns file
+`-p`       | `--pattern-count arg`   | maximum number of patterns read from top of the patterns file (non-positive values are ignored)
 `-v`       | `--version`             | display version info
 
 ## Compile-time parameter description
@@ -112,12 +113,14 @@ A complete testing procedure is as follows.
 
 1. Run `generate_synthetic_data.sh`.
 
-1. Download data from the 1000 Genomes project. Reference file: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/,
-corresponding variant files: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/.
+1. Download data from the 1000 Genomes project. 
+
+* Reference file: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/
+* Corresponding variant files: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/
 
 1. Move the reference file `hs37d5.fa` to the `data` folder. Move all .vcf files to the `data` folder, rename them as `chr1.vcf`, `chr2.vcf`, ..., `chr24.vcf`.
 
-1. Run `generate_real_source_data.sh`. For all chromosomes, this will take a very, very long time (days), however, it only needs to be performed once in order to obtain elastic-degenerate data with sources.
+1. Run `generate_real_source_data.sh`. For all chromosomes, this will take a very long time. However, it only needs to be performed once in order to obtain elastic-degenerate data with sources.
 
 1. Compile SoPanG (see above).
 
