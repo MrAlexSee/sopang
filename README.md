@@ -115,8 +115,8 @@ A complete testing procedure is as follows.
 
 1. Download data from the 1000 Genomes project. 
 
-* Reference file: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
-* Corresponding variant files: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ (*.vcf.gz files)
+    * Reference file: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
+    * Corresponding variant files: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ (*.vcf.gz files)
 
 1. Unpack the files. Move the reference file `hs37d5.fa` to the `data` folder. Move all .vcf files to the `data` folder, rename them as `chr1.vcf`, `chr2.vcf`, ..., `chr24.vcf`.
 
