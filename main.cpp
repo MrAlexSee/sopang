@@ -6,6 +6,10 @@
  *** Set BOOST_DIR in makefile and type "make" for optimized compile.
  */
 
+#include "helpers.hpp"
+#include "params.hpp"
+#include "sopang.hpp"
+
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <chrono>
@@ -15,10 +19,6 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-
-#include "helpers.hpp"
-#include "params.hpp"
-#include "sopang.hpp"
 
 using namespace sopang;
 using namespace std;

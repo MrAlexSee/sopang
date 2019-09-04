@@ -45,6 +45,7 @@ public:
         unsigned nSegments, const unsigned *segmentSizes,
         const std::vector<std::vector<std::set<int>>> &sources,
         const std::string &pattern, const std::string &alphabet);
+
 private:
     void initCounterPositionMasks();
 

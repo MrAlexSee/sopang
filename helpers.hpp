@@ -1,6 +1,7 @@
 #ifndef HELPERS_HPP
 #define HELPERS_HPP
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <fstream>
