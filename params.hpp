@@ -13,7 +13,8 @@ struct Params
      *** COMPILE-TIME PARAMS
      */
 
-    /** A set of symbols occurring in input (ED) text file or input pattern file. Restricted to DNA characters, matches the output of the data generation tools from the scripts folder. */
+    /** A set of symbols occurring in input (ED) text file or input pattern file.
+      * Restricted to DNA characters, matches the output of the data generation tools from the scripts folder. */
     const std::string alphabet = "ACGTN";
 
     /*
