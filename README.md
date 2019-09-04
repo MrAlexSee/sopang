@@ -33,6 +33,12 @@ This indicates the following.
 In every segment, each variant is associated with some sources. Moreover, each source must be associated with exactly one variant from every segment.
 The proposed format of the sources data was described in such a way as to be consistent with the ED text, that is, it also consists of curly braces and commas as delimiters.
 Other formats could be also defined.
+
+The sources file should contain two lines in total.
+
+* The first line contains the source count, e.g., 10 if there are 10 sources (individuals).
+* The second line contains a contiguous string containing the data described above.
+
 We choose the following naming convention: `.eds` for ED text and `.edss` for the corresponding sources file.
 In order to use SOPanG for matching with sources, supply the path to the sources file in the format described above via the parameter `-S`.
 
