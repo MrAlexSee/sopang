@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# These paths should be relative to the root folder of this repository.
 dataDirPath="data"
 scriptsDirPath="scripts"
 

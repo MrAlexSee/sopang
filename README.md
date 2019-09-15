@@ -125,7 +125,7 @@ A complete testing procedure is as follows.
     * Reference file: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
     * Corresponding variant files: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ (*.vcf.gz files)
 
-1. Unpack the files. Move the reference file `hs37d5.fa` to the `data` folder. Move all .vcf files to the `data` folder, rename them as `chr1.vcf`, `chr2.vcf`, ..., `chr24.vcf`. The above 2 points can be automated with the `download_data.sh` script, however, note that it would download and occupy a significant amount of disk space in a single run.
+1. Unpack the files. Move the reference file `hs37d5.fa` to the `data` folder. Move all .vcf files to the `data` folder, rename them as `chr1.vcf`, `chr2.vcf`, ..., `chr24.vcf`. The above 2 points can be automated with the `download_genome_data.sh` script, however, note that it would download a significant amount of data in a single run.
 
 1. Run `generate_real_source_data.sh`. For all chromosomes, this will take a very long time. However, it only needs to be performed once in order to obtain elastic-degenerate data with sources.
 
