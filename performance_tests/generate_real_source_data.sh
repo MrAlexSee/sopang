@@ -7,7 +7,6 @@ inputFastaFileName="hs37d5.fa"
 maxChromosomeId=24
 
 cd ..
-
 mkdir -p ${dataDirPath}
 
 for i in $(seq 1 ${maxChromosomeId});
