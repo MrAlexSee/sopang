@@ -1,11 +1,15 @@
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-#include <cstdint>
-#include <string>
-#include <vector>
+#include "sopang.hpp"
 
 #include "helpers.hpp"
-#include "sopang.hpp"
+
+#include <cassert>
+#include <cstdint>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 using namespace std;
 
@@ -214,7 +218,7 @@ void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, 
     curSegment.clear();
 }
 
-}
+} // namespace (anonymous)
 
 vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
 {
@@ -369,7 +373,7 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
                 dBuffer[iD] <<= 1;
                 dBuffer[iD] |= maskBuffer[static_cast<unsigned char>(c)];
 
-                // Match occurred.
+                // Match occurred. Note: we still continue in order to fill the whole d-buffer.
                 if ((dBuffer[iD] & hitMask) == 0x0ULL)
                 {
                     res.insert(iS);
@@ -476,7 +480,51 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
     assert(sources.size() > 0);
 
     unordered_set<unsigned> res;
+    fillPatternMaskBuffer(pattern, alphabet);
 
+    const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
+    uint64_t D = allOnes;
+
+    map<int, int> indexToSourceIndex; // segment index -> sources vector index
+    map<int, pair<int, int>> indexToMatch; // segment index -> (variant index, letter in variant index)
+
+    int nonDetSegmentIndex = 0;
+
+    for (unsigned iS = 0; iS < nSegments; ++iS)
+    {
+        if (segmentSizes[iS] > 0)
+        {
+            indexToSourceIndex[iS] = nonDetSegmentIndex++;
+        }
+
+        for (unsigned iD = 0; iD < segmentSizes[iS]; ++iD)
+        {
+            dBuffer[iD] = D;
+
+            for (size_t iC = 0; iC < segments[iS][iD].size(); ++iC)
+            {
+                const char c = segments[iS][iD][iC];
+
+                dBuffer[iD] <<= 1;
+                dBuffer[iD] |= maskBuffer[static_cast<unsigned char>(c)];
+
+                if ((dBuffer[iD] & hitMask) == 0x0ULL)
+                {
+                    res.insert(iS);
+                    indexToMatch[iS] = make_pair(iD, iC);
+                }
+            }
+        }
+
+        D = dBuffer[0];
+
+        for (unsigned iD = 1; iD < segmentSizes[iS]; ++iD)
+        {
+            D &= dBuffer[iD];
+        }
+    }
+
+    // TODO: match the sources.
     return res;
 }
 
