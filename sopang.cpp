@@ -486,7 +486,7 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
     uint64_t D = allOnes;
 
     map<int, int> indexToSourceIndex; // segment index -> sources vector index
-    map<int, pair<int, int>> indexToMatch; // segment index -> (variant index, letter in variant index)
+    map<int, pair<int, int>> indexToMatch; // segment index -> (variant index, char in variant index)
 
     int nonDetSegmentIndex = 0;
 
