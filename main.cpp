@@ -10,8 +10,6 @@
 #include "params.hpp"
 #include "sopang.hpp"
 
-#include <boost/format.hpp>
-#include <boost/program_options.hpp>
 #include <chrono>
 #include <cstring>
 #include <functional>
@@ -19,6 +17,9 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+
+#include <boost/format.hpp>
+#include <boost/program_options.hpp>
 
 using namespace sopang;
 using namespace std;
