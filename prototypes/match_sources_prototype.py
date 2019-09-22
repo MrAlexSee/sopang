@@ -28,9 +28,10 @@ def draw_graph(graph):
 
 def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
     verifiedMatches = set()
+    print(f'\nPattern: \"{pattern}"')
 
     for matchIndex, match in indexToMatch.items():
-        print(f"\nVerifying: {matchIndex} -> {match}")
+        print(f"Verifying: {matchIndex} -> {match}")
 
         charInVariantIndex = match[1]
         patternCharIndex = len(pattern) - 1
@@ -52,8 +53,8 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
         leafList = [rootNode]
         segmentIndex = matchIndex - 1
 
-        while segmentIndex >= 0:
-            assert leafList and nx.is_directed_acyclic_graph(matchTree)
+        while leafList and segmentIndex >= 0:
+            assert nx.is_directed_acyclic_graph(matchTree)
 
             print(f"Segment: {segmentIndex} -> #leaves = {len(leafList)}")
             newLeafList = []
@@ -64,10 +65,17 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
 
                 # A deterministic segment -- we simply jump over the entire segment.
                 if len(text[segmentIndex]) == 1:
-                    matchTree[leaf]["pattern_char_index"] -= len(text[segmentIndex][0])
+                    print(f"  Deterministic: {text[segmentIndex][0]}")
+                    matchTree.node[leaf]["pattern_char_index"] -= len(text[segmentIndex][0])
 
-                    if matchTree[leaf]["pattern_char_index"] < 0:
-                        matchTree[leaf]["match_complete"] = True
+                    if matchTree.node[leaf]["pattern_char_index"] < 0:
+                        print("  Match ends in the middle of the variant")
+                        matchTree.node[leaf]["match_complete"] = True
+
+                        if leaf == rootNode:
+                            verifiedMatches.add(matchIndex)
+                    else:
+                        newLeafList += [leaf]
                 else:
                     for variantIndex, variant in enumerate(text[segmentIndex]):
                         print(f"  Checking variant: {variantIndex} -> {variant}")
@@ -100,8 +108,7 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
 
                             newLeafList += [matchNode]
 
-                    leafList = newLeafList
-
+                leafList = newLeafList
                 segmentIndex -= 1
 
         print("Constructed a match tree")
@@ -114,9 +121,10 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
 
         for leaf in leaves:
             matchedSources = None
-
             paths = list(nx.all_simple_paths(matchTree, rootNode, leaf))
-            assert len(paths) == 1
+
+            if not paths:
+                continue
 
             for node in paths[0]:
                 newSources = set(sources[indexToSourceIndex[node[0]]][node[1]])
@@ -145,10 +153,22 @@ def main():
     text2 = [["ADT", "AC", "GGT"], ["CGGA"], ["CGAAA", "A"]]
     sources2 = [[[0], [1], [2]], [[0], [1, 2]]]
     indexToSourceIndex2 = {0: 0, 2: 1}
-    indexToMatch2 = {2: (0, 2)}
-    assert verify(text2, sources2, "CGA", indexToSourceIndex2, indexToMatch2) == set([2])
 
-    print("All passed")
+    assert verify(text2, sources2, "CGA", indexToSourceIndex2, {2: (0, 2)}) == set([2])
+    assert verify(text2, sources2, "GGACGA", indexToSourceIndex2, {2: (0, 2)}) == set([2])
+    assert verify(text2, sources2, "CGGACGA", indexToSourceIndex2, {2: (0, 2)}) == set([2])
+    assert verify(text2, sources2, "DTCGGACG", indexToSourceIndex2, {2: (0, 1)}) == set([2])
+    assert verify(text2, sources2, "GTCGGACG", indexToSourceIndex2, {2: (0, 1)}) == set()
+
+    print("\n[Text 3]")
+    text3 = [["ADT", "AC", "GGT"], ["CGGA"], ["CGAAA", "TTT", "GGG"], ["AAC", "TC"]]
+    sources3 = [[[0], [1], [2]], [[0], [1], [2]], [[0, 1], [2]]]
+    indexToSourceIndex3 = {0: 0, 2: 1, 3: 2}
+
+    assert verify(text3, sources3, "GATTTAA", indexToSourceIndex3, {3: (0, 1)}) == set([3])
+    assert verify(text3, sources3, "GAGGGAA", indexToSourceIndex3, {3: (0, 1)}) == set()
+
+    print("!!All passed!!")
 
 if __name__ == "__main__":
     main()
