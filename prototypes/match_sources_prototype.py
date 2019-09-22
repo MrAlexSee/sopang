@@ -3,46 +3,65 @@ A prototype for verifying matches based on the sources file.
 It is assumed that both text and sources have already been parsed and processed. We only check the verification.
 """
 
+import matplotlib.pyplot as plt
 import networkx as nx
+
+
+def draw_graph(graph):
+    pos = nx.drawing.nx_agraph.graphviz_layout(graph)
+
+    nx.draw_networkx_edges(graph, pos, alpha=0.6)
+    nx.draw_networkx_nodes(graph, pos, alpha=0.6)
+
+    labels = {}
+    for node in graph.nodes(data=True):
+        label = str(node[0])
+        if "pattern_char_index" in node[1]:
+            label += f' -> {node[1]["pattern_char_index"]}'
+        else:
+            label += ' <>'
+
+        labels[node[0]] = label
+
+    nx.draw_networkx_labels(graph, pos, labels=labels)
+    plt.show()
 
 def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
     verifiedMatches = set()
 
     for matchIndex, match in indexToMatch.items():
-        print(f"Verifying: {matchIndex}")
+        print(f"\nVerifying: {matchIndex} -> {match}")
 
+        charInVariantIndex = match[1]
         patternCharIndex = len(pattern) - 1
-        charInSegmentIndex = match[0]
 
-        # 1. Go back to the beginning of the segment where the match occurred.
-        while charInSegmentIndex >= 0:
-           patternCharIndex -= 1
-           charInSegmentIndex -= 1
+        # 1. We go back to the beginning of the segment where the match occurred.
+        patternCharIndex -= (charInVariantIndex + 1)
 
-           if patternCharIndex < 0:
-               verifiedMatches.add(matchIndex)
-               break
-
-        if charInSegmentIndex >= 0:
+        if patternCharIndex < 0:
             print("Matched pattern doesn't span multiple segments")
+            verifiedMatches.add(matchIndex)
             break
 
         # 2. Build a tree of all possible match paths. Branch out each time a match occurs.
         matchTree = nx.DiGraph()
 
-        matchTree.add_node((matchIndex, match[0]), pattern_char_index=patternCharIndex, match_active=True, match_complete=False)
-        leafList = [(matchIndex, match[0])]
+        rootNode = (matchIndex, match[0])
+        matchTree.add_node(rootNode, pattern_char_index=patternCharIndex)
 
+        leafList = [rootNode]
         segmentIndex = matchIndex - 1
 
         while segmentIndex >= 0:
-            assert nx.is_directed_acyclic_graph(matchTree) and leafList
+            assert leafList and nx.is_directed_acyclic_graph(matchTree)
 
-            print(f"{segmentIndex} -> #leaves = {len(leafList)}")
+            print(f"Segment: {segmentIndex} -> #leaves = {len(leafList)}")
             newLeafList = []
 
             # Each time we traverse a segment, we need to update every leaf.
             for leaf in leafList:
+                print(f" Checking leaf: {leaf}")
+
                 # A deterministic segment -- we simply jump over the entire segment.
                 if len(text[segmentIndex]) == 1:
                     matchTree[leaf]["pattern_char_index"] -= len(text[segmentIndex][0])
@@ -51,16 +70,19 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
                         matchTree[leaf]["match_complete"] = True
                 else:
                     for variantIndex, variant in enumerate(text[segmentIndex]):
+                        print(f"  Checking variant: {variantIndex} -> {variant}")
                         matchNode = (segmentIndex, variantIndex)
 
                         curCharIndex = len(variant) - 1
-                        curPatternIndex = leaf["pattern_char_index"]
+                        curPatternIndex = matchTree.node[leaf]["pattern_char_index"]
 
                         while curCharIndex >= 0:
                             # A match in the middle of this variant -> add a new match complete node.
                             if curPatternIndex < 0:
+                                print("  Match ends in the middle of the variant")
+
+                                matchTree.add_node(matchNode, match_complete=True)
                                 matchTree.add_edge(leaf, matchNode)
-                                matchTree[matchNode]["match_complete"] = True
                                 break
 
                             if pattern[curPatternIndex] != variant[curCharIndex]:
@@ -69,9 +91,13 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
                             curCharIndex -= 1
                             curPatternIndex -= 1
 
-                        # Managed to traverse this whole variant -> add a new continuation node.
+                        # Managed to traverse (match) this whole variant -> add a new continuation node.
                         if curCharIndex < 0:
+                            print("  Matched the variant")
+
+                            matchTree.add_node(matchNode, pattern_char_index = curPatternIndex)
                             matchTree.add_edge(leaf, matchNode)
+
                             newLeafList += [matchNode]
 
                     leafList = newLeafList
@@ -79,25 +105,48 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
                 segmentIndex -= 1
 
         print("Constructed a match tree")
-        print(matchTree)
+        assert not leafList and nx.is_directed_acyclic_graph(matchTree)
 
-        paths = nx.dag_to_branching(matchTree)
+        # draw_graph(matchTree)
 
-        for path in paths:
-            print(f"Checking a path: {path}")
-            # TODO: check if there's a common part.
+        leaves = [node for node, degree in matchTree.out_degree() if degree == 0]
+        print(f"Leaf count = {len(leaves)}")
+
+        for leaf in leaves:
+            matchedSources = None
+
+            paths = list(nx.all_simple_paths(matchTree, rootNode, leaf))
+            assert len(paths) == 1
+
+            for node in paths[0]:
+                newSources = set(sources[indexToSourceIndex[node[0]]][node[1]])
+                matchedSources = matchedSources & newSources if matchedSources else newSources
+
+        if matchedSources:
+            print(f"Matched sources: {matchedSources}")
+            verifiedMatches.add(matchIndex)
+
+    print(f"Verified matches: {verifiedMatches}")
+    return verifiedMatches
 
 def main():
+    print("\n[Text 1]")
     # {ADT,AC,GGT}{CG,A}{AG,C}
     # 3 {{0}{1}}{{0,1}}{{0}}
     text1 = [["ADT", "AC", "GGT"], ["CG", "A"], ["AG", "C"]]
-    sources1 = [[(0), (1), (2)], [(0, 1), (2)], [(0), (1, 2)]]
+    sources1 = [[[0], [1], [2]], [[0, 1], [2]], [[0], [1, 2]]]
+    indexToSourceIndex1 = {0: 0, 1: 1, 2: 2} # segment index -> sources vector index
+    indexToMatch1 = {2: (0, 0)} # segment index -> (variant index, char in variant index)
 
-    # Pattern = DTCGA
-    indexToSourceIndex1 = {2: 0} # segment index -> sources vector index
-    indexToMatch1 = {2: (0, 0)} # segment index -> (variant index, letter in variant index)
+    assert verify(text1, sources1, "DTCGA", indexToSourceIndex1, indexToMatch1) == set([2])
+    assert verify(text1, sources1, "GTCGA", indexToSourceIndex1, indexToMatch1) == set()
 
-    assert verify(text1, sources1, "DTCGA", indexToSourceIndex1, indexToMatch1) == [2]
+    print("\n[Text 2]")
+    text2 = [["ADT", "AC", "GGT"], ["CGGA"], ["CGAAA", "A"]]
+    sources2 = [[[0], [1], [2]], [[0], [1, 2]]]
+    indexToSourceIndex2 = {0: 0, 2: 1}
+    indexToMatch2 = {2: (0, 2)}
+    assert verify(text2, sources2, "CGA", indexToSourceIndex2, indexToMatch2) == set([2])
 
     print("All passed")
 
