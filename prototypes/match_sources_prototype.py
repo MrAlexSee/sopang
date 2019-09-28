@@ -27,7 +27,8 @@ def draw_graph(graph):
     nx.draw_networkx_labels(graph, pos, labels=labels)
     plt.show()
 
-def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
+
+def verifyTree(text, sources, pattern, indexToSourceIndex, indexToMatch):
     verifiedMatches = set()
     print(f'\nPattern: \"{pattern}"')
 
@@ -163,7 +164,86 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
     print(f"Verified matches: {verifiedMatches}")
     return verifiedMatches
 
-def main():
+
+def verifyLeaves(text, sources, pattern, indexToSourceIndex, indexToMatch):
+    print(pattern, indexToMatch)
+
+    def verifyMatch(text, sources, pattern, indexToSourceIndex, matchIndex, match):
+        patternCharIndex = len(pattern) - match[1] - 2
+
+        if patternCharIndex < 0:
+            return True
+
+        rootSources = None
+        if matchIndex in indexToSourceIndex:
+            rootSources = set(sources[indexToSourceIndex[matchIndex]][match[0]])
+
+        leaves = [[rootSources, patternCharIndex]]
+        segmentIndex = matchIndex - 1
+
+        while leaves and segmentIndex >= 0:
+            if len(text[segmentIndex]) == 1:
+                for leaf in leaves:
+                    leaf[1] -= len(text[segmentIndex][0])
+                    if leaf[1] < 0:
+                        return True
+            else:
+                newLeaves = []
+
+                for leaf in leaves:
+                    for variantIndex, variant in enumerate(text[segmentIndex]):
+                        print(leaf, variant)
+                        curSources = set(sources[indexToSourceIndex[segmentIndex]][variantIndex])
+
+                        if len(variant) == 0:
+                            newSources = curSources & leaf[0] if leaf[0] else curSources
+
+                            if newSources:
+                                newLeaves += [[newSources, leaf[1]]]
+                            continue
+
+                        curCharIndex = len(variant) - 1
+                        curPatternIndex = leaf[1]
+
+                        while curCharIndex >= 0:
+                            if curPatternIndex < 0:
+                                newSources = curSources & leaf[0] if leaf[0] else curSources
+                                if newSources:
+                                    return True
+
+                            if pattern[curPatternIndex] != variant[curCharIndex]:
+                                break
+
+                            curCharIndex -= 1
+                            curPatternIndex -= 1
+
+                        if curPatternIndex < 0:
+                            newSources = curSources & leaf[0] if leaf[0] else curSources
+                            if newSources:
+                                return True
+
+                        if curCharIndex < 0:
+                            newSources = curSources & leaf[0] if leaf[0] else curSources
+
+                            if newSources:
+                                newLeaves += [[newSources, curPatternIndex]]
+
+                leaves = newLeaves
+            segmentIndex -= 1
+
+        return False
+
+    ret = set()
+
+    for matchIndex, match in indexToMatch.items():
+        if verifyMatch(text, sources, pattern, indexToSourceIndex, matchIndex, match):
+            ret.add(matchIndex)
+
+    print(ret)
+    return ret
+
+
+def runTesting(verifyFun):
     print("\n[Text 1]")
     # {ADT,AC,GGT}{CG,A}{AG,C}
     # 3 {{0}{1}}{{0,1}}{{0}}
@@ -172,93 +252,116 @@ def main():
     indexToSourceIndex1 = {0: 0, 1: 1, 2: 2} # segment index -> sources vector index
     indexToMatch1 = {2: (0, 0)} # segment index -> (variant index, char in variant index)
 
-    assert verify(text1, sources1, "DTCGA", indexToSourceIndex1, indexToMatch1) == set([2])
-    assert verify(text1, sources1, "GTCGA", indexToSourceIndex1, indexToMatch1) == set()
+    assert verifyFun(text1, sources1, "DTCGA", indexToSourceIndex1, indexToMatch1) == set([2])
+    assert verifyFun(text1, sources1, "GTCGA", indexToSourceIndex1, indexToMatch1) == set()
 
     print("\n[Text 2]")
     text2 = [["ADT", "AC", "GGT"], ["CGGA"], ["CGAAA", "A"]]
     sources2 = [[[0], [1], [2]], [[0], [1, 2]]]
     indexToSourceIndex2 = {0: 0, 2: 1}
 
-    assert verify(text2, sources2, "CGA", indexToSourceIndex2, {2: (0, 2)}) == set([2])
-    assert verify(text2, sources2, "GGACGA", indexToSourceIndex2, {2: (0, 2)}) == set([2])
-    assert verify(text2, sources2, "CGGACGA", indexToSourceIndex2, {2: (0, 2)}) == set([2])
-    assert verify(text2, sources2, "DTCGGACG", indexToSourceIndex2, {2: (0, 1)}) == set([2])
-    assert verify(text2, sources2, "GTCGGACG", indexToSourceIndex2, {2: (0, 1)}) == set()
-    assert verify(text2, sources2, "GGTCGGAA", indexToSourceIndex2, {2: (1, 0)}) == set([2])
-    assert verify(text2, sources2, "ADTCGGACGAA", indexToSourceIndex2, {2: (0, 3)}) == set([2])
-    assert verify(text2, sources2, "ADTCGGACGAAA", indexToSourceIndex2, {2: (0, 4)}) == set([2])
-    assert verify(text2, sources2, "AD", indexToSourceIndex2, {0: (0, 1)}) == set([0])
-    assert verify(text2, sources2, "ADT", indexToSourceIndex2, {0: (0, 2)}) == set([0])
+    assert verifyFun(text2, sources2, "CGA", indexToSourceIndex2, {2: (0, 2)}) == set([2])
+    assert verifyFun(text2, sources2, "GGACGA", indexToSourceIndex2, {2: (0, 2)}) == set([2])
+    assert verifyFun(text2, sources2, "CGGACGA", indexToSourceIndex2, {2: (0, 2)}) == set([2])
+    assert verifyFun(text2, sources2, "DTCGGACG", indexToSourceIndex2, {2: (0, 1)}) == set([2])
+    assert verifyFun(text2, sources2, "GTCGGACG", indexToSourceIndex2, {2: (0, 1)}) == set()
+    assert verifyFun(text2, sources2, "GGTCGGAA", indexToSourceIndex2, {2: (1, 0)}) == set([2])
+    assert verifyFun(text2, sources2, "ADTCGGACGAA", indexToSourceIndex2, {2: (0, 3)}) == set([2])
+    assert verifyFun(text2, sources2, "ADTCGGACGAAA", indexToSourceIndex2, {2: (0, 4)}) == set([2])
+    assert verifyFun(text2, sources2, "AD", indexToSourceIndex2, {0: (0, 1)}) == set([0])
+    assert verifyFun(text2, sources2, "ADT", indexToSourceIndex2, {0: (0, 2)}) == set([0])
 
     print("\n[Text 3]")
     text3 = [["ADT", "AC", "GGT"], ["CGGA"], ["CGAAA", "TTT", "GGG"], ["AAC", "TC"]]
     sources3 = [[[0], [1], [2]], [[0], [1], [2]], [[0, 1], [2]]]
     indexToSourceIndex3 = {0: 0, 2: 1, 3: 2}
 
-    assert verify(text3, sources3, "GATTTAA", indexToSourceIndex3, {3: (0, 1)}) == set([3])
-    assert verify(text3, sources3, "GAGGGAA", indexToSourceIndex3, {3: (0, 1)}) == set()
-    assert verify(text3, sources3, "ADTCGGACGA", indexToSourceIndex3, {2: (0, 2)}) == set([2])
-    assert verify(text3, sources3, "GGTCGGACGA", indexToSourceIndex3, {2: (0, 2)}) == set()
-    assert verify(text3, sources3, "CGGA", indexToSourceIndex3, {1: (0, 3)}) == set([1])
-    assert verify(text3, sources3, "ADTC", indexToSourceIndex3, {1: (0, 0)}) == set([1])
-    assert verify(text3, sources3, "ADTCG", indexToSourceIndex3, {1: (0, 1)}) == set([1])
-    assert verify(text3, sources3, "ADTCGG", indexToSourceIndex3, {1: (0, 2)}) == set([1])
-    assert verify(text3, sources3, "ADTCGGA", indexToSourceIndex3, {1: (0, 3)}) == set([1])
-    assert verify(text3, sources3, "ADTCGGAC", indexToSourceIndex3, {2: (0, 0)}) == set([2])
-    assert verify(text3, sources3, "ADTCGGACG", indexToSourceIndex3, {2: (0, 1)}) == set([2])
-    assert verify(text3, sources3, "ADTCGGACGA", indexToSourceIndex3, {2: (0, 2)}) == set([2])
-    assert verify(text3, sources3, "ADTCGGACGAA", indexToSourceIndex3, {2: (0, 3)}) == set([2])
-    assert verify(text3, sources3, "ADTCGGACGAAA", indexToSourceIndex3, {2: (0, 4)}) == set([2])
-    assert verify(text3, sources3, "ADTCGGAT", indexToSourceIndex3, {2: (1, 0)}) == set([])
-    assert verify(text3, sources3, "ADTCGGAG", indexToSourceIndex3, {2: (2, 0)}) == set([])
-    assert verify(text3, sources3, "ADT", indexToSourceIndex3, {0: (0, 2)}) == set([0])
-    assert verify(text3, sources3, "AD", indexToSourceIndex3, {0: (0, 1)}) == set([0])
-    assert verify(text3, sources3, "A", indexToSourceIndex3, {0: (0, 0)}) == set([0])
+    assert verifyFun(text3, sources3, "GATTTAA", indexToSourceIndex3, {3: (0, 1)}) == set([3])
+    assert verifyFun(text3, sources3, "GAGGGAA", indexToSourceIndex3, {3: (0, 1)}) == set()
+    assert verifyFun(text3, sources3, "ADTCGGACGA", indexToSourceIndex3, {2: (0, 2)}) == set([2])
+    assert verifyFun(text3, sources3, "GGTCGGACGA", indexToSourceIndex3, {2: (0, 2)}) == set()
+    assert verifyFun(text3, sources3, "CGGA", indexToSourceIndex3, {1: (0, 3)}) == set([1])
+    assert verifyFun(text3, sources3, "ADTC", indexToSourceIndex3, {1: (0, 0)}) == set([1])
+    assert verifyFun(text3, sources3, "ADTCG", indexToSourceIndex3, {1: (0, 1)}) == set([1])
+    assert verifyFun(text3, sources3, "ADTCGG", indexToSourceIndex3, {1: (0, 2)}) == set([1])
+    assert verifyFun(text3, sources3, "ADTCGGA", indexToSourceIndex3, {1: (0, 3)}) == set([1])
+    assert verifyFun(text3, sources3, "ADTCGGAC", indexToSourceIndex3, {2: (0, 0)}) == set([2])
+    assert verifyFun(text3, sources3, "ADTCGGACG", indexToSourceIndex3, {2: (0, 1)}) == set([2])
+    assert verifyFun(text3, sources3, "ADTCGGACGA", indexToSourceIndex3, {2: (0, 2)}) == set([2])
+    assert verifyFun(text3, sources3, "ADTCGGACGAA", indexToSourceIndex3, {2: (0, 3)}) == set([2])
+    assert verifyFun(text3, sources3, "ADTCGGACGAAA", indexToSourceIndex3, {2: (0, 4)}) == set([2])
+    assert verifyFun(text3, sources3, "ADTCGGAT", indexToSourceIndex3, {2: (1, 0)}) == set([])
+    assert verifyFun(text3, sources3, "ADTCGGAG", indexToSourceIndex3, {2: (2, 0)}) == set([])
+    assert verifyFun(text3, sources3, "ADT", indexToSourceIndex3, {0: (0, 2)}) == set([0])
+    assert verifyFun(text3, sources3, "AD", indexToSourceIndex3, {0: (0, 1)}) == set([0])
+    assert verifyFun(text3, sources3, "A", indexToSourceIndex3, {0: (0, 0)}) == set([0])
 
     print("\n[Text 4]")
     text4 = [["AA"], ["ADT", "AC", "GGT", ""], ["CGGA"], ["CGAAA", ""], ["AAC", "TC"]]
     sources4 = [[[0], [1], [2], [3]], [[0], [1, 2, 3]], [[0, 1], [2, 3]]]
     indexToSourceIndex4 = {1: 0, 3: 1, 4: 2}
 
-    assert verify(text4, sources4, "CGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4])
-    assert verify(text4, sources4, "ACG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
-    assert verify(text4, sources4, "AACG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
-    assert verify(text4, sources4, "AADTCG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
-    assert verify(text4, sources4, "AAADTCG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
-    assert verify(text4, sources4, "AAADTCGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([3])
-    assert verify(text4, sources4, "AAACCGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
-    assert verify(text4, sources4, "AAGGTCGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
-    assert verify(text4, sources4, "AACGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
+    assert verifyFun(text4, sources4, "CGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4])
+    assert verifyFun(text4, sources4, "ACG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
+    assert verifyFun(text4, sources4, "AACG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
+    assert verifyFun(text4, sources4, "AADTCG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
+    assert verifyFun(text4, sources4, "AAADTCG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
+    assert verifyFun(text4, sources4, "AAADTCGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([3])
+    assert verifyFun(text4, sources4, "AAACCGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
+    assert verifyFun(text4, sources4, "AAGGTCGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
+    assert verifyFun(text4, sources4, "AACGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
     
-    assert verify(text4, sources4, "AAADTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 0 123 23
-    assert verify(text4, sources4, "AAACCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 1 123 23
-    assert verify(text4, sources4, "ACCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([4]) # 1 123 01
-    assert verify(text4, sources4, "AAGGTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 2 123 23
-    assert verify(text4, sources4, "AAGGTCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 2 123 01
-    assert verify(text4, sources4, "AACGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 3 123 01
-    assert verify(text4, sources4, "AACGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 3 123 23
+    assert verifyFun(text4, sources4, "AAADTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 0 123 23
+    assert verifyFun(text4, sources4, "AAACCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 1 123 23
+    assert verifyFun(text4, sources4, "ACCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([4]) # 1 123 01
+    assert verifyFun(text4, sources4, "AAGGTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 2 123 23
+    assert verifyFun(text4, sources4, "AAGGTCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 2 123 01
+    assert verifyFun(text4, sources4, "AACGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 3 123 01
+    assert verifyFun(text4, sources4, "AACGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 3 123 23
 
     print("\n[Text 5]")
     text5 = [["ADT", "AC", "GGT"], ["CGGA", "ADT"], ["CG", "AC"]]
     sources5 = [[[0], [1], [2]], [[0, 1], [2]], [[0, 2], [1]]]
     indexToSourceIndex5 = {0: 0, 1: 1, 2: 2}
 
-    assert verify(text5, sources5, "ADTC", indexToSourceIndex5, {1: (0, 0), 2: (0, 0)}) == set([1, 2])
+    assert verifyFun(text5, sources5, "ADTC", indexToSourceIndex5, {1: (0, 0), 2: (0, 0)}) == set([1, 2])
 
     print("\n[Text 6]")
     text6 = [["ADT", "AC", ""], ["AC"], ["CGGA", "ADT", ""], ["CG", "AC", ""], ["AC", "AT"]]
     sources6 = [[[0], [1], [2, 3]], [[0, 1], [3], [2]], [[0, 2], [1], [3]], [[0, 3], [1, 2]]]
     indexToSourceIndex6 = {0: 0, 2: 1, 3: 2, 4: 3}
 
-    assert verify(text6, sources6, "ADTACA", indexToSourceIndex6, {4: (0, 0)}) == set([4]) # 0 03 or 3 03
-    assert verify(text6, sources6, "ADTACAC", indexToSourceIndex6, {4: (0, 1)}) == set([4]) # 0 03 or 3 03
-    assert verify(text6, sources6, "ADTACA", indexToSourceIndex6, {4: (1, 0)}) == set([]) # 0 12 or 3 12
-    assert verify(text6, sources6, "ADTACAT", indexToSourceIndex6, {4: (1, 1)}) == set([]) # 0 12 or 3 12
-    assert verify(text6, sources6, "ACACAC", indexToSourceIndex6, {4: (0, 1)}) == set([]) # 1 03
-    assert verify(text6, sources6, "ACACAT", indexToSourceIndex6, {4: (1, 1)}) == set([4]) # 1 12
+    assert verifyFun(text6, sources6, "ACADTAC", indexToSourceIndex6, {4: (0, 1)}) == set([4]) # 3-3-03
+    assert verifyFun(text6, sources6, "ACADTAT", indexToSourceIndex6, {4: (1, 1)}) == set([]) # 3-3-12
+    assert verifyFun(text6, sources6, "ADTACA", indexToSourceIndex6, {4: (0, 0)}) == set([]) # 0-2-3-03 | 3-1-03
+    assert verifyFun(text6, sources6, "ADTACAC", indexToSourceIndex6, {4: (0, 1)}) == set([]) # 0-2-3-03 | 3-1-03
+    assert verifyFun(text6, sources6, "ADTACA", indexToSourceIndex6, {4: (1, 0)}) == set([]) # 0-2-3-12 | 3-1-12
+    assert verifyFun(text6, sources6, "ADTACAT", indexToSourceIndex6, {4: (1, 1)}) == set([]) # 0-2-3-12 | 3-1-12
+    assert verifyFun(text6, sources6, "ACACAC", indexToSourceIndex6, {4: (0, 1)}) == set([]) # 1-2-3-03 | 2-1-03
+    assert verifyFun(text6, sources6, "ACACAT", indexToSourceIndex6, {4: (1, 1)}) == set([]) # 1-2-3-12 | 2-1-12
 
-    print("\n!!All passed!!")
+    print("\n[Text 7]")
+    text7 = [["ADT", "AC", ""], ["AC"], ["CGGA", "ADT", ""], ["CG", "AC", ""], ["AC", "AT"]]
+    sources7 = [[[0], [1], [2, 3]], [[2], [3], [0, 1]], [[1], [3], [0, 2]], [[0, 3], [1, 2]]]
+    indexToSourceIndex7 = {0: 0, 2: 1, 3: 2, 4: 3}
+
+    assert verifyFun(text7, sources7, "ACADTAC", indexToSourceIndex7, {4: (0, 1)}) == set([]) # 3-02-03
+    assert verifyFun(text7, sources7, "ACADTAT", indexToSourceIndex7, {4: (1, 1)}) == set([]) # 3-02-12
+    assert verifyFun(text7, sources7, "ADTACA", indexToSourceIndex7, {4: (0, 0)}) == set([4]) # 0-01-02-03 | 3-3-03
+    assert verifyFun(text7, sources7, "ADTACAC", indexToSourceIndex7, {4: (0, 1)}) == set([4]) # 0-01-02-03 | 3-3-03
+    assert verifyFun(text7, sources7, "ADTACA", indexToSourceIndex7, {4: (1, 0)}) == set([]) # 0-01-02-12 | 3-3-12
+    assert verifyFun(text7, sources7, "ADTACAT", indexToSourceIndex7, {4: (1, 1)}) == set([]) # 0-01-02-12 | 3-3-12
+    assert verifyFun(text7, sources7, "ACACAC", indexToSourceIndex7, {4: (0, 1)}) == set([]) # 1-01-02-03 | 01-3-03
+    assert verifyFun(text7, sources7, "ACACAT", indexToSourceIndex7, {4: (1, 1)}) == set([]) # 1-01-02-12 | 01-3-12
+
+    print("\n!!All cases passed!!")
+
+
+def main():
+    runTesting(verifyLeaves)
+
+    print('\n!!All functions passed!!')
+
 
 if __name__ == "__main__":
     main()
