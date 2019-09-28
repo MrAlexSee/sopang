@@ -1,6 +1,7 @@
 """
 A prototype for verifying matches based on the sources file.
-It is assumed that both text and sources have already been parsed and processed. We only check the verification.
+It is assumed that both text and sources have already been parsed and processed.
+We only test the verification here.
 """
 
 import matplotlib.pyplot as plt
@@ -37,6 +38,7 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
         patternCharIndex = len(pattern) - 1
 
         # 1. We go back to the beginning of the segment where the match occurred.
+        assert pattern[-1 - charInVariantIndex : ] == text[matchIndex][match[0]][ : charInVariantIndex + 1]
         patternCharIndex -= (charInVariantIndex + 1)
 
         if patternCharIndex < 0:
@@ -44,7 +46,7 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
             verifiedMatches.add(matchIndex)
             break
 
-        # 2. Build a tree of all possible match paths. Branch out each time a match occurs.
+        # 2. We build a tree of all possible match paths. Branch out each time a match occurs.
         matchTree = nx.DiGraph()
 
         rootNode = (matchIndex, match[0])
@@ -199,13 +201,28 @@ def main():
     assert verify(text3, sources3, "GAGGGAA", indexToSourceIndex3, {3: (0, 1)}) == set()
     assert verify(text3, sources3, "ADTCGGACGA", indexToSourceIndex3, {2: (0, 2)}) == set([2])
     assert verify(text3, sources3, "GGTCGGACGA", indexToSourceIndex3, {2: (0, 2)}) == set()
+    assert verify(text3, sources3, "CGGA", indexToSourceIndex3, {1: (0, 3)}) == set([1])
+    assert verify(text3, sources3, "ADTC", indexToSourceIndex3, {1: (0, 0)}) == set([1])
+    assert verify(text3, sources3, "ADTCG", indexToSourceIndex3, {1: (0, 1)}) == set([1])
+    assert verify(text3, sources3, "ADTCGG", indexToSourceIndex3, {1: (0, 2)}) == set([1])
+    assert verify(text3, sources3, "ADTCGGA", indexToSourceIndex3, {1: (0, 3)}) == set([1])
+    assert verify(text3, sources3, "ADTCGGAC", indexToSourceIndex3, {2: (0, 0)}) == set([2])
+    assert verify(text3, sources3, "ADTCGGACG", indexToSourceIndex3, {2: (0, 1)}) == set([2])
+    assert verify(text3, sources3, "ADTCGGACGA", indexToSourceIndex3, {2: (0, 2)}) == set([2])
+    assert verify(text3, sources3, "ADTCGGACGAA", indexToSourceIndex3, {2: (0, 3)}) == set([2])
+    assert verify(text3, sources3, "ADTCGGACGAAA", indexToSourceIndex3, {2: (0, 4)}) == set([2])
+    assert verify(text3, sources3, "ADTCGGAT", indexToSourceIndex3, {2: (1, 0)}) == set([])
+    assert verify(text3, sources3, "ADTCGGAG", indexToSourceIndex3, {2: (2, 0)}) == set([])
+    assert verify(text3, sources3, "ADT", indexToSourceIndex3, {0: (0, 2)}) == set([0])
+    assert verify(text3, sources3, "AD", indexToSourceIndex3, {0: (0, 1)}) == set([0])
+    assert verify(text3, sources3, "A", indexToSourceIndex3, {0: (0, 0)}) == set([0])
 
     print("\n[Text 4]")
     text4 = [["AA"], ["ADT", "AC", "GGT", ""], ["CGGA"], ["CGAAA", ""], ["AAC", "TC"]]
     sources4 = [[[0], [1], [2], [3]], [[0], [1, 2, 3]], [[0, 1], [2, 3]]]
     indexToSourceIndex4 = {1: 0, 3: 1, 4: 2}
 
-    assert verify(text4, sources4, "CGGATC", indexToSourceIndex4, {4: (0, 2)}) == set([4])
+    assert verify(text4, sources4, "CGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4])
     assert verify(text4, sources4, "ACG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
     assert verify(text4, sources4, "AACG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
     assert verify(text4, sources4, "AADTCG", indexToSourceIndex4, {2: (0, 1)}) == set([2])
@@ -217,12 +234,12 @@ def main():
 
     print("\n[Text 5]")
     text5 = [["ADT", "AC", "GGT"], ["CGGA", "ADT"], ["CG", "AC"]]
-    sources5 = [[[0], [1], [2]], [[0, 1], [2]], [[0, 1], [2]]]
+    sources5 = [[[0], [1], [2]], [[0, 1], [2]], [[0, 2], [1]]]
     indexToSourceIndex5 = {0: 0, 1: 1, 2: 2}
 
-    assert verify(text5, sources5, "ADTC", indexToSourceIndex5, {1: (0, 0), 2: (1, 0)}) == set([1, 2])
+    assert verify(text5, sources5, "ADTC", indexToSourceIndex5, {1: (0, 0), 2: (0, 0)}) == set([1, 2])
 
-    print("!!All passed!!")
+    print("\n!!All passed!!")
 
 if __name__ == "__main__":
     main()
