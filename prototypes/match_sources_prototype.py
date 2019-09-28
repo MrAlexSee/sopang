@@ -150,12 +150,14 @@ def verifyTree(text, sources, pattern, indexToSourceIndex, indexToMatch):
             if not paths:
                 continue
 
+            print(f"Leaf {leaf}, checking path: {paths[0]}")
+
             for node in paths[0]:
                 if node[0] not in indexToSourceIndex:
                     continue
 
                 newSources = set(sources[indexToSourceIndex[node[0]]][node[1]])
-                matchedSources = matchedSources & newSources if matchedSources else newSources
+                matchedSources = newSources if matchedSources is None else matchedSources & newSources
 
             if matchedSources:
                 print(f"Matched sources: {matchedSources}")
@@ -311,13 +313,13 @@ def runTesting(verifyFun):
     assert verifyFun(text4, sources4, "AAGGTCGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
     assert verifyFun(text4, sources4, "AACGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
     
-    assert verifyFun(text4, sources4, "AAADTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 0 123 23
-    assert verifyFun(text4, sources4, "AAACCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 1 123 23
-    assert verifyFun(text4, sources4, "ACCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([4]) # 1 123 01
-    assert verifyFun(text4, sources4, "AAGGTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 2 123 23
-    assert verifyFun(text4, sources4, "AAGGTCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 2 123 01
-    assert verifyFun(text4, sources4, "AACGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 3 123 01
-    assert verifyFun(text4, sources4, "AACGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 3 123 23
+    assert verifyFun(text4, sources4, "ACCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([4]) # 1-123-01
+    assert verifyFun(text4, sources4, "AAACCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 1-123-23
+    assert verifyFun(text4, sources4, "AAADTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 0-123-23
+    assert verifyFun(text4, sources4, "AAGGTCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 2-123-01
+    assert verifyFun(text4, sources4, "AAGGTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 2-123-23
+    assert verifyFun(text4, sources4, "AACGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 3-123-01
+    assert verifyFun(text4, sources4, "AACGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 3-123-23
 
     print("\n[Text 5]")
     text5 = [["ADT", "AC", "GGT"], ["CGGA", "ADT"], ["CG", "AC"]]
@@ -327,8 +329,15 @@ def runTesting(verifyFun):
     assert verifyFun(text5, sources5, "ADTC", indexToSourceIndex5, {1: (0, 0), 2: (0, 0)}) == set([1, 2])
 
     print("\n[Text 6]")
-    text6 = [["ADT", "AC", ""], ["AC"], ["CGGA", "ADT", ""], ["CG", "AC", ""], ["AC", "AT"]]
-    sources6 = [[[0], [1], [2, 3]], [[0, 1], [3], [2]], [[0, 2], [1], [3]], [[0, 3], [1, 2]]]
+    text6 = [["ADT", "AC", ""],
+             ["AC"],
+             ["CGGA", "ADT", ""],
+             ["CG", "AC", ""],
+             ["AC", "AT"]]
+    sources6 = [[[0], [1], [2, 3]],
+                [[0, 1], [3], [2]],
+                [[0, 2], [1], [3]],
+                [[0, 3], [1, 2]]]
     indexToSourceIndex6 = {0: 0, 2: 1, 3: 2, 4: 3}
 
     assert verifyFun(text6, sources6, "ACADTAC", indexToSourceIndex6, {4: (0, 1)}) == set([4]) # 3-3-03
@@ -341,8 +350,15 @@ def runTesting(verifyFun):
     assert verifyFun(text6, sources6, "ACACAT", indexToSourceIndex6, {4: (1, 1)}) == set([]) # 1-2-3-12 | 2-1-12
 
     print("\n[Text 7]")
-    text7 = [["ADT", "AC", ""], ["AC"], ["CGGA", "ADT", ""], ["CG", "AC", ""], ["AC", "AT"]]
-    sources7 = [[[0], [1], [2, 3]], [[2], [3], [0, 1]], [[1], [3], [0, 2]], [[0, 3], [1, 2]]]
+    text7 = [["ADT", "AC", ""],
+             ["AC"],
+             ["CGGA", "ADT", ""],
+             ["CG", "AC", ""],
+             ["AC", "AT"]]
+    sources7 = [[[0], [1], [2, 3]],
+                [[2], [3], [0, 1]],
+                [[1], [3], [0, 2]],
+                [[0, 3], [1, 2]]]
     indexToSourceIndex7 = {0: 0, 2: 1, 3: 2, 4: 3}
 
     assert verifyFun(text7, sources7, "ACADTAC", indexToSourceIndex7, {4: (0, 1)}) == set([]) # 3-02-03
@@ -358,6 +374,7 @@ def runTesting(verifyFun):
 
 
 def main():
+    runTesting(verifyTree)
     runTesting(verifyLeaves)
 
     print('\n!!All functions passed!!')
