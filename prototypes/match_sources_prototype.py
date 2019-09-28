@@ -41,6 +41,8 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
         assert pattern[-1 - charInVariantIndex : ] == text[matchIndex][match[0]][ : charInVariantIndex + 1]
         patternCharIndex -= (charInVariantIndex + 1)
 
+        print(f'Jumped back by {charInVariantIndex + 1} chars, index in pattern = {patternCharIndex}')
+
         if patternCharIndex < 0:
             print("Matched pattern doesn't span multiple segments")
             verifiedMatches.add(matchIndex)
@@ -140,9 +142,6 @@ def verify(text, sources, pattern, indexToSourceIndex, indexToMatch):
 
         print(f"Leaf count = {len(leaves)}")
 
-        print(matchTree.nodes(data=True))
-        print(matchTree.edges)
-
         for leaf in leaves:
             matchedSources = None
             paths = list(nx.all_simple_paths(matchTree, rootNode, leaf))
@@ -231,6 +230,14 @@ def main():
     assert verify(text4, sources4, "AAACCGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
     assert verify(text4, sources4, "AAGGTCGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
     assert verify(text4, sources4, "AACGGACGA", indexToSourceIndex4, {3: (0, 2)}) == set([])
+    
+    assert verify(text4, sources4, "AAADTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 0 123 23
+    assert verify(text4, sources4, "AAACCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([]) # 1 123 23
+    assert verify(text4, sources4, "ACCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([4]) # 1 123 01
+    assert verify(text4, sources4, "AAGGTCGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 2 123 23
+    assert verify(text4, sources4, "AAGGTCGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 2 123 01
+    assert verify(text4, sources4, "AACGGAAAC", indexToSourceIndex4, {4: (0, 2)}) == set([]) # 3 123 01
+    assert verify(text4, sources4, "AACGGATC", indexToSourceIndex4, {4: (1, 1)}) == set([4]) # 3 123 23
 
     print("\n[Text 5]")
     text5 = [["ADT", "AC", "GGT"], ["CGGA", "ADT"], ["CG", "AC"]]
@@ -238,6 +245,18 @@ def main():
     indexToSourceIndex5 = {0: 0, 1: 1, 2: 2}
 
     assert verify(text5, sources5, "ADTC", indexToSourceIndex5, {1: (0, 0), 2: (0, 0)}) == set([1, 2])
+
+    print("\n[Text 6]")
+    text6 = [["ADT", "AC", ""], ["AC"], ["CGGA", "ADT", ""], ["CG", "AC", ""], ["AC", "AT"]]
+    sources6 = [[[0], [1], [2, 3]], [[0, 1], [3], [2]], [[0, 2], [1], [3]], [[0, 3], [1, 2]]]
+    indexToSourceIndex6 = {0: 0, 2: 1, 3: 2, 4: 3}
+
+    assert verify(text6, sources6, "ADTACA", indexToSourceIndex6, {4: (0, 0)}) == set([4]) # 0 03 or 3 03
+    assert verify(text6, sources6, "ADTACAC", indexToSourceIndex6, {4: (0, 1)}) == set([4]) # 0 03 or 3 03
+    assert verify(text6, sources6, "ADTACA", indexToSourceIndex6, {4: (1, 0)}) == set([]) # 0 12 or 3 12
+    assert verify(text6, sources6, "ADTACAT", indexToSourceIndex6, {4: (1, 1)}) == set([]) # 0 12 or 3 12
+    assert verify(text6, sources6, "ACACAC", indexToSourceIndex6, {4: (0, 1)}) == set([]) # 1 03
+    assert verify(text6, sources6, "ACACAT", indexToSourceIndex6, {4: (1, 1)}) == set([4]) # 1 12
 
     print("\n!!All passed!!")
 
