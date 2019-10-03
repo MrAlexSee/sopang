@@ -10,7 +10,8 @@ Arguments:
   <output-sources.edss>      path to the output sources file
 
 Options:
-  --include-ref-sources      dumps sources for a reference sequence (results in a longer but explicit sources file)
+  --compress                 dump compressed files (recommended extensions: .edz .edsz)
+  --include-ref-sources      dump sources for a reference sequence (results in a longer but explicit sources file), ignored for compress
   -h --help                  show this screen
   -v --version               show version
 """
@@ -19,8 +20,9 @@ from docopt import docopt
 
 import itertools
 import sys
+import vcf
+import zstd
 
-import vcf # Requires the package "pyvcf".
 
 def shouldProcessRecord(record):
     alphabet = set("ACGTN")
@@ -38,6 +40,7 @@ def shouldProcessRecord(record):
                 return False
 
     return True
+
 
 def getSourcesMapFromVcfReader(vcfReader, lineCount):
     processedCount, ignoredCount = 0, 0
@@ -105,6 +108,7 @@ def getSourcesMapFromVcfReader(vcfReader, lineCount):
     print("\nProcessed VCF #records = {0}, ignored #records = {1}".format(processedCount, ignoredCount))
     return ret, nextSampleIndex, chromosomeId
 
+
 def processLine(line, charIdx, sourcesMap, sourceCount):
     text, sourcesText = "", ""
     processedVcfPositionsCount = 0
@@ -149,10 +153,109 @@ def processLine(line, charIdx, sourcesMap, sourceCount):
 
     return text, sourcesText, processedVcfPositionsCount
 
-def parseFastaFile(args, sourcesMap, sourceCount, searchedChromosomeId):
-    includeRefSources = args["--include-ref-sources"]
 
-    inFileHandle = open(args["<input-chr.fa>"], "r")
+def packNumber(x):
+    assert isinstance(x, int)
+    if x < 128:
+        return chr(128 + x)
+    else:
+        return chr(int(x / 128)) + chr(128 + (x % 128))
+
+
+def processLineCompressed(line, charIdx, sourcesMap):
+    text, sourcesText = "", ""
+    processedVcfPositionsCount = 0
+
+    segmentSeparator = chr(127)
+
+    for curChar in line[ : -1].upper():
+        if charIdx not in sourcesMap:
+            text += curChar
+            charIdx += 1
+            continue
+
+        assert len(sourcesMap[charIdx]) > 0
+
+        text += "{"
+        sourcesText += segmentSeparator
+
+        for altSequence, sourceIndexes in sourcesMap[charIdx].items():
+            text += altSequence + ","
+
+            sourceIndexList = sorted(list(sourceIndexes))
+
+            sourcesText += packNumber(len(sourceIndexList))
+            sourcesText += packNumber(sourceIndexList[0])
+
+            for i in range(1, len(sourceIndexList), 1):
+                sourcesText += packNumber(sourceIndexList[i] - sourceIndexList[i - 1])
+
+        text += curChar + "}"
+
+        charIdx += 1
+        processedVcfPositionsCount += 1
+
+    return text, sourcesText, processedVcfPositionsCount
+
+
+def dumpCompressedFiles(args, text, sourcesText):
+    zstdCompressionLevel = 22
+    print("Using zstd compression level = {0}".format(zstdCompressionLevel))
+
+    text = zstd.compress(text.encode(), zstdCompressionLevel)
+
+    with open(args["<output-chr.eds>"], "wb") as f:
+        f.write(text)
+
+    sourcesText = zstd.compress(sourcesText.encode(), zstdCompressionLevel)
+
+    with open(args["<output-sources.edss>"], "wb") as f:
+        f.write(sourcesText)
+
+    print("Dumped ED text to: {0} and ED sources to: {1}".format(args["<output-chr.eds>"], args["<output-sources.edss>"]))
+
+
+def parseFastaFileCompressed(args, sourcesMap, sourceCount, searchedChromosomeId):
+    text = ""
+    sourcesText = "{0}\n".format(sourceCount)
+
+    inGenome = False
+    charIdx = 0
+
+    processedVcfPositionsCount, processedLinesCount = 0, 0
+
+    for lineIdx, line in enumerate(open(args["<input-chr.fa>"], "r"), 1):
+        if line[0] == ">":
+            if inGenome: # Encountered the next genome -> finish processing.
+                print("Exited genome: {0} at line: {1}".format(searchedChromosomeId, lineIdx))
+                break
+
+            curChromosomeId = line[1 : ].split()[0]
+
+            if curChromosomeId == searchedChromosomeId:
+                inGenome = True
+                print("Entered genome: {0} at line: {1}".format(searchedChromosomeId, lineIdx))
+                continue
+
+        if not inGenome:
+            continue
+
+        curText, curSourcesText, curProcessedVcfPositionsCount = processLineCompressed(line, charIdx, sourcesMap)
+
+        text += curText
+        sourcesText += curSourcesText
+        processedVcfPositionsCount += curProcessedVcfPositionsCount
+
+        charIdx += len(line) - 1
+        processedLinesCount += 1
+
+    print("\nFinished parsing the fasta file")
+    print("Processed VCF #positions = {0}, processed genome #lines = {1}".format(processedVcfPositionsCount, processedLinesCount))
+
+    dumpCompressedFiles(args, text, sourcesText)
+
+
+def parseFastaFileBuffered(args, sourcesMap, sourceCount, searchedChromosomeId):
     outTextFileHandle = open(args["<output-chr.eds>"], "w")
     outSourcesFileHandle = open(args["<output-sources.edss>"], "w")
     
@@ -163,11 +266,12 @@ def parseFastaFile(args, sourcesMap, sourceCount, searchedChromosomeId):
     inGenome = False
 
     outBufferSize = 1000
-    sourceCountForLine = sourceCount if includeRefSources else 0
+    sourceCountForLine = sourceCount if args["--include-ref-sources"] else 0
 
-    bufferedWritesCount, processedVcfPositionsCount, processedLinesCount = 0, 0, 0
+    processedVcfPositionsCount, processedLinesCount = 0, 0
+    bufferedWritesCount = 0
 
-    for lineIdx, line in enumerate(inFileHandle, 1):
+    for lineIdx, line in enumerate(open(args["<input-chr.fa>"], "r"), 1):
         if line[0] == ">":
             if inGenome: # Encountered the next genome -> finish processing.
                 print("Exited genome: {0} at line: {1}".format(searchedChromosomeId, lineIdx))
@@ -200,8 +304,10 @@ def parseFastaFile(args, sourcesMap, sourceCount, searchedChromosomeId):
             bufferedWritesCount += 1
 
     print("\nFinished parsing the fasta file")
-    print("Dumped ED text to: {0} and ED sources to: {1}, performed #writes = {2}".format(args["<output-chr.eds>"], args["<output-sources.edss>"], bufferedWritesCount))
     print("Processed VCF #positions = {0}, processed genome #lines = {1}".format(processedVcfPositionsCount, processedLinesCount))
+
+    print("Dumped ED text to: {0} and ED sources to: {1}, performed #writes = {2}".format(args["<output-chr.eds>"], args["<output-sources.edss>"], bufferedWritesCount))
+
 
 def main():
     args = docopt(__doc__, version="0.1.0")
@@ -221,7 +327,12 @@ def main():
     print("Current chromosome: {0}".format(chromosomeId))
 
     print("\nParsing fasta file from: {0}".format(args["<input-chr.fa>"]))
-    parseFastaFile(args, sourcesMap, sourceCount, chromosomeId)
+
+    if args["--compress"]:
+        parseFastaFileCompressed(args, sourcesMap, sourceCount, chromosomeId)
+    else:
+        parseFastaFileBuffered(args, sourcesMap, sourceCount, chromosomeId)
+
 
 if __name__ == "__main__":
     main()
