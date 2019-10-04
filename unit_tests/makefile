@@ -9,7 +9,7 @@ INCLUDE   = -I$(BOOST_DIR)
 TEST_FILES    = catch.hpp repeat.hpp
 
 EXE 	      = main_tests
-OBJ           = main_tests.o helpers_tests.o sopang_approx_tests.o sopang_exact_tests.o sopang_parsing_tests.o sopang.o
+OBJ           = main_tests.o helpers_tests.o sopang_approx_tests.o sopang_exact_tests.o sopang_parsing_tests.o sopang_sources_tests.o sopang.o
 
 all: $(EXE)
 
@@ -30,6 +30,9 @@ sopang_exact_tests.o: sopang_exact_tests.cpp sopang_whitebox.hpp ../sopang.hpp .
 
 sopang_parsing_tests.o: sopang_parsing_tests.cpp ../sopang.hpp ../helpers.hpp $(TEST_FILES)
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c sopang_parsing_tests.cpp
+
+sopang_sources_tests.o: sopang_sources_tests.cpp ../sopang.hpp ../helpers.hpp $(TEST_FILES)
+	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c sopang_sources_tests.cpp
 
 sopang.o: ../sopang.cpp ../sopang.hpp ../helpers.hpp
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c ../sopang.cpp

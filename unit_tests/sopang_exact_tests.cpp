@@ -51,7 +51,7 @@ TEST_CASE("is matching a single segment correct for partial segment match", "[ex
 
     for (const string &pattern : { "ACG", "CGT" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACG", alphabet);
+        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
 
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(0) == 1);
