@@ -58,7 +58,7 @@ struct Params
 
     const std::string verboseInfoString =
         "This software is called SOPanG (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model).\n"
-        "Authors for the current release version: Aleksander Cislak, Szymon Grabowski. Authors of the SOPang algorithm: Aleksander Cislak, Szymon Grabowski, Jan Holub.\n"
+        "Authors for the current release version: Aleksander Cislak, Szymon Grabowski. Authors of the SOPanG algorithm: Aleksander Cislak, Szymon Grabowski, Jan Holub.\n"
         "ED text is in a format possibly best explained with an example: {A,C,}GAAT{AT,A}ATT. Braces determine the start and end of each non-deterministic segment (i.e. segment having multiple variants), and commas delimit segment variants.\n"
         "If a comma is not preceded by a string of letters or it is a trailing symbol in a segment, it indicates an empty word.\n"
         "To give an example, all three notations: {,A,C}, {A,,C}, and {A,C,} mean the same, which is a segment which accepts either a string A, or a string C, or an empty word.\n"
