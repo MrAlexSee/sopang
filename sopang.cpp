@@ -343,6 +343,12 @@ vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
     return ret;
 }
 
+std::vector<std::vector<std::set<int>>> parseSourcesCompressed(const std::string &sourcesStr, int &sourceCount)
+{
+    // TODO
+    return {};
+}
+
 unordered_set<unsigned> Sopang::match(const string *const *segments,
                                       unsigned nSegments, const unsigned *segmentSizes,
                                       const string &pattern, const string &alphabet)
@@ -472,12 +478,11 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
 }
 
 unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
-        unsigned nSegments, const unsigned *segmentSizes,
-        const vector<vector<set<int>>> &sources,
-        const string &pattern, const string &alphabet)
+                                                 unsigned nSegments, const unsigned *segmentSizes,
+                                                 const vector<vector<set<int>>> &sources,
+                                                 const string &pattern, const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
-    assert(sources.size() > 0);
 
     unordered_set<unsigned> res;
     fillPatternMaskBuffer(pattern, alphabet);

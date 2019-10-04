@@ -26,7 +26,9 @@ public:
 
     static const std::string *const *parseTextArray(std::string text, unsigned *nSegments, unsigned **segmentSizes);
     static std::vector<std::string> parsePatterns(std::string patternsStr);
+
     static std::vector<std::vector<std::set<int>>> parseSources(std::string sourcesStr, int &sourceCount);
+    static std::vector<std::vector<std::set<int>>> parseSourcesCompressed(const std::string &sourcesStr, int &sourceCount);
 
     /*
      *** MATCHING
