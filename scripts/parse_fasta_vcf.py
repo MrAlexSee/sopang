@@ -1,7 +1,7 @@
 """
 Parses a fasta and VCF file pair in order to obtain elastic-degenerate text with sources.
 
-Usage: parse_fasta_vcf_to_ed_sources.py <input-chr.fa> <input-variants.vcf> <output-chr.eds> <output-sources.edss> [options]
+Usage: parse_fasta_vcf.py <input-chr.fa> <input-variants.vcf> <output-chr.eds> <output-sources.edss> [options]
 
 Arguments:
   <input-chr.fa>             path to the input fasta (reference) file
@@ -54,7 +54,7 @@ def getSourcesMapFromVcfReader(vcfReader, lineCount):
     chromosomeId = None
 
     for recordIdx, record in enumerate(vcfReader, 1):
-        processedPercentage = 100 * recordIdx / lineCount
+        processedPercentage = 100.0 * recordIdx / lineCount
 
         sys.stdout.write("\rRough progress: {0:.2f}%".format(processedPercentage))
         sys.stdout.flush()
@@ -109,51 +109,6 @@ def getSourcesMapFromVcfReader(vcfReader, lineCount):
     return ret, nextSampleIndex, chromosomeId
 
 
-def processLine(line, charIdx, sourcesMap, sourceCount):
-    text, sourcesText = "", ""
-    processedVcfPositionsCount = 0
-
-    for curChar in line[ : -1].upper():
-        if charIdx not in sourcesMap:
-            text += curChar
-            charIdx += 1
-            continue
-
-        assert len(sourcesMap[charIdx]) > 0
-        text += "{"
-
-        # If there will be more than one sources sequence for the current position,
-        # we need to enclose them with additional brackets.
-        if sourceCount or len(sourcesMap[charIdx]) > 1:
-            sourcesText += "{"
-
-        usedSources = set()
-
-        for altSequence, sourceIndexes in sourcesMap[charIdx].items():
-            text += altSequence + ","
-            sourcesText += "{" + ",".join([str(i) for i in sorted(sourceIndexes)]) + "}"
-
-            usedSources.update(sourceIndexes)
-
-        text += curChar + "}"
-
-        # We associate the reference sequence with the remaining sources only if the source count is provided,
-        # i.e. when the explicit sources file has been requested.
-        if sourceCount:
-            assert len(usedSources) < sourceCount
-
-            curSources = [s for s in range(sourceCount) if s not in usedSources]
-            sourcesText += "{" + ",".join([str(i) for i in sorted(curSources)]) + "}"
-
-        if sourceCount or len(sourcesMap[charIdx]) > 1:
-            sourcesText += "}"
-
-        charIdx += 1
-        processedVcfPositionsCount += 1
-
-    return text, sourcesText, processedVcfPositionsCount
-
-
 def packNumber(x):
     assert isinstance(x, int)
     if x < 128:
@@ -166,7 +121,7 @@ def processLineCompressed(line, charIdx, sourcesMap):
     text, sourcesText = "", ""
     processedVcfPositionsCount = 0
 
-    segmentSeparator = chr(127)
+    segmentStartMark = chr(127)
 
     for curChar in line[ : -1].upper():
         if charIdx not in sourcesMap:
@@ -177,7 +132,7 @@ def processLineCompressed(line, charIdx, sourcesMap):
         assert len(sourcesMap[charIdx]) > 0
 
         text += "{"
-        sourcesText += segmentSeparator
+        sourcesText += segmentStartMark
 
         for altSequence, sourceIndexes in sourcesMap[charIdx].items():
             text += altSequence + ","
@@ -212,7 +167,7 @@ def dumpCompressedFiles(args, text, sourcesText):
     with open(args["<output-sources.edss>"], "wb") as f:
         f.write(sourcesText)
 
-    print("Dumped ED text to: {0} and ED sources to: {1}".format(args["<output-chr.eds>"], args["<output-sources.edss>"]))
+    print("Dumped compressed ED text to: {0} and ED sources to: {1}".format(args["<output-chr.eds>"], args["<output-sources.edss>"]))
 
 
 def parseFastaFileCompressed(args, sourcesMap, sourceCount, searchedChromosomeId):
@@ -255,20 +210,66 @@ def parseFastaFileCompressed(args, sourcesMap, sourceCount, searchedChromosomeId
     dumpCompressedFiles(args, text, sourcesText)
 
 
+def processLine(line, charIdx, sourcesMap, sourceCount):
+    text, sourcesText = "", ""
+    processedVcfPositionsCount = 0
+
+    for curChar in line[ : -1].upper():
+        if charIdx not in sourcesMap:
+            text += curChar
+            charIdx += 1
+            continue
+
+        assert len(sourcesMap[charIdx]) > 0
+        text += "{"
+
+        # If there is more than one sources sequence for the current position,
+        # we need to enclose them with additional brackets.
+        if sourceCount or len(sourcesMap[charIdx]) > 1:
+            sourcesText += "{"
+
+        usedSources = set()
+
+        for altSequence, sourceIndexes in sourcesMap[charIdx].items():
+            text += altSequence + ","
+            sourcesText += "{" + ",".join([str(i) for i in sorted(sourceIndexes)]) + "}"
+
+            usedSources.update(sourceIndexes)
+
+        text += curChar + "}"
+
+        # We associate the reference sequence with the remaining sources only if the source count is provided,
+        # i.e. when the explicit sources file has been requested.
+        if sourceCount:
+            assert len(usedSources) < sourceCount
+
+            curSources = [s for s in range(sourceCount) if s not in usedSources]
+            sourcesText += "{" + ",".join([str(i) for i in sorted(curSources)]) + "}"
+
+        if sourceCount or len(sourcesMap[charIdx]) > 1:
+            sourcesText += "}"
+
+        charIdx += 1
+        processedVcfPositionsCount += 1
+
+    return text, sourcesText, processedVcfPositionsCount
+
+
 def parseFastaFileBuffered(args, sourcesMap, sourceCount, searchedChromosomeId):
     outTextFileHandle = open(args["<output-chr.eds>"], "w")
     outSourcesFileHandle = open(args["<output-sources.edss>"], "w")
-    
+
+    sourceCountForLine = sourceCount if args["--include-ref-sources"] else 0
+
     text = ""
     sourcesText = "{0}\n".format(sourceCount)
 
     charIdx = 0
     inGenome = False
 
-    outBufferSize = 1000
-    sourceCountForLine = sourceCount if args["--include-ref-sources"] else 0
-
     processedVcfPositionsCount, processedLinesCount = 0, 0
+
+    outBufferSize = 1000
     bufferedWritesCount = 0
 
     for lineIdx, line in enumerate(open(args["<input-chr.fa>"], "r"), 1):
