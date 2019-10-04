@@ -20,6 +20,7 @@
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+#include <zstd.h>
 
 using namespace sopang;
 using namespace std;
@@ -106,6 +107,7 @@ int handleParams(int argc, const char **argv)
        ("in-text-file,i", po::value<string>(&params.inTextFile)->required(), "input text file path (positional arg 1)")
        ("in-pattern-file,I", po::value<string>(&params.inPatternFile)->required(), "input pattern file path (positional arg 2)")
        ("in-sources-file,S", po::value<string>(&params.inSourcesFile), "input sources file path")
+       ("in-compressed", "parse compressed input files")
        ("approx,k", po::value<int>(&params.kApprox), "perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12, not compatible with matching with sources)")
        ("out-file,o", po::value<string>(&params.outFile)->default_value("timings.txt"), "output file path")
        ("pattern-count,p", po::value<int>(&params.nPatterns), "maximum number of patterns read from top of the patterns file (non-positive values are ignored)")
@@ -165,6 +167,10 @@ int handleParams(int argc, const char **argv)
     if (vm.count("dump-indexes"))
     {
         params.dumpIndexes = true;
+    }
+    if (vm.count("in-compressed"))
+    {
+        params.decompressInput = true;
     }
 
     return paramsResContinue;
@@ -240,6 +246,43 @@ string readInputText()
 {
     string text = Helpers::readFile(params.inTextFile);
     cout << "Read file: " << params.inTextFile << endl;
+
+    size_t bufferSize = params.zstdBufferSize;
+
+    if (params.decompressInput)
+    {
+        string decompressed;
+        ZSTD_DCtx *zstdContext = ZSTD_createDCtx();
+
+        char *inBuffer = new char[bufferSize];
+        char *outBuffer = new char[bufferSize];
+
+        for (size_t i = 0; i < text.size(); i += bufferSize)
+        {
+            if (i + bufferSize > text.size())
+            {
+                bufferSize = text.size() - i;
+            }
+
+            memcpy(inBuffer, text.c_str() + i, bufferSize);
+            ZSTD_inBuffer input = { inBuffer, bufferSize, 0 };
+
+            while (input.pos < input.size)
+            {
+                ZSTD_outBuffer output = { outBuffer, bufferSize, 0 };
+                const size_t ret = ZSTD_decompressStream(zstdContext, &output, &input);
+
+                if (ZSTD_isError(ret))
+                {
+                    break;
+                }
+
+                decompressed += string(decompressed.c_str(), output.pos);
+            }
+        }
+
+        text = decompressed;
+    }
 
     double textSizeMB = text.size() / 1000.0 / 1000.0;
     if (params.dumpToFile)

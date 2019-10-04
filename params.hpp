@@ -17,12 +17,16 @@ struct Params
       * Restricted to DNA characters, matches the output of the data generation tools from the scripts folder. */
     const std::string alphabet = "ACGTN";
 
+    const size_t zstdBufferSize = 1000;
+
     /*
      *** COMMAND-LINE PARAMS
      */
 
     // These parameters are set by handleParams() in main.cpp after parsing command line args.
 
+    /** Decompress input files (zstd lib compression and custom sources file format). */
+    bool decompressInput = false;
     /** Dump input file info and throughput to output file (outFile). Cmd arg -d. */
     bool dumpToFile = false;
     /** Dump resulting indexes (full results) to stdout. Cmd arg -D. */

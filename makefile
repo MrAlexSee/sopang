@@ -1,12 +1,13 @@
 CC        = g++
 CCFLAGS   = -Wall -pedantic -std=c++11
-OPTFLAGS  = -DNDEBUG -O3
+# OPTFLAGS  = -DNDEBUG -O3
 
 BOOST_DIR = "/home/alex/boost_1_67_0"
+ZSTD_DIR = "/home/alex/zstd/lib"
 
-INCLUDE   = -I$(BOOST_DIR)
-LDFLAGS   = -L$(BOOST_DIR) -static
-LDLIBS    = -lboost_program_options -lm
+INCLUDE   = -I$(BOOST_DIR) -I$(ZSTD_DIR)
+LDFLAGS   = -L$(BOOST_DIR) -L$(ZSTD_DIR) -static
+LDLIBS    = -lboost_program_options -lzstd -lm
 
 EXE       = sopang
 OBJ       = main.o sopang.o
