@@ -121,7 +121,7 @@ def processLineCompressed(line, charIdx, sourcesMap):
     text, sourcesText = "", ""
     processedVcfPositionsCount = 0
 
-    segmentStartMark = chr(127)
+    sourceSegmentStartMark = chr(127)
 
     for curChar in line[ : -1].upper():
         if charIdx not in sourcesMap:
@@ -132,7 +132,7 @@ def processLineCompressed(line, charIdx, sourcesMap):
         assert len(sourcesMap[charIdx]) > 0
 
         text += "{"
-        sourcesText += segmentStartMark
+        sourcesText += sourceSegmentStartMark
 
         for altSequence, sourceIndexes in sourcesMap[charIdx].items():
             text += altSequence + ","
