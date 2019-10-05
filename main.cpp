@@ -9,9 +9,9 @@
 #include "helpers.hpp"
 #include "params.hpp"
 #include "sopang.hpp"
+#include "zstd_helper.hpp"
 
 #include <chrono>
-#include <cstring>
 #include <functional>
 #include <iostream>
 #include <string>
@@ -20,7 +20,6 @@
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
-#include <zstd.h>
 
 using namespace sopang;
 using namespace std;
@@ -247,41 +246,9 @@ string readInputText()
     string text = Helpers::readFile(params.inTextFile);
     cout << "Read file: " << params.inTextFile << endl;
 
-    size_t bufferSize = params.zstdBufferSize;
-
     if (params.decompressInput)
     {
-        string decompressed;
-        ZSTD_DCtx *zstdContext = ZSTD_createDCtx();
-
-        char *inBuffer = new char[bufferSize];
-        char *outBuffer = new char[bufferSize];
-
-        for (size_t i = 0; i < text.size(); i += bufferSize)
-        {
-            if (i + bufferSize > text.size())
-            {
-                bufferSize = text.size() - i;
-            }
-
-            memcpy(inBuffer, text.c_str() + i, bufferSize);
-            ZSTD_inBuffer input = { inBuffer, bufferSize, 0 };
-
-            while (input.pos < input.size)
-            {
-                ZSTD_outBuffer output = { outBuffer, bufferSize, 0 };
-                const size_t ret = ZSTD_decompressStream(zstdContext, &output, &input);
-
-                if (ZSTD_isError(ret))
-                {
-                    break;
-                }
-
-                decompressed += string(decompressed.c_str(), output.pos);
-            }
-        }
-
-        text = decompressed;
+        text = decompressZstd(text, params.zstdBufferSize);
     }
 
     double textSizeMB = text.size() / 1000.0 / 1000.0;

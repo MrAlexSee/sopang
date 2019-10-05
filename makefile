@@ -10,7 +10,7 @@ LDFLAGS   = -L$(BOOST_DIR) -L$(ZSTD_DIR) -static
 LDLIBS    = -lboost_program_options -lzstd -lm
 
 EXE       = sopang
-OBJ       = main.o sopang.o
+OBJ       = main.o sopang.o zstd_helper.o
 
 all: $(EXE)
 
@@ -22,6 +22,9 @@ main.o: main.cpp helpers.hpp params.hpp sopang.hpp
 
 sopang.o: sopang.cpp sopang.hpp helpers.hpp
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c sopang.cpp
+
+zstd_helper.o: zstd_helper.cpp zstd_helper.hpp
+	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c zstd_helper.cpp
 
 .PHONY: clean
 

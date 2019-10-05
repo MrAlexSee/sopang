@@ -17,6 +17,7 @@ struct Params
       * Restricted to DNA characters, matches the output of the data generation tools from the scripts folder. */
     const std::string alphabet = "ACGTN";
 
+    /** Input and output buffer size used for Zstandard library streaming decompression. */
     const size_t zstdBufferSize = 1000;
 
     /*
