@@ -28,8 +28,8 @@ public:
     static const std::string *const *parseTextArray(std::string text, unsigned *nSegments, unsigned **segmentSizes);
     static std::vector<std::string> parsePatterns(std::string patternsStr);
 
-    static std::vector<std::vector<std::set<int>>> parseSources(std::string sourcesStr, int &sourceCount);
-    static std::vector<std::vector<std::set<int>>> parseSourcesCompressed(const std::string &sourcesStr, int &sourceCount);
+    static std::vector<std::vector<std::set<int>>> parseSources(std::string text, int &sourceCount);
+    static std::vector<std::vector<std::set<int>>> parseSourcesCompressed(std::string text, int &sourceCount);
 
     static std::unordered_map<unsigned, std::vector<std::set<int>>> sourcesToSourceMap(unsigned nSegments,
         const unsigned *segmentSizes, const std::vector<std::vector<std::set<int>>> &sources);
@@ -76,8 +76,11 @@ private:
     static constexpr uint64_t saFullCounter = 0x10ULL;
     /** Single Shift-Add counter with all bits set. */
     static constexpr uint64_t saCounterAllSet = 0x20ULL - 0x1ULL;
-
+    /** Counter with all bits set. */
     static constexpr uint64_t allOnes = ~(0x0ULL);
+
+    /** Segment start mark value in the compressed sources file. */
+    static constexpr char segmentStartMark = static_cast<char>(127);
 
     uint64_t counterPosMasks[maxPatternApproxSize];
 

@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -187,17 +188,15 @@ void handleSourceVariantEnd(set<int> &curVariant, vector<set<int>> &curSegment)
     curVariant.clear();
 }
 
-void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, string &curNumber, vector<vector<set<int>>> &sources, int sourceCount, size_t charIdx)
+void addReferenceSources(vector<set<int>> &segment, int sourceCount)
 {
-    handleSourceNumberEnd(curNumber, curVariant, charIdx);
-    handleSourceVariantEnd(curVariant, curSegment);
+    set<int> referenceVariant;
 
-    // We add a set with the remaining (reference) sources.
     for (int sourceIdx = 0; sourceIdx < sourceCount; ++sourceIdx)
     {
         bool exists = false;
 
-        for (const set<int> &variant : curSegment)
+        for (const set<int> &variant : segment)
         {
             if (variant.count(sourceIdx) > 0)
             {
@@ -208,11 +207,19 @@ void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, 
 
         if (not exists)
         {
-            curVariant.insert(sourceIdx);
+            referenceVariant.insert(sourceIdx);
         }
     }
 
+    segment.emplace_back(move(referenceVariant));
+}
+
+void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, string &curNumber, vector<vector<set<int>>> &sources, int sourceCount, size_t charIdx)
+{
+    handleSourceNumberEnd(curNumber, curVariant, charIdx);
     handleSourceVariantEnd(curVariant, curSegment);
+
+    addReferenceSources(curSegment, sourceCount);
 
     sources.emplace_back(move(curSegment));
     curSegment.clear();
@@ -220,6 +227,9 @@ void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, 
 
 } // namespace (anonymous)
 
+// We will return a vector with size equal to the number of non-deterministic segments.
+// For each segment, we will store a vector with size equal to the number of variants.
+// For each variant, we will store a set with source indexes, with reference sources stored in the last set.
 vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
 {
     if (text.empty())
@@ -227,9 +237,6 @@ vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
         return {};
     }
 
-    // We will return a vector with size equal to the number of non-deterministic segments.
-    // For each segment, we will store a vector with size equal to the number of variants.
-    // For each variant, we will store a set with source indexes, with reference sources stored in the last set.
     boost::trim(text);
 
     bool inSegment = false;
@@ -244,7 +251,7 @@ vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
     size_t startIdx;
     sourceCount = parseSourceCount(text, startIdx);
 
-    for (size_t charIdx = startIdx; text[charIdx] != '\0'; ++charIdx)
+    for (size_t charIdx = startIdx; charIdx < text.size(); ++charIdx)
     {
         const char curChar = text[charIdx];
 
@@ -343,10 +350,92 @@ vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
     return ret;
 }
 
-vector<vector<set<int>>> Sopang::parseSourcesCompressed(const string &sourcesStr, int &sourceCount)
+namespace // Contains helpers for parsing compressed sources.
 {
-    // TODO
-    return {};
+
+int unpackNumber(const unsigned char first, const unsigned char second, size_t &shift)
+{
+    const int firstVal = static_cast<int>(first);
+
+    if (firstVal >= 128)
+    {
+        shift = 1;
+        return firstVal - 128;
+    }
+
+    const int secondVal = static_cast<int>(second);
+
+    shift = 2;
+    return firstVal * 128 + secondVal - 128;
+}
+
+} // namespace (anonymous)
+
+// The same output as for Sopang::parseSources.
+vector<vector<set<int>>> Sopang::parseSourcesCompressed(string text, int &sourceCount)
+{
+    if (text.empty())
+    {
+        return {};
+    }
+
+    boost::trim(text);
+    vector<vector<set<int>>> ret;
+
+    vector<set<int>> curSegment;
+    set<int> curVariant;
+
+    size_t charIdx, shift;
+    sourceCount = parseSourceCount(text, charIdx);
+
+    while (charIdx < text.size())
+    {
+        const char curChar = text[charIdx];
+
+        if (curChar == segmentStartMark)
+        {
+            if (not curSegment.empty())
+            {
+                addReferenceSources(curSegment, sourceCount);
+                ret.emplace_back(move(curSegment));
+
+                curSegment.clear();
+            }
+
+            charIdx += 1;
+            continue;
+        }
+
+        assert(charIdx < text.size());
+
+        // Note that even if (charIdx + 1) spills, it should be contained by the terminating '\0'.
+        const int variantSize = unpackNumber(text[charIdx], text[charIdx + 1], shift);
+        charIdx += shift;
+
+        int prevVal = 0;
+
+        for (int variantIdx = 0; variantIdx < variantSize; ++variantIdx)
+        {
+            int sourceVal = unpackNumber(text[charIdx], text[charIdx + 1], shift);
+            sourceVal += prevVal;
+
+            assert(curVariant.count(sourceVal) == 0);
+            curVariant.insert(sourceVal);
+
+            prevVal = sourceVal;
+            charIdx += shift;
+        }
+
+        curSegment.emplace_back(move(curVariant));
+        curVariant.clear();
+    }
+
+    assert(not curSegment.empty());
+
+    addReferenceSources(curSegment, sourceCount);
+    ret.emplace_back(move(curSegment));
+
+    return ret;
 }
 
 unordered_map<unsigned, vector<set<int>>> Sopang::sourcesToSourceMap(unsigned nSegments,
