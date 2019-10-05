@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -30,6 +31,9 @@ public:
     static std::vector<std::vector<std::set<int>>> parseSources(std::string sourcesStr, int &sourceCount);
     static std::vector<std::vector<std::set<int>>> parseSourcesCompressed(const std::string &sourcesStr, int &sourceCount);
 
+    static std::unordered_map<unsigned, std::vector<std::set<int>>> sourcesToSourceMap(unsigned nSegments,
+        const unsigned *segmentSizes, const std::vector<std::vector<std::set<int>>> &sources);
+
     /*
      *** MATCHING
      */
@@ -45,7 +49,7 @@ public:
 
     std::unordered_set<unsigned> matchWithSources(const std::string *const *segments,
         unsigned nSegments, const unsigned *segmentSizes,
-        const std::vector<std::vector<std::set<int>>> &sources,
+        const std::unordered_map<unsigned, std::vector<std::set<int>>> &sourceMap,
         const std::string &pattern, const std::string &alphabet);
 
 private:

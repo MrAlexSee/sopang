@@ -343,10 +343,28 @@ vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
     return ret;
 }
 
-std::vector<std::vector<std::set<int>>> parseSourcesCompressed(const std::string &sourcesStr, int &sourceCount)
+vector<vector<set<int>>> Sopang::parseSourcesCompressed(const string &sourcesStr, int &sourceCount)
 {
     // TODO
     return {};
+}
+
+unordered_map<unsigned, vector<set<int>>> Sopang::sourcesToSourceMap(unsigned nSegments,
+    const unsigned *segmentSizes, const vector<vector<set<int>>> &sources)
+{
+    unordered_map<unsigned, vector<set<int>>> ret;
+    size_t arrayIndex = 0;
+
+    for (unsigned iS = 0; iS < nSegments; ++iS)
+    {
+        if (segmentSizes[iS] > 1)
+        {
+            ret[iS] = sources[arrayIndex];
+            arrayIndex += 1;
+        }
+    }
+
+    return ret;
 }
 
 unordered_set<unsigned> Sopang::match(const string *const *segments,
@@ -479,7 +497,7 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
 
 unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
                                                  unsigned nSegments, const unsigned *segmentSizes,
-                                                 const vector<vector<set<int>>> &sources,
+                                                 const unordered_map<unsigned, vector<set<int>>> &sourceMap,
                                                  const string &pattern, const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
@@ -490,18 +508,10 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
     const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
     uint64_t D = allOnes;
 
-    map<int, int> indexToSourceIndex; // segment index -> sources vector index
-    map<int, pair<int, int>> indexToMatch; // segment index -> (variant index, char in variant index)
-
-    int nonDetSegmentIndex = 0;
+    map<unsigned, pair<int, int>> indexToMatch; // segment index -> (variant index, char in variant index).
 
     for (unsigned iS = 0; iS < nSegments; ++iS)
     {
-        if (segmentSizes[iS] > 0)
-        {
-            indexToSourceIndex[iS] = nonDetSegmentIndex++;
-        }
-
         for (unsigned iD = 0; iD < segmentSizes[iS]; ++iD)
         {
             dBuffer[iD] = D;

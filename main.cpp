@@ -57,15 +57,15 @@ string readInputText();
 vector<string> readPatterns();
 vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes);
 
-/** Runs sopang for [segmentData] and [sources] (which may be empty), searching for [patterns]. */
-void runSopang(const SegmentData &segmentData, const vector<vector<set<int>>> &sources,
+/** Runs sopang for [segmentData] and [sourceMap] (which may be empty), searching for [patterns]. */
+void runSopang(const SegmentData &segmentData, const unordered_map<unsigned, vector<set<int>>> &sourceMap,
     const vector<string> &patterns);
 
 /** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segmentData]. */
 void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSizeMB);
 
-/** Searches for [pattern] in [segmentData] and [sources] (which may be empty) and returns elapsed time in seconds. */
-double measure(const SegmentData &segmentData, const vector<vector<set<int>>> &sources,
+/** Searches for [pattern] in [segmentData] and [sourceMap] (which may be empty) and returns elapsed time in seconds. */
+double measure(const SegmentData &segmentData, const unordered_map<unsigned, vector<set<int>>> &sourceMap,
     const string &pattern);
 
 void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
@@ -106,7 +106,7 @@ int handleParams(int argc, const char **argv)
        ("in-text-file,i", po::value<string>(&params.inTextFile)->required(), "input text file path (positional arg 1)")
        ("in-pattern-file,I", po::value<string>(&params.inPatternFile)->required(), "input pattern file path (positional arg 2)")
        ("in-sources-file,S", po::value<string>(&params.inSourcesFile), "input sources file path")
-       ("in-compressed", "parse compressed input files")
+       ("in-compressed", "parse compressed input text or sources file")
        ("approx,k", po::value<int>(&params.kApprox), "perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12, not compatible with matching with sources)")
        ("out-file,o", po::value<string>(&params.outFile)->default_value("timings.txt"), "output file path")
        ("pattern-count,p", po::value<int>(&params.nPatterns), "maximum number of patterns read from top of the patterns file (non-positive values are ignored)")
@@ -222,14 +222,15 @@ int run()
         vector<string> patterns = readPatterns();
 
         SegmentData segmentData{ segments, nSegments, segmentSizes };
-        vector<vector<set<int>>> sources;
+        unordered_map<unsigned, vector<set<int>>> sourceMap;
 
         if (not params.inSourcesFile.empty())
         {
-            sources = readSources(nSegments, segmentSizes);
+            vector<vector<set<int>>> sources = readSources(nSegments, segmentSizes);
+            sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
         }
 
-        runSopang(segmentData, sources, patterns);
+        runSopang(segmentData, sourceMap, patterns);
         clearMemory(segmentData);
     }
     catch (const exception &e)
@@ -249,6 +250,7 @@ string readInputText()
     if (params.decompressInput)
     {
         text = decompressZstd(text, params.zstdBufferSize);
+        cout << "Decompressed input text" << endl;
     }
 
     double textSizeMB = text.size() / 1000.0 / 1000.0;
@@ -265,7 +267,7 @@ string readInputText()
 vector<string> readPatterns()
 {
     string patternsStr = Helpers::readFile(params.inPatternFile);
-    cout << "Read patterns, #chars = " << patternsStr.size() << endl;
+    cout << "Read file: " << params.inPatternFile << endl;
 
     vector<string> patterns = Sopang::parsePatterns(patternsStr);
 
@@ -274,7 +276,7 @@ vector<string> readPatterns()
         patterns.resize(params.nPatterns);
     }
 
-    cout << "Parsed #patterns = " << patterns.size() << endl;
+    cout << boost::format("Parsed #patterns = %1%, #chars = %2%") % patterns.size() % patternsStr.size() << endl;
 
     if (patterns.empty())
     {
@@ -287,12 +289,26 @@ vector<string> readPatterns()
 vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes)
 {
     string sourcesStr = Helpers::readFile(params.inSourcesFile);
-    cout << "Read sources, #chars = " << sourcesStr.size() << endl;
+    cout << "Read file: " << params.inSourcesFile << endl;
 
+    vector<vector<set<int>>> sources;
     int sourceCount;
-    vector<vector<set<int>>> sources = Sopang::parseSources(sourcesStr, sourceCount);
 
-    cout << "Parsed sources for non-deterministic #segments = " << sources.size() << endl;
+    if (params.decompressInput)
+    {
+        sourcesStr = decompressZstd(sourcesStr, params.zstdBufferSize);
+        cout << "Decompressed sources text" << endl;
+
+        sources = Sopang::parseSourcesCompressed(sourcesStr, sourceCount);
+    }
+    else
+    {
+        sources = Sopang::parseSources(sourcesStr, sourceCount);
+    }
+
+    cout << boost::format("Parsed sources for non-deterministic #segments = %1%, #chars = %2%")
+        % sources.size() % sourcesStr.size() << endl;
+
     cout << "Source count = " << sourceCount << endl;
 
     if (sources.empty())
@@ -346,7 +362,7 @@ vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segment
     return sources;
 }
 
-void runSopang(const SegmentData &segmentData, const vector<vector<set<int>>> &sources, 
+void runSopang(const SegmentData &segmentData, const unordered_map<unsigned, vector<set<int>>> &sourceMap,
     const vector<string> &patterns)
 {
     assert(segmentData.nSegments > 0);
@@ -382,7 +398,7 @@ void runSopang(const SegmentData &segmentData, const vector<vector<set<int>>> &s
 
         cout << endl << msg << endl;
 
-        double elapsedSec = measure(segmentData, sources, pattern);
+        double elapsedSec = measure(segmentData, sourceMap, pattern);
         elapsedSecVec.push_back(elapsedSec);
     }
 
@@ -407,7 +423,7 @@ void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSiz
     *textSizeMB = static_cast<double>(*textSize) / 1000.0 / 1000.0;
 }
 
-double measure(const SegmentData &segmentData, const vector<vector<set<int>>> &sources,
+double measure(const SegmentData &segmentData, const unordered_map<unsigned, vector<set<int>>> &sourceMap,
     const string &pattern)
 {
     unordered_set<unsigned> res;
@@ -418,7 +434,7 @@ double measure(const SegmentData &segmentData, const vector<vector<set<int>>> &s
 
         if (params.kApprox > 0)
         {
-            if (not sources.empty())
+            if (not sourceMap.empty())
             {
                 throw runtime_error("matching with sources is not supported for approximate matching");
             }
@@ -430,7 +446,7 @@ double measure(const SegmentData &segmentData, const vector<vector<set<int>>> &s
         }
         else
         {
-            if (sources.empty())
+            if (sourceMap.empty())
             {
                 start = std::clock();
                 res = sopang.match(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
@@ -441,7 +457,7 @@ double measure(const SegmentData &segmentData, const vector<vector<set<int>>> &s
             {
                 start = std::clock();
                 res = sopang.matchWithSources(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
-                    sources, pattern, params.alphabet);
+                    sourceMap, pattern, params.alphabet);
                 end = std::clock();
             }
         }
