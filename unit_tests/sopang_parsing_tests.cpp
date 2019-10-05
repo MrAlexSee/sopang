@@ -337,4 +337,18 @@ TEST_CASE("is parsing sources for multiple segments correct 2", "[parsing]")
     REQUIRE(sources[1] == vector<set<int>>{ { 6 }, { 7 }, { 0 }, { 4 }, { 1 }, { 8 }, { 2, 3, 5, 9 } });
 }
 
+TEST_CASE("is converting sources to source map correct", "[parsing]")
+{
+    vector<vector<set<int>>> sources { { { 1, 2 }, { 3, 4 } }, { { 1 }, { 2, 3 }, { 4 } }, { { 3, 4 }, { 1, 2 } } };
+    vector<unsigned> segmentSizes { 1, 2, 3, 2, 1 };
+
+    unordered_map<unsigned, vector<set<int>>> sourceMap = Sopang::sourcesToSourceMap(segmentSizes.size(), segmentSizes.data(), sources);
+
+    REQUIRE(sourceMap.size() == 3);
+
+    REQUIRE(sourceMap[1].size() == 2);
+    REQUIRE(sourceMap[2].size() == 3);
+    REQUIRE(sourceMap[3].size() == 2);
+}
+
 } // namespace sopang
