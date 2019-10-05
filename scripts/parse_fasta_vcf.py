@@ -204,7 +204,7 @@ def parseFastaFileCompressed(args, sourcesMap, sourceCount, searchedChromosomeId
         charIdx += len(line) - 1
         processedLinesCount += 1
 
-    print("\nFinished parsing the fasta file")
+    print("\nFinished parsing the fasta file, ED text size = {0}".format(len(text)))
     print("Processed VCF #positions = {0}, processed genome #lines = {1}".format(processedVcfPositionsCount, processedLinesCount))
 
     dumpCompressedFiles(args, text, sourcesText)
@@ -268,6 +268,7 @@ def parseFastaFileBuffered(args, sourcesMap, sourceCount, searchedChromosomeId):
     inGenome = False
 
     processedVcfPositionsCount, processedLinesCount = 0, 0
+    edTextSize = 0
 
     outBufferSize = 1000
     bufferedWritesCount = 0
@@ -301,10 +302,12 @@ def parseFastaFileBuffered(args, sourcesMap, sourceCount, searchedChromosomeId):
             outTextFileHandle.write(text)
             outSourcesFileHandle.write(sourcesText)
 
+            edTextSize += len(text)
+
             text, sourcesText = "", ""
             bufferedWritesCount += 1
 
-    print("\nFinished parsing the fasta file")
+    print("\nFinished parsing the fasta file, ED text size = {0}".format(edTextSize))
     print("Processed VCF #positions = {0}, processed genome #lines = {1}".format(processedVcfPositionsCount, processedLinesCount))
 
     print("Dumped ED text to: {0} and ED sources to: {1}, performed #writes = {2}".format(args["<output-chr.eds>"], args["<output-sources.edss>"], bufferedWritesCount))
