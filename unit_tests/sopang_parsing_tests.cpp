@@ -337,6 +337,70 @@ TEST_CASE("is parsing sources for multiple segments correct 2", "[parsing]")
     REQUIRE(sources[1] == vector<set<int>>{ { 6 }, { 7 }, { 0 }, { 4 }, { 1 }, { 8 }, { 2, 3, 5, 9 } });
 }
 
+TEST_CASE("is parsing compressed sources for a single segment correct", "[parsing]")
+{
+    string sourceStr = "8\n";
+    sourceStr += static_cast<char>(127); // segment start
+    sourceStr += static_cast<char>(131); // len = 3 (+128)
+    sourceStr += static_cast<char>(128); // 0 (+128)
+    sourceStr += static_cast<char>(129); // diff = 1 (+128)
+    sourceStr += static_cast<char>(129); // diff = 1 (+128)
+    sourceStr += static_cast<char>(130); // len = 2 (+128)
+    sourceStr += static_cast<char>(131); // 3 (+128)
+    sourceStr += static_cast<char>(130); // diff = 2 (+128)
+    sourceStr += static_cast<char>(129); // len = 1 (+128)
+    sourceStr += static_cast<char>(135); // 7 (+128)
+
+    int sourceCount;
+    const auto sources = Sopang::parseSourcesCompressed(sourceStr, sourceCount);
+
+    REQUIRE(sourceCount == 8);
+    REQUIRE(sources.size() == 1);
+
+    const auto variants = sources[0];
+    REQUIRE(variants.size() == 4);
+
+    REQUIRE(variants[0] == set<int>{ 0, 1, 2 });
+    REQUIRE(variants[1] == set<int>{ 3, 5 });
+    REQUIRE(variants[2] == set<int>{ 7 });
+    REQUIRE(variants[3] == set<int>{ 4, 6 }); // Reference sequence = remaining sources.
+}
+
+TEST_CASE("is parsing compressed sources for multiple segments correct", "[parsing]")
+{
+    string sourceStr = "3\n";
+    sourceStr += static_cast<char>(127); // segment start
+    sourceStr += static_cast<char>(130); // len = 2 (+128)
+    sourceStr += static_cast<char>(128); // 0 (+128)
+    sourceStr += static_cast<char>(130); // diff = 2 (+128)
+    sourceStr += static_cast<char>(127); // segment start
+    sourceStr += static_cast<char>(129); // len = 1 (+128)
+    sourceStr += static_cast<char>(128); // 0 (+128)
+    sourceStr += static_cast<char>(127); // segment start
+    sourceStr += static_cast<char>(130); // len = 2 (+128)
+    sourceStr += static_cast<char>(129); // 1 (+128)
+    sourceStr += static_cast<char>(129); // diff = 1 (+128)
+
+    int sourceCount;
+    const auto sources = Sopang::parseSourcesCompressed(sourceStr, sourceCount);
+
+    REQUIRE(sourceCount == 3);
+    REQUIRE(sources.size() == 3);
+
+    REQUIRE(sources[0].size() == 2);
+    REQUIRE(sources[1].size() == 2);
+    REQUIRE(sources[2].size() == 2);
+
+    REQUIRE(sources[0][0] == set<int>{ 0, 2 });
+    REQUIRE(sources[0][1] == set<int>{ 1 });
+
+    REQUIRE(sources[1][0] == set<int>{ 0 });
+    REQUIRE(sources[1][1] == set<int>{ 1, 2 });
+
+    REQUIRE(sources[2][0] == set<int>{ 1, 2 });
+    REQUIRE(sources[2][1] == set<int>{ 0 });
+}
+
 TEST_CASE("is converting sources to source map correct", "[parsing]")
 {
     vector<vector<set<int>>> sources { { { 1, 2 }, { 3, 4 } }, { { 1 }, { 2, 3 }, { 4 } }, { { 3, 4 }, { 1, 2 } } };
