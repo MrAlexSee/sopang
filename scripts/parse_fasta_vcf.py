@@ -270,7 +270,7 @@ def parseFastaFileBuffered(args, sourcesMap, sourceCount, searchedChromosomeId):
     processedVcfPositionsCount, processedLinesCount = 0, 0
     edTextSize = 0
 
-    outBufferSize = 1000
+    outBufferSize = 4096
     bufferedWritesCount = 0
 
     for lineIdx, line in enumerate(open(args["<input-chr.fa>"], "r"), 1):
@@ -306,6 +306,12 @@ def parseFastaFileBuffered(args, sourcesMap, sourceCount, searchedChromosomeId):
 
             text, sourcesText = "", ""
             bufferedWritesCount += 1
+
+    outTextFileHandle.write(text)
+    outSourcesFileHandle.write(sourcesText)
+
+    edTextSize += len(text)
+    bufferedWritesCount += 1
 
     print("\nFinished parsing the fasta file, ED text size = {0}".format(edTextSize))
     print("Processed VCF #positions = {0}, processed genome #lines = {1}".format(processedVcfPositionsCount, processedLinesCount))
