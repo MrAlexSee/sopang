@@ -339,20 +339,20 @@ TEST_CASE("is parsing sources for multiple segments correct 2", "[parsing]")
 
 TEST_CASE("is parsing compressed sources for a single segment correct", "[parsing]")
 {
-    string sourceStr = "8\n";
-    sourceStr += static_cast<char>(127); // segment start
-    sourceStr += static_cast<char>(131); // len = 3 (+128)
-    sourceStr += static_cast<char>(128); // 0 (+128)
-    sourceStr += static_cast<char>(129); // diff = 1 (+128)
-    sourceStr += static_cast<char>(129); // diff = 1 (+128)
-    sourceStr += static_cast<char>(130); // len = 2 (+128)
-    sourceStr += static_cast<char>(131); // 3 (+128)
-    sourceStr += static_cast<char>(130); // diff = 2 (+128)
-    sourceStr += static_cast<char>(129); // len = 1 (+128)
-    sourceStr += static_cast<char>(135); // 7 (+128)
+    string sourcesStr = "8\n";
+    sourcesStr += static_cast<char>(127); // segment start
+    sourcesStr += static_cast<char>(131); // len = 3 (+128)
+    sourcesStr += static_cast<char>(128); // 0 (+128)
+    sourcesStr += static_cast<char>(129); // diff = 1 (+128)
+    sourcesStr += static_cast<char>(129); // diff = 1 (+128)
+    sourcesStr += static_cast<char>(130); // len = 2 (+128)
+    sourcesStr += static_cast<char>(131); // 3 (+128)
+    sourcesStr += static_cast<char>(130); // diff = 2 (+128)
+    sourcesStr += static_cast<char>(129); // len = 1 (+128)
+    sourcesStr += static_cast<char>(135); // 7 (+128)
 
     int sourceCount;
-    const auto sources = Sopang::parseSourcesCompressed(sourceStr, sourceCount);
+    const auto sources = Sopang::parseSourcesCompressed(sourcesStr, sourceCount);
 
     REQUIRE(sourceCount == 8);
     REQUIRE(sources.size() == 1);
@@ -368,21 +368,21 @@ TEST_CASE("is parsing compressed sources for a single segment correct", "[parsin
 
 TEST_CASE("is parsing compressed sources for multiple segments correct", "[parsing]")
 {
-    string sourceStr = "3\n";
-    sourceStr += static_cast<char>(127); // segment start
-    sourceStr += static_cast<char>(130); // len = 2 (+128)
-    sourceStr += static_cast<char>(128); // 0 (+128)
-    sourceStr += static_cast<char>(130); // diff = 2 (+128)
-    sourceStr += static_cast<char>(127); // segment start
-    sourceStr += static_cast<char>(129); // len = 1 (+128)
-    sourceStr += static_cast<char>(128); // 0 (+128)
-    sourceStr += static_cast<char>(127); // segment start
-    sourceStr += static_cast<char>(130); // len = 2 (+128)
-    sourceStr += static_cast<char>(129); // 1 (+128)
-    sourceStr += static_cast<char>(129); // diff = 1 (+128)
+    string sourcesStr = "3\n";
+    sourcesStr += static_cast<char>(127); // segment start
+    sourcesStr += static_cast<char>(130); // len = 2 (+128)
+    sourcesStr += static_cast<char>(128); // 0 (+128)
+    sourcesStr += static_cast<char>(130); // diff = 2 (+128)
+    sourcesStr += static_cast<char>(127); // segment start
+    sourcesStr += static_cast<char>(129); // len = 1 (+128)
+    sourcesStr += static_cast<char>(128); // 0 (+128)
+    sourcesStr += static_cast<char>(127); // segment start
+    sourcesStr += static_cast<char>(130); // len = 2 (+128)
+    sourcesStr += static_cast<char>(129); // 1 (+128)
+    sourcesStr += static_cast<char>(129); // diff = 1 (+128)
 
     int sourceCount;
-    const auto sources = Sopang::parseSourcesCompressed(sourceStr, sourceCount);
+    const auto sources = Sopang::parseSourcesCompressed(sourcesStr, sourceCount);
 
     REQUIRE(sourceCount == 3);
     REQUIRE(sources.size() == 3);
