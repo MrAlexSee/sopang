@@ -1,6 +1,9 @@
 ## Basic information
 
-This software is called **SOPanG** (Shift-Or for Pan-Genome). It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model). Authors: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
+This software is called **SOPanG** (Shift-Or for Pan-Genome).
+It can be used for matching patterns in elastic-degenerate (ED) text (simplified pan-genome model).
+Authors for the current release version: Aleksander Cisłak, Szymon Grabowski.
+Authors of the SOPanG algorithm: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
 
 Published as an applications note entitled *SOPanG: online text searching over a pan-genome* (Cisłak, Grabowski, Holub), Bioinformatics, Vol. 34, Issue 24, 12/2018, pp. 4290-4292.
 DOI link: https://doi.org/10.1093/bioinformatics/bty506.
@@ -14,7 +17,8 @@ Note that, e.g., `{AC,CG}` and `{AC, CG}` are not the same (the latter would exp
 Therefore, you should not use whitespaces in the ED text if not intended.
 For more information regarding this format, consult, e.g., *Efficient pattern matching in elastic-degenerate texts* (Iliopoulos et al., 2017).
 
-SOPanG returns the end positions of pattern occurrences in the ED text. More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).
+SOPanG returns the end positions of pattern occurrences in the ED text.
+More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).
 
 #### Sources
 
@@ -66,6 +70,8 @@ This package contains a script `run_all.sh`, which allows for processing multipl
 * End-to-end tests are located in the `end_to_end_tests` folder and they can be run using the `run_tests.sh` script in that folder.
 
 * Performance testing tools are located in the `performance_tests` folder, see below for details.
+
+* Python prototypes are located in the `prototypes` folder.
 
 * Python tools are located in the `scripts` folder, see below for details.
 
@@ -135,11 +141,12 @@ A complete testing procedure is as follows.
 
 ## Scripts
 
-All Python (Python 3, tested with Python 3.6.8) scripts are located in the `scripts` folder. Their command line parameters are described as docopt interfaces at the top of each file.
+All Python (Python 3, tested with Python 3.6.8) scripts are located in the `scripts` folder.
+Their command line parameters are described as docopt interfaces at the top of each file.
 
 Script name                         | Description
 ----------------------------------- | ------------------------------
 `ed_histogram.py`                   | Prints the histogram of character counts in deterministic/non-deterministic segments.
 `generate_synth_ed_text.py`         | Generates synthetic elastic-degenerate text.
 `generate_synth_sources.py`         | Generates a synthetic sources file for elastic-degenerate text.
-`parse_fasta_vcf_to_ed_sources.py`  | Parses a .fasta and .vcf file pair in order to obtain elastic-degenerate text with sources.
+`parse_fasta_vcf.py`                | Parses a .fasta and .vcf file pair in order to obtain elastic-degenerate text with sources.
