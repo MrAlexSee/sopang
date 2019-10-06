@@ -112,63 +112,64 @@ def getSourcesMapFromVcfReader(vcfReader, lineCount):
 def packNumber(x):
     assert isinstance(x, int)
     if x < 128:
-        return chr(128 + x)
+        return [128 + x]
     else:
-        return chr(int(x / 128)) + chr(128 + (x % 128))
+        return [int(x / 128), 128 + (x % 128)]
 
 
 def processLineCompressed(line, charIdx, sourcesMap):
-    text, sourcesText = "", ""
+    textBytes, sourceBytes = [], []
     processedVcfPositionsCount = 0
 
-    sourceSegmentStartMark = chr(127)
+    sourceSegmentStartMark = [127]
 
     for curChar in line[ : -1].upper():
         if charIdx not in sourcesMap:
-            text += curChar
+            textBytes += [ord(curChar)]
+
             charIdx += 1
             continue
 
         assert len(sourcesMap[charIdx]) > 0
 
-        text += "{"
-        sourcesText += sourceSegmentStartMark
+        textBytes += [ord("{")]
+        sourceBytes += sourceSegmentStartMark
 
         for altSequence, sourceIndexes in sourcesMap[charIdx].items():
-            text += altSequence + ","
+            textBytes += [ord(c) for c in altSequence + ","]
 
             sourceIndexList = sorted(list(sourceIndexes))
             assert sourceIndexList
 
-            sourcesText += packNumber(len(sourceIndexList))
-            sourcesText += packNumber(sourceIndexList[0])
+            sourceBytes += packNumber(len(sourceIndexList))
+            sourceBytes += packNumber(sourceIndexList[0])
 
             for i in range(1, len(sourceIndexList), 1):
                 diff = sourceIndexList[i] - sourceIndexList[i - 1]
                 assert diff > 0
 
-                sourcesText += packNumber(diff)
+                sourceBytes += packNumber(diff)
 
-        text += curChar + "}"
+        textBytes += [ord(c) for c in (curChar, "}")]
 
         charIdx += 1
         processedVcfPositionsCount += 1
 
-    return text, sourcesText, processedVcfPositionsCount
+    return textBytes, sourceBytes, processedVcfPositionsCount
 
 
-def dumpCompressedFiles(args, text, sourcesText):
+def dumpCompressedFiles(args, textBytes, sourceBytes):
     zstdCompressionLevel = 22
     print("Using zstd compression level = {0}".format(zstdCompressionLevel))
 
-    print("Original text size = {0}".format(len(text)))
-    text = zstd.compress(text.encode(), zstdCompressionLevel)
+    print("Original text size = {0}".format(len(textBytes)))
+    text = zstd.compress(textBytes, zstdCompressionLevel)
 
     with open(args["<output-chr.eds>"], "wb") as f:
         f.write(text)
 
-    print("Original sources size = {0}".format(len(sourcesText)))
-    sourcesText = zstd.compress(sourcesText.encode(), zstdCompressionLevel)
+    print("Original sources size = {0}".format(len(sourceBytes)))
+    sourcesText = zstd.compress(sourceBytes, zstdCompressionLevel)
 
     with open(args["<output-sources.edss>"], "wb") as f:
         f.write(sourcesText)
@@ -177,8 +178,7 @@ def dumpCompressedFiles(args, text, sourcesText):
 
 
 def parseFastaFileCompressed(args, sourcesMap, sourceCount, searchedChromosomeId):
-    text = ""
-    sourcesText = "{0}\n".format(sourceCount)
+    textBytes, sourceBytes = [], []
 
     inGenome = False
     charIdx = 0
@@ -201,19 +201,24 @@ def parseFastaFileCompressed(args, sourcesMap, sourceCount, searchedChromosomeId
         if not inGenome:
             continue
 
-        curText, curSourcesText, curProcessedVcfPositionsCount = processLineCompressed(line, charIdx, sourcesMap)
+        curTextBytes, curSourceBytes, curProcessedVcfPositionsCount = processLineCompressed(line, charIdx, sourcesMap)
 
-        text += curText
-        sourcesText += curSourcesText
+        textBytes += curTextBytes
+        sourceBytes += curSourceBytes
         processedVcfPositionsCount += curProcessedVcfPositionsCount
 
         charIdx += len(line) - 1
         processedLinesCount += 1
 
-    print("\nFinished parsing the fasta file, ED text size = {0}".format(len(text)))
+    print("\nFinished parsing the fasta file, ED text size = {0}".format(len(textBytes)))
     print("Processed VCF #positions = {0}, processed genome #lines = {1}".format(processedVcfPositionsCount, processedLinesCount))
 
-    dumpCompressedFiles(args, text, sourcesText)
+    textBytes = bytes(textBytes)
+
+    sourcesHeader = "{0}\n".format(sourceCount).encode('ascii')
+    sourceBytes = bytes(sourcesHeader) + bytes(sourceBytes)
+
+    dumpCompressedFiles(args, textBytes, sourceBytes)
 
 
 def processLine(line, charIdx, sourcesMap, sourceCount):
