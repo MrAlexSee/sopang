@@ -297,8 +297,6 @@ vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segment
     if (params.decompressInput)
     {
         sourcesStr = decompressZstd(sourcesStr, params.zstdBufferSize);
-        cout << "Decompressed sources text" << endl;
-
         sources = Sopang::parseSourcesCompressed(sourcesStr, sourceCount);
     }
     else
