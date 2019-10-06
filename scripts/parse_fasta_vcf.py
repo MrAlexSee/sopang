@@ -138,12 +138,16 @@ def processLineCompressed(line, charIdx, sourcesMap):
             text += altSequence + ","
 
             sourceIndexList = sorted(list(sourceIndexes))
+            assert sourceIndexList
 
             sourcesText += packNumber(len(sourceIndexList))
             sourcesText += packNumber(sourceIndexList[0])
 
             for i in range(1, len(sourceIndexList), 1):
-                sourcesText += packNumber(sourceIndexList[i] - sourceIndexList[i - 1])
+                diff = sourceIndexList[i] - sourceIndexList[i - 1]
+                assert diff > 0
+
+                sourcesText += packNumber(diff)
 
         text += curChar + "}"
 
@@ -157,11 +161,13 @@ def dumpCompressedFiles(args, text, sourcesText):
     zstdCompressionLevel = 22
     print("Using zstd compression level = {0}".format(zstdCompressionLevel))
 
+    print("Original text size = {0}".format(len(text)))
     text = zstd.compress(text.encode(), zstdCompressionLevel)
 
     with open(args["<output-chr.eds>"], "wb") as f:
         f.write(text)
 
+    print("Original sources size = {0}".format(len(sourcesText)))
     sourcesText = zstd.compress(sourcesText.encode(), zstdCompressionLevel)
 
     with open(args["<output-sources.edss>"], "wb") as f:
