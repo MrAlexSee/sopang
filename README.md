@@ -35,15 +35,18 @@ This indicates the following.
 * For the 2nd segment, `CG` is associated with sources `0` and `2`, `N` with source `3`, and `TT` (the reference sequence) is associated with the remaining source `1`.
 
 In every segment, each variant is associated with some sources. Moreover, each source must be associated with exactly one variant from every segment.
-The proposed format of the sources data was described in such a way as to be consistent with the ED text, that is, it also consists of curly braces and commas as delimiters.
-Other formats could be also defined.
+The proposed human-readable format of the sources data was described in such a way as to be consistent with the ED text, that is, it also consists of curly braces and commas as delimiters.
 
 The sources file should have two lines in total.
 
 * The first line contains the source count, e.g., 10 if there are 10 sources (individuals).
 * The second line contains a contiguous string with the data described above.
 
-We choose the following naming convention: `.eds` for ED text and `.edss` for the corresponding sources file.
+We also offer a compressed sources format, which is not human-readable.
+It is recommended for practical use, as the resulting files are expected to be at least an order of magnitude smaller.
+It is based on variable-length differential coding and the use of Zstandard compression library.
+
+We choose the following naming convention: `.eds` for ED text and `.edss` for the corresponding sources file, or `.edz` and `.edsz` for compressed versions of these files.
 In order to use SOPanG for matching with sources, supply the path to the sources file in the format described above via the parameter `-S`.
 
 ## Compilation
@@ -88,6 +91,7 @@ Short name | Long name               | Parameter description
 `-i`       | `--in-text-file arg`    | input text file path (positional arg 1)
 `-I`       | `--in-pattern-file arg` | input pattern file path (positional arg 2)
 `-S`       | `--in-sources-file arg` | input sources file path
+&nbsp;     | `--in-compressed`       | parse compressed input text or sources file
 `-k`       | `--approx arg`          | perform approximate search (Hamming distance) for k errors (preliminary, max pattern length = 12, not compatible with matching with sources)
 `-o`       | `--out-file arg`        | output file path (default = timings.txt)
 `-p`       | `--pattern-count arg`   | maximum number of patterns read from top of the patterns file (non-positive values are ignored)
@@ -98,8 +102,9 @@ Short name | Long name               | Parameter description
 #### params.hpp
 
 Parameter name  | Parameter description
---------------- | ---------------------
-`alphabet`      | A set of symbols occurring in input (ED) text file or input pattern file.
+---------------- | ---------------------
+`alphabet`       | A set of symbols occurring in input (ED) text file or input pattern file.
+`zstdBufferSize` | Input and output buffer size used for Zstandard library streaming decompression. 
 
 #### sopang.hpp
 
