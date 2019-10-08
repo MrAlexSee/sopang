@@ -14,5 +14,5 @@ for i in $(seq 1 ${maxChromosomeId});
 do
     echo $i
 
-    python3 ./${scriptsDirPath}/parse_fasta_vcf_to_ed_sources.py ${dataDirPath}/${inputFastaFileName} ${dataDirPath}/chr${i}.vcf ${dataDirPath}/chr${i}.eds ${dataDirPath}/chr${i}.edss
+    python3 ./${scriptsDirPath}/parse_fasta_vcf.py ${dataDirPath}/${inputFastaFileName} ${dataDirPath}/chr${i}.vcf ${dataDirPath}/chr${i}.edz ${dataDirPath}/chr${i}.edsz --compress
 done
