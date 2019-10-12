@@ -2,6 +2,7 @@
 
 #include "helpers.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <string>
@@ -213,7 +214,8 @@ void addReferenceSources(vector<set<int>> &segment, int sourceCount)
     segment.emplace_back(move(referenceVariant));
 }
 
-void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, string &curNumber, vector<vector<set<int>>> &sources, int sourceCount, size_t charIdx)
+void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, string &curNumber,
+    vector<vector<set<int>>> &sources, int sourceCount, size_t charIdx)
 {
     handleSourceNumberEnd(curNumber, curVariant, charIdx);
     handleSourceVariantEnd(curVariant, curSegment);
@@ -441,14 +443,14 @@ unordered_map<unsigned, vector<set<int>>> Sopang::sourcesToSourceMap(unsigned nS
     const unsigned *segmentSizes, const vector<vector<set<int>>> &sources)
 {
     unordered_map<unsigned, vector<set<int>>> ret;
-    size_t arrayIndex = 0;
+    size_t arrayIdx = 0;
 
     for (unsigned iS = 0; iS < nSegments; ++iS)
     {
         if (segmentSizes[iS] > 1)
         {
-            ret[iS] = sources[arrayIndex];
-            arrayIndex += 1;
+            ret[iS] = sources[arrayIdx];
+            arrayIdx += 1;
         }
     }
 
@@ -456,12 +458,12 @@ unordered_map<unsigned, vector<set<int>>> Sopang::sourcesToSourceMap(unsigned nS
 }
 
 unordered_set<unsigned> Sopang::match(const string *const *segments,
-                                      unsigned nSegments, const unsigned *segmentSizes,
-                                      const string &pattern, const string &alphabet)
+    unsigned nSegments, const unsigned *segmentSizes,
+    const string &pattern, const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
-    unordered_set<unsigned> res;
 
+    unordered_set<unsigned> res;
     fillPatternMaskBuffer(pattern, alphabet);
 
     const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
@@ -507,9 +509,9 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
 }
 
 unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
-                                            unsigned nSegments, const unsigned *segmentSizes,
-                                            const string &pattern, const string &alphabet,
-                                            unsigned k)
+    unsigned nSegments, const unsigned *segmentSizes,
+    const string &pattern, const string &alphabet,
+    unsigned k)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= maxPatternApproxSize);
     assert(k > 0);
@@ -583,20 +585,113 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
     return res;
 }
 
+namespace
+{
+    bool verifyMatch(const string *const *segments,
+        const unsigned *segmentSizes,
+        const unordered_map<unsigned, vector<set<int>>> &sourceMap,
+        const string &pattern,
+        unsigned matchIdx,
+        const pair<unsigned, size_t> &match)
+    {
+        size_t patternCharIdx = pattern.size() - match.second - 2;
+
+        if (patternCharIdx < 0) 
+            return true;
+
+        vector<pair<set<int>, size_t>> leaves;
+
+        bool setLeafSources = false;
+        set<int> rootSources;
+        
+        if (sourceMap.count(matchIdx) > 0)
+        {
+            rootSources = sourceMap.at(matchIdx)[match.first];
+            setLeafSources = true;
+        }
+
+        leaves.emplace_back(make_pair(move(rootSources), patternCharIdx));
+        int segmentIdx = static_cast<int>(matchIdx - 1);
+
+        const auto sourcesIntersection = [&setLeafSources](const set<int> &variantSources, const set<int> &leafSources)
+        {
+            if (not setLeafSources)
+            {
+                return variantSources;
+            }
+
+            set<int> ret;
+            set_intersection(variantSources.begin(), variantSources.end(),
+                leafSources.begin(), leafSources.end(), inserter(ret, ret.begin()));
+
+            return ret;
+        };
+
+        while (not leaves.empty() and segmentIdx >= 0)
+        {
+            if (segmentSizes[segmentIdx] == 1)
+            {
+                for (auto &leaf : leaves)
+                {
+                    leaf.second -= segments[segmentIdx][0].size();
+
+                    if (leaf.second < 0)
+                        return true;
+                }
+            }
+            else
+            {
+                vector<pair<set<int>, size_t>> newLeaves;
+                newLeaves.reserve(segmentSizes[segmentIdx]);
+                
+                for (const auto &leaf : leaves)
+                {
+                    for (unsigned variantIdx = 0; variantIdx < segmentSizes[segmentIdx]; ++variantIdx)
+                    {
+                        assert(sourceMap.count(variantIdx) > 0 and sourceMap.at(variantIdx).size() == segmentSizes[segmentIdx]);
+                        const set<int> &variantSources = sourceMap.at(segmentIdx)[variantIdx];
+
+                        if (segments[segmentIdx][variantIdx].empty())
+                        {
+                            const set<int> newSources = sourcesIntersection(variantSources, leaf.first);
+
+                            if (not newSources.empty())
+                            {
+                                newLeaves.emplace_back(make_pair(move(newSources), leaf.second));
+                            }
+                        }
+                        else
+                        {
+                            int curCharIdx = static_cast<int>(segments[segmentIdx][variantIdx].size() - 1);
+                            int curPatternIdx = static_cast<int>(leaf.second);
+                        }
+                    }
+                }
+
+                leaves = newLeaves;
+            }
+
+            segmentIdx -= 1;
+            setLeafSources = true;
+        }
+
+        return false;
+    }
+} // namespace (anonymous)
+
 unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
-                                                 unsigned nSegments, const unsigned *segmentSizes,
-                                                 const unordered_map<unsigned, vector<set<int>>> &sourceMap,
-                                                 const string &pattern, const string &alphabet)
+    unsigned nSegments, const unsigned *segmentSizes,
+    const unordered_map<unsigned, vector<set<int>>> &sourceMap,
+    const string &pattern, const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
-
-    unordered_set<unsigned> res;
     fillPatternMaskBuffer(pattern, alphabet);
 
     const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
     uint64_t D = allOnes;
 
-    map<unsigned, pair<int, int>> indexToMatch; // segment index -> (variant index, char in variant index).
+    unordered_map<unsigned, pair<unsigned, size_t>> indexToMatch; // segment index -> (variant index, char in variant index)
+    indexToMatch.reserve(matchMapReserveSize);
 
     for (unsigned iS = 0; iS < nSegments; ++iS)
     {
@@ -613,7 +708,6 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
 
                 if ((dBuffer[iD] & hitMask) == 0x0ULL)
                 {
-                    res.insert(iS);
                     indexToMatch[iS] = make_pair(iD, iC);
                 }
             }
@@ -627,7 +721,15 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
         }
     }
 
-    // TODO: match the sources.
+    unordered_set<unsigned> res;
+    for (const auto &kv : indexToMatch)
+    {
+        if (verifyMatch(segments, segmentSizes, sourceMap, pattern, kv.first, kv.second))
+        {
+            res.insert(kv.first);
+        }
+    }
+
     return res;
 }
 

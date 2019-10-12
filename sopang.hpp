@@ -82,6 +82,8 @@ private:
     /** Segment start mark value in the compressed sources file. */
     static constexpr char segmentStartMark = static_cast<char>(127);
 
+    static constexpr size_t matchMapReserveSize = 32;
+
     uint64_t counterPosMasks[maxPatternApproxSize];
 
     uint64_t *dBuffer;
