@@ -594,12 +594,12 @@ namespace
         unsigned matchIdx,
         const pair<unsigned, size_t> &match)
     {
-        size_t patternCharIdx = pattern.size() - match.second - 2;
+        int patternCharIdx = static_cast<int>(pattern.size()) - match.second - 2;
 
-        if (patternCharIdx < 0) 
+        if (patternCharIdx < 0) // The match is fully contained within a single segment.
             return true;
 
-        vector<pair<set<int>, size_t>> leaves;
+        vector<pair<set<int>, int>> leaves;
 
         bool setLeafSources = false;
         set<int> rootSources;
@@ -641,14 +641,15 @@ namespace
             }
             else
             {
-                vector<pair<set<int>, size_t>> newLeaves;
-                newLeaves.reserve(segmentSizes[segmentIdx]);
+                assert(sourceMap.count(segmentIdx) > 0 and sourceMap.at(segmentIdx).size() == segmentSizes[segmentIdx]);
+
+                vector<pair<set<int>, int>> newLeaves;
+                newLeaves.reserve(leaves.size() * segmentSizes[segmentIdx]);
                 
                 for (const auto &leaf : leaves)
                 {
                     for (unsigned variantIdx = 0; variantIdx < segmentSizes[segmentIdx]; ++variantIdx)
                     {
-                        assert(sourceMap.count(variantIdx) > 0 and sourceMap.at(variantIdx).size() == segmentSizes[segmentIdx]);
                         const set<int> &variantSources = sourceMap.at(segmentIdx)[variantIdx];
 
                         if (segments[segmentIdx][variantIdx].empty())
@@ -664,6 +665,41 @@ namespace
                         {
                             int curCharIdx = static_cast<int>(segments[segmentIdx][variantIdx].size() - 1);
                             int curPatternIdx = static_cast<int>(leaf.second);
+
+                            while (curCharIdx >= 0)
+                            {
+                                if (curPatternIdx < 0)
+                                {
+                                    const set<int> newSources = sourcesIntersection(variantSources, leaf.first);
+
+                                    if (not newSources.empty())
+                                        return true;
+                                }
+
+                                if (pattern[curPatternIdx] != segments[segmentIdx][variantIdx][curCharIdx])
+                                    break;
+
+                                curCharIdx -= 1;
+                                curPatternIdx -= 1;
+                            }
+
+                            if (curPatternIdx < 0)
+                            {
+                                const set<int> newSources = sourcesIntersection(variantSources, leaf.first);
+
+                                if (not newSources.empty())
+                                    return true;
+                            }
+
+                            if (curCharIdx < 0)
+                            {
+                                const set<int> newSources = sourcesIntersection(variantSources, leaf.first);
+
+                                if (not newSources.empty())
+                                {
+                                    newLeaves.emplace_back(make_pair(move(newSources), curPatternIdx));
+                                }   
+                            }
                         }
                     }
                 }
@@ -690,7 +726,7 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
     const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
     uint64_t D = allOnes;
 
-    unordered_map<unsigned, pair<unsigned, size_t>> indexToMatch; // segment index -> (variant index, char in variant index)
+    unordered_map<unsigned, vector<pair<unsigned, size_t>>> indexToMatch; // segment index -> [(variant index, char in variant index)]
     indexToMatch.reserve(matchMapReserveSize);
 
     for (unsigned iS = 0; iS < nSegments; ++iS)
@@ -708,7 +744,12 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
 
                 if ((dBuffer[iD] & hitMask) == 0x0ULL)
                 {
-                    indexToMatch[iS] = make_pair(iD, iC);
+                    if (indexToMatch.count(iS) == 0)
+                    {
+                        indexToMatch[iS] = {};
+                    }
+
+                    indexToMatch[iS].emplace_back(make_pair(iD, iC));
                 }
             }
         }
@@ -724,9 +765,12 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
     unordered_set<unsigned> res;
     for (const auto &kv : indexToMatch)
     {
-        if (verifyMatch(segments, segmentSizes, sourceMap, pattern, kv.first, kv.second))
+        for (const auto &match : kv.second)
         {
-            res.insert(kv.first);
+            if (verifyMatch(segments, segmentSizes, sourceMap, pattern, kv.first, match))
+            {
+                res.insert(kv.first);
+            }
         }
     }
 
