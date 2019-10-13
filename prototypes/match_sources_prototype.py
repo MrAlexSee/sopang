@@ -370,6 +370,14 @@ def runTesting(verifyFun):
     assert verifyFun(text7, sources7, "ACACAC", indexToSourceIndex7, {4: (0, 1)}) == set([]) # 1-01-02-03 | 01-3-03
     assert verifyFun(text7, sources7, "ACACAT", indexToSourceIndex7, {4: (1, 1)}) == set([]) # 1-01-02-12 | 01-3-12
 
+    print("\n[Text 8]")
+    text8 = [["ACGT"]]
+
+    assert verifyFun(text8, [], "ACGT", {}, {0: (0, 3)}) == set([0])
+    assert verifyFun(text8, [], "ACG", {}, {0: (0, 2)}) == set([0])
+    assert verifyFun(text8, [], "AC", {}, {0: (0, 1)}) == set([0])
+    assert verifyFun(text8, [], "A", {}, {0: (0, 0)}) == set([0])
+
     print("\n!!All cases passed!!")
 
 
