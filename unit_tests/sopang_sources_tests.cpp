@@ -17,7 +17,7 @@ const string alphabet = "ACGTN";
 
 }
 
-TEST_CASE("is matching a single segment with empty sources correct for whole segment match", "[sources]")
+TEST_CASE("is matching a single segment with empty sources correct", "[sources]")
 {
     unsigned nSegments;
     unsigned *segmentSizes;
@@ -25,19 +25,7 @@ TEST_CASE("is matching a single segment with empty sources correct for whole seg
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, { }, "ACGT", alphabet);
-    REQUIRE(res == unordered_set<unsigned>{ 0 });
-}
-
-TEST_CASE("is matching a single segment with empty sources correct for partial segment match", "[sources]")
-{
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT", &nSegments, &segmentSizes);
-
-    Sopang sopang;
-
-    for (const string &pattern : { "ACG", "CGT" })
+    for (const string &pattern : { "ACGT", "ACG", "CGT", "AC", "CG", "GT", "A", "C", "G", "T" })
     {
         unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, { }, pattern, alphabet);
         REQUIRE(res == unordered_set<unsigned>{ 0 });
@@ -116,7 +104,7 @@ TEST_CASE("is matching sources for 4 segments with deterministic correct", "[sou
         REQUIRE(res == expected);
     };
 
-    testMatch("A", { 0 });
+    testMatch("A", { 0, 1, 2, 3 });
     testMatch("AN", { 0 });
     testMatch("ANT", { 0 });
     testMatch("GATTTAA", { 3 });
@@ -273,7 +261,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
     testMatch("ACANTAT", {  }); // 3-02-12
     testMatch("ANTACA", { 4 }); // 0-3 | 0-01-3 | 0-01-02-0 | 0-01-02-12 | 3-3-03 | 3-3-12
     testMatch("ANTACAC", { 4 }); // 0-01-3 | 0-01-02-03 | 3-3-03
-    testMatch("ANTACAT", { 4 }); // 0-01-02-12 | 3-3-12
+    testMatch("ANTACAT", { }); // 0-01-02-12 | 3-3-12
     testMatch("ACACAC", { }); // 1-01-01-3 | 1-01-02-03 | 01-3-03
     testMatch("ACACAT", { }); // 1-01-02-12 | 01-3-12
 }
