@@ -1,3 +1,4 @@
+#include <set>
 #include <string>
 #include <vector>
 
@@ -14,6 +15,28 @@ namespace
 {
 
 const string alphabet = "ACGTN";
+
+vector<vector<Sopang::SourceSet>> setToSourceSet(const vector<vector<set<int>>> &sources)
+{
+    vector<vector<Sopang::SourceSet>> ret;
+
+    for (const vector<set<int> &segment : sources)
+    {
+        vector<Sopang::SourceSet> tmp;
+
+        for (const set<int> &variant : segment)
+        {
+            for (const int source : variant)
+            {
+                tmp.set(source)
+            }
+        }
+
+        ret.emplace_back(move(tmp));
+    }
+
+    return ret;
+}
 
 }
 
@@ -39,7 +62,7 @@ TEST_CASE("is matching sources for 3 non-deterministic segments correct", "[sour
     const string *const *segments = Sopang::parseTextArray("{ANT,AC,GGT}{CG,A}{AG,C}", &nSegments, &segmentSizes);
 
     const vector<vector<set<int>>> sources { { { 0 }, { 1 }, { 2 } }, { { 0, 1 }, { 2 } }, { { 0 }, { 1, 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, setToSourceSet(sources));
 
     Sopang sopang;
 
@@ -67,7 +90,7 @@ TEST_CASE("is matching sources for 3 segments with deterministic correct", "[sou
     const string *const *segments = Sopang::parseTextArray("{ANT,AC,GGT}CGGA{CGAAA,A}", &nSegments, &segmentSizes);
 
     const vector<vector<set<int>>> sources { { { 0 }, { 1 }, { 2 } }, { { 0 }, { 1, 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, setToSourceSet(sources));
 
     Sopang sopang;
 
@@ -95,7 +118,7 @@ TEST_CASE("is matching sources for 4 segments with deterministic correct", "[sou
     const string *const *segments = Sopang::parseTextArray("{ANT,AC,GGT}CGGA{CGAAA,TTT,GGG}{AAC,TC}", &nSegments, &segmentSizes);
 
     const vector<vector<set<int>>> sources { { { 0 }, { 1 }, { 2 } }, { { 0 }, { 1 }, { 2 } }, { { 0, 1 }, { 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, setToSourceSet(sources));
 
     Sopang sopang;
 
@@ -136,7 +159,7 @@ TEST_CASE("is matching sources for 3 non-deterministic segments multiple matches
     const string *const *segments = Sopang::parseTextArray("{ANT,AC,GGT}{CGGA,ANT}{CG,AC}", &nSegments, &segmentSizes);
 
     const vector<vector<set<int>>> sources { { { 0 }, { 1 }, { 2 } }, { { 0, 1 }, { 2 } }, { { 0, 2 }, { 1 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, setToSourceSet(sources));
 
     Sopang sopang;
 
@@ -159,7 +182,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
     const string *const *segments = Sopang::parseTextArray("AA{ANT,AC,GGT,}CGGA{CGAAA,}{AAC,TC}", &nSegments, &segmentSizes);
 
     const vector<vector<set<int>>> sources { { { 0 }, { 1 }, { 2 }, { 3 } }, { { 0 }, { 1, 2, 3 } }, { { 0, 1 }, { 2, 3 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, setToSourceSet(sources));
 
     Sopang sopang;
 
@@ -222,7 +245,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
 
     const vector<vector<set<int>>> sources { { { 0 }, { 1 }, { 2, 3 } }, { { 0, 1 }, { 3 }, { 2 } },
                                              { { 0, 2 }, { 1 }, { 3 } }, { { 0 , 3 }, { 1, 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, setToSourceSet(sources));
 
     Sopang sopang;
 
@@ -248,7 +271,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
 
     const vector<vector<set<int>>> sources { { { 0 }, { 1 }, { 2, 3 } }, { { 2 }, { 3 }, { 0, 1 } },
                                              { { 1 }, { 3 }, { 0, 2 } }, { { 0 , 3 }, { 1, 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, setToSourceSet(sources));
 
     Sopang sopang;
 

@@ -3,7 +3,7 @@
  *** Authors for the current release version: Aleksander Cislak, Szymon Grabowski.
  *** Authors of the SOPanG algorithm: Aleksander Cislak, Szymon Grabowski, Jan Holub.
  *** License: GNU LGPL v3.
- *** Set BOOST_DIR in makefile and type "make" for optimized compile.
+ *** Type "make" for optimized compile.
  */
 
 #include "helpers.hpp"
@@ -55,17 +55,19 @@ int run();
 
 string readInputText();
 vector<string> readPatterns();
-vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes);
+vector<vector<Sopang::SourceSet>> readSources(unsigned nSegments, const unsigned *segmentSizes);
 
 /** Runs sopang for [segmentData] and [sourceMap] (which may be empty), searching for [patterns]. */
-void runSopang(const SegmentData &segmentData, const unordered_map<unsigned, vector<set<int>>> &sourceMap,
+void runSopang(const SegmentData &segmentData, 
+    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
     const vector<string> &patterns);
 
 /** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segmentData]. */
 void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSizeMB);
 
 /** Searches for [pattern] in [segmentData] and [sourceMap] (which may be empty) and returns elapsed time in seconds. */
-double measure(const SegmentData &segmentData, const unordered_map<unsigned, vector<set<int>>> &sourceMap,
+double measure(const SegmentData &segmentData,
+    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
     const string &pattern);
 
 void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
@@ -222,11 +224,11 @@ int run()
         vector<string> patterns = readPatterns();
 
         SegmentData segmentData{ segments, nSegments, segmentSizes };
-        unordered_map<unsigned, vector<set<int>>> sourceMap;
+        unordered_map<unsigned, vector<Sopang::SourceSet>> sourceMap;
 
         if (not params.inSourcesFile.empty())
         {
-            vector<vector<set<int>>> sources = readSources(nSegments, segmentSizes);
+            vector<vector<Sopang::SourceSet>> sources = readSources(nSegments, segmentSizes);
             sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
         }
 
@@ -286,12 +288,12 @@ vector<string> readPatterns()
     return patterns;
 }
 
-vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segmentSizes)
+vector<vector<Sopang::SourceSet>> readSources(unsigned nSegments, const unsigned *segmentSizes)
 {
     string sourcesStr = Helpers::readFile(params.inSourcesFile);
     cout << "Read file: " << params.inSourcesFile << endl;
 
-    vector<vector<set<int>>> sources;
+    vector<vector<Sopang::SourceSet>> sources;
     int sourceCount;
 
     if (params.decompressInput)
@@ -333,14 +335,14 @@ vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segment
         }
 
         // We check whether all sources are present for the current segment.
-        set<int> sourcesForSegment;
+        Sopang::SourceSet sourcesForSegment;
 
-        for (const set<int> &sourcesForVariant : sources[sourceIdx])
+        for (const Sopang::SourceSet &sourcesForVariant : sources[sourceIdx])
         {
-            sourcesForSegment.insert(sourcesForVariant.begin(), sourcesForVariant.end());
+            sourcesForSegment |= sourcesForVariant;
         }
 
-        if (sourcesForSegment.size() != static_cast<size_t>(sourceCount))
+        if (sourcesForSegment.count() != static_cast<size_t>(sourceCount))
         {
             throw runtime_error("not all sources are present for segment: " + to_string(sourceIdx));
         }
@@ -362,7 +364,8 @@ vector<vector<set<int>>> readSources(unsigned nSegments, const unsigned *segment
     return sources;
 }
 
-void runSopang(const SegmentData &segmentData, const unordered_map<unsigned, vector<set<int>>> &sourceMap,
+void runSopang(const SegmentData &segmentData,
+    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
     const vector<string> &patterns)
 {
     assert(segmentData.nSegments > 0);
@@ -423,7 +426,8 @@ void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSiz
     *textSizeMB = static_cast<double>(*textSize) / 1000.0 / 1000.0;
 }
 
-double measure(const SegmentData &segmentData, const unordered_map<unsigned, vector<set<int>>> &sourceMap,
+double measure(const SegmentData &segmentData,
+    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
     const string &pattern)
 {
     unordered_set<unsigned> res;

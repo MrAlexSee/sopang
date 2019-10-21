@@ -40,6 +40,11 @@ public:
     {
         return sopang.saCounterSize;
     }
+
+    inline static size_t getMaxSourceCount(const Sopang &sopang)
+    {
+        return sopang.maxSourceCount;
+    }
 };
 
 } // namespace sopang

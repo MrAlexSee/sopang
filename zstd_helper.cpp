@@ -6,9 +6,6 @@
 
 using namespace std;
 
-namespace sopang
-{
-
 string decompressZstd(const string &compressed, size_t bufferSize)
 {
     string ret;
@@ -45,5 +42,3 @@ string decompressZstd(const string &compressed, size_t bufferSize)
 
     return ret;
 }
-
-} // namespace sopang

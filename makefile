@@ -1,6 +1,6 @@
 CC        = g++
 CCFLAGS   = -Wall -pedantic -std=c++11
-# OPTFLAGS  = -DNDEBUG -O3
+OPTFLAGS  = -DNDEBUG -O3
 
 BOOST_DIR = "/home/alex/boost_1_67_0"
 ZSTD_DIR = "/home/alex/zstd/lib"
@@ -17,10 +17,10 @@ all: $(EXE)
 $(EXE): $(OBJ)
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
-main.o: main.cpp helpers.hpp params.hpp sopang.hpp
+main.o: main.cpp helpers.hpp params.hpp sopang.hpp zstd_helper.hpp
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c main.cpp
 
-sopang.o: sopang.cpp sopang.hpp helpers.hpp
+sopang.o: sopang.cpp sopang.hpp bitset.hpp helpers.hpp
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c sopang.cpp
 
 zstd_helper.o: zstd_helper.cpp zstd_helper.hpp

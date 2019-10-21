@@ -3,11 +3,6 @@
 
 #include <string>
 
-namespace sopang
-{
-
 std::string decompressZstd(const std::string &compressed, size_t bufferSize);
-
-} // namespace sopang
 
 #endif // ZSTD_HELPER_HPP

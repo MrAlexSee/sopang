@@ -78,7 +78,7 @@ private:
 template<typename T>
 void Helpers::calcStatsMedian(const std::vector<T> &vec, T *median)
 {
-    if (vec.size() == 0)
+    if (vec.empty())
     {
         return;
     }
@@ -157,7 +157,7 @@ int Helpers::randIntRangeExcluded(int start, int end, int excluded)
 template<typename T>
 std::string Helpers::join(const std::vector<T> &vec, const std::string &delim)
 {
-    if (vec.size() == 0)
+    if (vec.empty())
     {
         return "";
     }

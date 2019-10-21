@@ -163,7 +163,7 @@ int parseSourceCount(const string &text, size_t &startIdx)
     return stoi(numberStr);
 }
 
-void handleSourceNumberEnd(string &curNumber, set<int> &curVariant, size_t charIdx)
+void handleSourceNumberEnd(string &curNumber, Sopang::SourceSet &curVariant, size_t charIdx)
 {
     if (curNumber.empty())
     {
@@ -172,33 +172,33 @@ void handleSourceNumberEnd(string &curNumber, set<int> &curVariant, size_t charI
 
     const int sourceIdx = stoi(curNumber);
 
-    if (curVariant.count(sourceIdx) > 0)
+    if (curVariant.test(sourceIdx))
     {
         throw runtime_error((boost::format("duplicate source index = %1%, text index = %2%")
             % sourceIdx % charIdx).str());
     }
 
-    curVariant.insert(sourceIdx);
+    curVariant.set(sourceIdx);
     curNumber.clear();
 }
 
-void handleSourceVariantEnd(set<int> &curVariant, vector<set<int>> &curSegment)
+void handleSourceVariantEnd(Sopang::SourceSet &curVariant, vector<Sopang::SourceSet> &curSegment)
 {
     curSegment.emplace_back(move(curVariant));
-    curVariant.clear();
+    curVariant.reset();
 }
 
-void addReferenceSources(vector<set<int>> &segment, int sourceCount)
+void addReferenceSources(vector<Sopang::SourceSet> &segment, int sourceCount)
 {
-    set<int> referenceVariant;
+    Sopang::SourceSet referenceVariant;
 
     for (int sourceIdx = 0; sourceIdx < sourceCount; ++sourceIdx)
     {
         bool exists = false;
 
-        for (const set<int> &variant : segment)
+        for (const Sopang::SourceSet &variant : segment)
         {
-            if (variant.count(sourceIdx) > 0)
+            if (variant.test(sourceIdx))
             {
                 exists = true;
                 break;
@@ -207,15 +207,17 @@ void addReferenceSources(vector<set<int>> &segment, int sourceCount)
 
         if (not exists)
         {
-            referenceVariant.insert(sourceIdx);
+            referenceVariant.set(sourceIdx);
         }
     }
 
     segment.emplace_back(move(referenceVariant));
 }
 
-void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, string &curNumber,
-    vector<vector<set<int>>> &sources, int sourceCount, size_t charIdx)
+void handleSourceSegmentEnd(vector<Sopang::SourceSet> &curSegment,
+    Sopang::SourceSet &curVariant, string &curNumber,
+    vector<vector<Sopang::SourceSet>> &sources,
+    int sourceCount, size_t charIdx)
 {
     handleSourceNumberEnd(curNumber, curVariant, charIdx);
     handleSourceVariantEnd(curVariant, curSegment);
@@ -231,7 +233,7 @@ void handleSourceSegmentEnd(vector<set<int>> &curSegment, set<int> &curVariant, 
 // We will return a vector with size equal to the number of non-deterministic segments.
 // For each segment, we will store a vector with size equal to the number of variants.
 // For each variant, we will store a set with source indexes, with reference sources stored in the last set.
-vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
+vector<vector<Sopang::SourceSet>> Sopang::parseSources(string text, int &sourceCount)
 {
     if (text.empty())
     {
@@ -244,9 +246,10 @@ vector<vector<set<int>>> Sopang::parseSources(string text, int &sourceCount)
     bool inSingleVariant = false;
     bool inMultipleVariants = false;
 
-    vector<vector<set<int>>> ret;
-    vector<set<int>> curSegment;
-    set<int> curVariant;
+    vector<vector<SourceSet>> ret;
+    vector<SourceSet> curSegment;
+    SourceSet curVariant;
+    
     string curNumber;
 
     size_t startIdx;
@@ -373,7 +376,7 @@ int unpackNumber(const unsigned char first, const unsigned char second, size_t &
 } // namespace (anonymous)
 
 // The same output as for Sopang::parseSources.
-vector<vector<set<int>>> Sopang::parseSourcesCompressed(string text, int &sourceCount)
+vector<vector<Sopang::SourceSet>> Sopang::parseSourcesCompressed(string text, int &sourceCount)
 {
     if (text.empty())
     {
@@ -381,10 +384,10 @@ vector<vector<set<int>>> Sopang::parseSourcesCompressed(string text, int &source
     }
 
     boost::trim(text);
-    vector<vector<set<int>>> ret;
+    vector<vector<SourceSet>> ret;
 
-    vector<set<int>> curSegment;
-    set<int> curVariant;
+    vector<SourceSet> curSegment;
+    SourceSet curVariant;
 
     size_t charIdx, shift;
     sourceCount = parseSourceCount(text, charIdx);
@@ -420,15 +423,15 @@ vector<vector<set<int>>> Sopang::parseSourcesCompressed(string text, int &source
             int sourceVal = unpackNumber(text[charIdx], text[charIdx + 1], shift);
             sourceVal += prevVal;
 
-            assert(curVariant.count(sourceVal) == 0);
-            curVariant.insert(sourceVal);
+            assert(not curVariant.test(sourceVal));
+            curVariant.set(sourceVal);
 
             prevVal = sourceVal;
             charIdx += shift;
         }
 
         curSegment.emplace_back(move(curVariant));
-        curVariant.clear();
+        curVariant.reset();
     }
 
     assert(not curSegment.empty());
@@ -439,10 +442,10 @@ vector<vector<set<int>>> Sopang::parseSourcesCompressed(string text, int &source
     return ret;
 }
 
-unordered_map<unsigned, vector<set<int>>> Sopang::sourcesToSourceMap(unsigned nSegments,
-    const unsigned *segmentSizes, const vector<vector<set<int>>> &sources)
+unordered_map<unsigned, vector<Sopang::SourceSet>> Sopang::sourcesToSourceMap(unsigned nSegments,
+    const unsigned *segmentSizes, const vector<vector<Sopang::SourceSet>> &sources)
 {
-    unordered_map<unsigned, vector<set<int>>> ret;
+    unordered_map<unsigned, vector<SourceSet>> ret;
     size_t arrayIdx = 0;
 
     for (unsigned iS = 0; iS < nSegments; ++iS)
@@ -463,11 +466,12 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
 
-    unordered_set<unsigned> res;
     fillPatternMaskBuffer(pattern, alphabet);
 
     const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
     uint64_t D = allOnes;
+
+    unordered_set<unsigned> res;
 
     for (unsigned iS = 0; iS < nSegments; ++iS)
     {
@@ -589,43 +593,31 @@ namespace
 {
     bool verifyMatch(const string *const *segments,
         const unsigned *segmentSizes,
-        const unordered_map<unsigned, vector<set<int>>> &sourceMap,
+        const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
         const string &pattern,
         unsigned matchIdx,
         const pair<unsigned, size_t> &match)
     {
+        using SourceSet = Sopang::SourceSet;
         int patternCharIdx = static_cast<int>(pattern.size()) - match.second - 2;
 
         if (patternCharIdx < 0) // The match is fully contained within a single segment.
             return true;
 
-        vector<pair<set<int>, int>> leaves;
-
-        bool setLeafSources = false;
-        set<int> rootSources;
+        vector<pair<SourceSet, int>> leaves;
+        SourceSet rootSources;
         
         if (sourceMap.count(matchIdx) > 0)
         {
             rootSources = sourceMap.at(matchIdx)[match.first];
-            setLeafSources = true;
+        }
+        else
+        {
+            rootSources.set();
         }
 
         leaves.emplace_back(make_pair(move(rootSources), patternCharIdx));
         int segmentIdx = static_cast<int>(matchIdx - 1);
-
-        const auto sourcesIntersection = [&setLeafSources](const set<int> &variantSources, const set<int> &leafSources)
-        {
-            if (not setLeafSources)
-            {
-                return variantSources;
-            }
-
-            set<int> ret;
-            set_intersection(variantSources.begin(), variantSources.end(),
-                leafSources.begin(), leafSources.end(), inserter(ret, ret.begin()));
-
-            return ret;
-        };
 
         while (not leaves.empty() and segmentIdx >= 0)
         {
@@ -643,20 +635,20 @@ namespace
             {
                 assert(sourceMap.count(segmentIdx) > 0 and sourceMap.at(segmentIdx).size() == segmentSizes[segmentIdx]);
 
-                vector<pair<set<int>, int>> newLeaves;
+                vector<pair<SourceSet, int>> newLeaves;
                 newLeaves.reserve(leaves.size() * segmentSizes[segmentIdx]);
                 
                 for (const auto &leaf : leaves)
                 {
                     for (unsigned variantIdx = 0; variantIdx < segmentSizes[segmentIdx]; ++variantIdx)
                     {
-                        const set<int> &variantSources = sourceMap.at(segmentIdx)[variantIdx];
+                        const SourceSet &variantSources = sourceMap.at(segmentIdx)[variantIdx];
 
                         if (segments[segmentIdx][variantIdx].empty())
                         {
-                            const set<int> newSources = sourcesIntersection(variantSources, leaf.first);
+                            const SourceSet newSources = (variantSources & leaf.first);
 
-                            if (not newSources.empty())
+                            if (newSources.any())
                             {
                                 newLeaves.emplace_back(make_pair(move(newSources), leaf.second));
                             }
@@ -670,9 +662,9 @@ namespace
                             {
                                 if (curPatternIdx < 0)
                                 {
-                                    const set<int> newSources = sourcesIntersection(variantSources, leaf.first);
+                                    const SourceSet newSources = (variantSources & leaf.first);
 
-                                    if (not newSources.empty())
+                                    if (newSources.any())
                                         return true;
                                 }
 
@@ -685,20 +677,20 @@ namespace
 
                             if (curPatternIdx < 0)
                             {
-                                const set<int> newSources = sourcesIntersection(variantSources, leaf.first);
+                                const SourceSet newSources = (variantSources & leaf.first);
 
-                                if (not newSources.empty())
+                                if (newSources.any())
                                     return true;
                             }
 
                             if (curCharIdx < 0)
                             {
-                                const set<int> newSources = sourcesIntersection(variantSources, leaf.first);
+                                const SourceSet newSources = (variantSources & leaf.first);
 
-                                if (not newSources.empty())
+                                if (newSources.any())
                                 {
                                     newLeaves.emplace_back(make_pair(move(newSources), curPatternIdx));
-                                }   
+                                }
                             }
                         }
                     }
@@ -708,7 +700,6 @@ namespace
             }
 
             segmentIdx -= 1;
-            setLeafSources = true;
         }
 
         return false;
@@ -717,7 +708,7 @@ namespace
 
 unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
     unsigned nSegments, const unsigned *segmentSizes,
-    const unordered_map<unsigned, vector<set<int>>> &sourceMap,
+    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
     const string &pattern, const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
@@ -726,11 +717,14 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
     const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
     uint64_t D = allOnes;
 
-    unordered_map<unsigned, vector<pair<unsigned, size_t>>> indexToMatch; // segment index -> [(variant index, char in variant index)]
+    // segment index -> [(variant index, char in variant index)]
+    unordered_map<unsigned, vector<pair<unsigned, size_t>>> indexToMatch;
     indexToMatch.reserve(matchMapReserveSize);
 
     for (unsigned iS = 0; iS < nSegments; ++iS)
     {
+        assert(segmentSizes[iS] > 0 and segmentSizes[iS] <= dBufferSize);
+
         for (unsigned iD = 0; iD < segmentSizes[iS]; ++iD)
         {
             dBuffer[iD] = D;
@@ -738,6 +732,9 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
             for (size_t iC = 0; iC < segments[iS][iD].size(); ++iC)
             {
                 const char c = segments[iS][iD][iC];
+
+                assert(c > 0 and static_cast<unsigned char>(c) < maskBufferSize);
+                assert(alphabet.find(c) != string::npos);
 
                 dBuffer[iD] <<= 1;
                 dBuffer[iD] |= maskBuffer[static_cast<unsigned char>(c)];

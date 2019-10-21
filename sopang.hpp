@@ -1,8 +1,10 @@
 #ifndef SOPANG_HPP
 #define SOPANG_HPP
 
+#include "bitset.hpp"
+
+#include <bitset>
 #include <map>
-#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -17,7 +19,13 @@ namespace sopang
 
 class Sopang
 {
+private:
+    /** Maximum number of sources (upper bound on source set size). */
+    static constexpr size_t maxSourceCount = 4096;
+
 public:
+    using SourceSet = std::bitset<maxSourceCount>;
+
     Sopang();
     ~Sopang();
 
@@ -28,11 +36,11 @@ public:
     static const std::string *const *parseTextArray(std::string text, unsigned *nSegments, unsigned **segmentSizes);
     static std::vector<std::string> parsePatterns(std::string patternsStr);
 
-    static std::vector<std::vector<std::set<int>>> parseSources(std::string text, int &sourceCount);
-    static std::vector<std::vector<std::set<int>>> parseSourcesCompressed(std::string text, int &sourceCount);
+    static std::vector<std::vector<SourceSet>> parseSources(std::string text, int &sourceCount);
+    static std::vector<std::vector<SourceSet>> parseSourcesCompressed(std::string text, int &sourceCount);
 
-    static std::unordered_map<unsigned, std::vector<std::set<int>>> sourcesToSourceMap(unsigned nSegments,
-        const unsigned *segmentSizes, const std::vector<std::vector<std::set<int>>> &sources);
+    static std::unordered_map<unsigned, std::vector<SourceSet>> sourcesToSourceMap(unsigned nSegments,
+        const unsigned *segmentSizes, const std::vector<std::vector<SourceSet>> &sources);
 
     /*
      *** MATCHING
@@ -49,7 +57,7 @@ public:
 
     std::unordered_set<unsigned> matchWithSources(const std::string *const *segments,
         unsigned nSegments, const unsigned *segmentSizes,
-        const std::unordered_map<unsigned, std::vector<std::set<int>>> &sourceMap,
+        const std::unordered_map<unsigned, std::vector<SourceSet>> &sourceMap,
         const std::string &pattern, const std::string &alphabet);
 
 private:
