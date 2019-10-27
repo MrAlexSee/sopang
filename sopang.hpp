@@ -21,7 +21,7 @@ class Sopang
 {
 private:
     /** Maximum number of sources (upper bound on source set size). */
-    static constexpr size_t maxSourceCount = 4096;
+    static constexpr size_t maxSourceCount = 8192;
 
 public:
     using SourceSet = std::bitset<maxSourceCount>;

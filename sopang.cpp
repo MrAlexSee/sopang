@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -160,7 +161,11 @@ int parseSourceCount(const string &text, size_t &startIdx)
     }
 
     startIdx += 1;
-    return stoi(numberStr);
+
+    const int ret = stoi(numberStr);
+    cout << "Parsed source count = " << ret << endl;
+
+    return ret;
 }
 
 void handleSourceNumberEnd(string &curNumber, Sopang::SourceSet &curVariant, size_t charIdx)
