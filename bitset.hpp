@@ -20,6 +20,7 @@ public:
     bool operator==(const std::set<int> &other) const;
 
     BitSet<N> operator&(const BitSet<N> &other) const;
+    BitSet<N> operator|=(const BitSet<N> &other);
 
     int count() const;
     int empty() const;
@@ -58,11 +59,13 @@ std::set<int> BitSet<N>::toSet() const
 
     for (int i = 0; i < bufferSize; ++i)
     {
+        const int offset = i * 64;
+
         for (int b = 0; b < 64; ++b)
         {
-            if (buffer[i] & (0x1 << b))
+            if (buffer[i] & (0x1ULL << b))
             {
-                ret.insert(i * 64 + b);
+                ret.insert(offset + b);
             }
         }
     }
@@ -96,6 +99,17 @@ BitSet<N> BitSet<N>::operator&(const BitSet<N> &other) const
 }
 
 template <int N>
+BitSet<N> BitSet<N>::operator|=(const BitSet<N> &other)
+{
+    for (int i = 0; i < bufferSize; ++i)
+    {
+        this->buffer[i] |= other.buffer[i];
+    }
+
+    return *this;
+}
+
+template <int N>
 int BitSet<N>::count() const
 {
     int ret = 0;
@@ -124,7 +138,7 @@ namespace
 {
 
 // https://stackoverflow.com/questions/33333363/built-in-mod-vs-custom-mod-function-improve-the-performance-of-modulus-op/33333636
-int modulo(const int input, const int ceil)
+inline int modulo(const int input, const int ceil)
 {
     return input >= ceil ? input % ceil : input;
 }
@@ -134,7 +148,7 @@ int modulo(const int input, const int ceil)
 template <int N>
 bool BitSet<N>::test(int n) const
 {
-    return (buffer[n / 64] & (0x1 << (modulo(n, 64))));
+    return (buffer[n / 64] & (0x1ULL << (modulo(n, 64))));
 }
 
 template <int N>
@@ -149,7 +163,7 @@ void BitSet<N>::set()
 template <int N>
 void BitSet<N>::set(int n)
 {
-    buffer[n / 64] |= (0x1 << (modulo(n, 64)));
+    buffer[n / 64] |= (0x1ULL << (modulo(n, 64)));
 }
 
 template <int N>
@@ -164,7 +178,7 @@ void BitSet<N>::reset()
 template <int N>
 void BitSet<N>::reset(int n)
 {
-    buffer[n / 64] &= (~(0x1 << (modulo(n, 64))));
+    buffer[n / 64] &= (~(0x1ULL << (modulo(n, 64))));
 }
 
 } // namespace sopang
