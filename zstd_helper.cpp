@@ -1,6 +1,7 @@
 #include "zstd_helper.hpp"
 
 #include <cstring>
+#include <iostream>
 
 #include <zstd.h>
 
@@ -8,6 +9,8 @@ using namespace std;
 
 string decompressZstd(const string &compressed, size_t bufferSize)
 {
+    cout << "Decompressing Zstd with buffer size = " << bufferSize << endl;
+
     string ret;
     ZSTD_DCtx *zstdContext = ZSTD_createDCtx();
 
