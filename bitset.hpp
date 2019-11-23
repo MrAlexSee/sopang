@@ -110,10 +110,13 @@ BitSet<N> BitSet<N>::operator&(const BitSet<N> &other) const
 template <int N>
 BitSet<N> &BitSet<N>::operator|=(const BitSet<N> &other)
 {
-    // TODO
+    for (int i = 0; i < bufferSize; ++i)
+    {
+        buffer[i] |= other.buffer[i];
+    }
+
     return *this;
 }
-
 
 template <int N>
 int BitSet<N>::count() const
