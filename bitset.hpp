@@ -12,6 +12,7 @@ template<int N>
 class BitSet
 {
 public:
+    BitSet();
     BitSet(const std::initializer_list<int> &other);
 
     std::set<int> toSet() const;
@@ -20,10 +21,13 @@ public:
     bool operator==(const std::set<int> &other) const;
 
     BitSet<N> operator&(const BitSet<N> &other) const;
-    BitSet<N> operator|=(const BitSet<N> &other);
+
+    BitSet<N> &operator|=(const BitSet<N> &other);
 
     int count() const;
-    int empty() const;
+    
+    bool empty() const;
+    bool any() const;
 
     bool test(int n) const;
 
@@ -44,7 +48,14 @@ private:
 };
 
 template<int N>
+BitSet<N>::BitSet()
+{
+    __builtin_memset(buffer, 0, bufferSizeBytes);
+}
+
+template<int N>
 BitSet<N>::BitSet(const std::initializer_list<int> &list)
+    :BitSet()
 {
     for (const int n : list)
     {
@@ -99,7 +110,7 @@ BitSet<N> BitSet<N>::operator&(const BitSet<N> &other) const
 }
 
 template <int N>
-BitSet<N> BitSet<N>::operator|=(const BitSet<N> &other)
+BitSet<N> &BitSet<N>::operator|=(const BitSet<N> &other)
 {
     for (int i = 0; i < bufferSize; ++i)
     {
@@ -123,7 +134,7 @@ int BitSet<N>::count() const
 }
 
 template <int N>
-int BitSet<N>::empty() const
+bool BitSet<N>::empty() const
 {
     for (int i = 0; i < bufferSize; ++i)
     {
@@ -132,6 +143,18 @@ int BitSet<N>::empty() const
     }
 
     return true;
+}
+
+template <int N>
+bool BitSet<N>::any() const
+{
+    for (int i = 0; i < bufferSize; ++i)
+    {
+        if (__builtin_popcountll(buffer[i]))
+            return true;
+    }
+
+    return false;
 }
 
 namespace

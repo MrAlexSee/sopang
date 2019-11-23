@@ -342,7 +342,7 @@ vector<vector<Sopang::SourceSet>> readSources(unsigned nSegments, const unsigned
             sourcesForSegment |= sourcesForVariant;
         }
 
-        if (sourcesForSegment.count() != static_cast<size_t>(sourceCount))
+        if (sourcesForSegment.count() != sourceCount)
         {
             throw runtime_error("not all sources are present for segment: " + to_string(sourceIdx));
         }

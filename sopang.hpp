@@ -24,7 +24,7 @@ private:
     static constexpr size_t maxSourceCount = 8192;
 
 public:
-    using SourceSet = std::bitset<maxSourceCount>;
+    using SourceSet = BitSet<maxSourceCount>;
 
     Sopang();
     ~Sopang();

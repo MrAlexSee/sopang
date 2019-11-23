@@ -1,4 +1,5 @@
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -253,10 +254,10 @@ TEST_CASE("is parsing sources for a single segment correct", "[parsing]")
     const auto variants = sources[0];
     REQUIRE(variants.size() == 4);
 
-    REQUIRE(variants[0] == set<int>{ 0, 1, 2 });
-    REQUIRE(variants[1] == set<int>{ 3, 5 });
-    REQUIRE(variants[2] == set<int>{ 7 });
-    REQUIRE(variants[3] == set<int>{ 4, 6 }); // Reference sequence = remaining sources.
+    REQUIRE(variants[0] == Sopang::SourceSet{ 0, 1, 2 });
+    REQUIRE(variants[1] == Sopang::SourceSet{ 3, 5 });
+    REQUIRE(variants[2] == Sopang::SourceSet{ 7 });
+    REQUIRE(variants[3] == Sopang::SourceSet{ 4, 6 }); // Reference sequence = remaining sources.
 }
 
 TEST_CASE("is parsing sources correct for a single segment with leading and trailing whitespace correct", "[parsing]")
@@ -270,10 +271,10 @@ TEST_CASE("is parsing sources correct for a single segment with leading and trai
     const auto variants = sources[0];
     REQUIRE(variants.size() == 4);
 
-    REQUIRE(variants[0] == set<int>{ 0, 1, 2 });
-    REQUIRE(variants[1] == set<int>{ 3, 5 });
-    REQUIRE(variants[2] == set<int>{ 7 });
-    REQUIRE(variants[3] == set<int>{ 4, 6 }); // Reference sequence = remaining sources.
+    REQUIRE(variants[0] == Sopang::SourceSet{ 0, 1, 2 });
+    REQUIRE(variants[1] == Sopang::SourceSet{ 3, 5 });
+    REQUIRE(variants[2] == Sopang::SourceSet{ 7 });
+    REQUIRE(variants[3] == Sopang::SourceSet{ 4, 6 }); // Reference sequence = remaining sources.
 }
 
 TEST_CASE("is parsing sources for multiple single segments correct", "[parsing]")
@@ -288,14 +289,14 @@ TEST_CASE("is parsing sources for multiple single segments correct", "[parsing]"
     REQUIRE(sources[1].size() == 2);
     REQUIRE(sources[2].size() == 2);
 
-    REQUIRE(sources[0][0] == set<int>{ 0, 2 });
-    REQUIRE(sources[0][1] == set<int>{ 1 });
+    REQUIRE(sources[0][0] == Sopang::SourceSet{ 0, 2 });
+    REQUIRE(sources[0][1] == Sopang::SourceSet{ 1 });
 
-    REQUIRE(sources[1][0] == set<int>{ 0 });
-    REQUIRE(sources[1][1] == set<int>{ 1, 2 });
+    REQUIRE(sources[1][0] == Sopang::SourceSet{ 0 });
+    REQUIRE(sources[1][1] == Sopang::SourceSet{ 1, 2 });
 
-    REQUIRE(sources[2][0] == set<int>{ 1, 2 });
-    REQUIRE(sources[2][1] == set<int>{ 0 });
+    REQUIRE(sources[2][0] == Sopang::SourceSet{ 1, 2 });
+    REQUIRE(sources[2][1] == Sopang::SourceSet{ 0 });
 }
 
 TEST_CASE("is parsing sources for multiple segments correct", "[parsing]")
@@ -310,17 +311,17 @@ TEST_CASE("is parsing sources for multiple segments correct", "[parsing]")
     REQUIRE(sources[1].size() == 2);
     REQUIRE(sources[2].size() == 4);
 
-    REQUIRE(sources[0][0] == set<int>{ 1, 2 });
-    REQUIRE(sources[0][1] == set<int>{ 0 });
-    REQUIRE(sources[0][2] == set<int>{ 3, 4 });
+    REQUIRE(sources[0][0] == Sopang::SourceSet{ 1, 2 });
+    REQUIRE(sources[0][1] == Sopang::SourceSet{ 0 });
+    REQUIRE(sources[0][2] == Sopang::SourceSet{ 3, 4 });
 
-    REQUIRE(sources[1][0] == set<int>{ 0 });
-    REQUIRE(sources[1][1] == set<int>{ 1, 2, 3, 4 });
+    REQUIRE(sources[1][0] == Sopang::SourceSet{ 0 });
+    REQUIRE(sources[1][1] == Sopang::SourceSet{ 1, 2, 3, 4 });
 
-    REQUIRE(sources[2][0] == set<int>{ 0 });
-    REQUIRE(sources[2][1] == set<int>{ 1 });
-    REQUIRE(sources[2][2] == set<int>{ 2 });
-    REQUIRE(sources[2][3] == set<int>{ 3, 4 });
+    REQUIRE(sources[2][0] == Sopang::SourceSet{ 0 });
+    REQUIRE(sources[2][1] == Sopang::SourceSet{ 1 });
+    REQUIRE(sources[2][2] == Sopang::SourceSet{ 2 });
+    REQUIRE(sources[2][3] == Sopang::SourceSet{ 3, 4 });
 }
 
 TEST_CASE("is parsing sources for multiple segments correct 2", "[parsing]")
@@ -334,8 +335,8 @@ TEST_CASE("is parsing sources for multiple segments correct 2", "[parsing]")
     REQUIRE(sources[0].size() == 6);
     REQUIRE(sources[1].size() == 7);
 
-    REQUIRE(sources[0] == vector<set<int>>{ { 3 }, { 7 }, { 8 }, { 1 }, { 2 }, { 0, 4, 5, 6, 9 } });
-    REQUIRE(sources[1] == vector<set<int>>{ { 6 }, { 7 }, { 0 }, { 4 }, { 1 }, { 8 }, { 2, 3, 5, 9 } });
+    REQUIRE(sources[0] == vector<Sopang::SourceSet>{ { 3 }, { 7 }, { 8 }, { 1 }, { 2 }, { 0, 4, 5, 6, 9 } });
+    REQUIRE(sources[1] == vector<Sopang::SourceSet>{ { 6 }, { 7 }, { 0 }, { 4 }, { 1 }, { 8 }, { 2, 3, 5, 9 } });
 }
 
 TEST_CASE("is parsing compressed sources for a single segment correct", "[parsing]")
@@ -361,10 +362,10 @@ TEST_CASE("is parsing compressed sources for a single segment correct", "[parsin
     const auto variants = sources[0];
     REQUIRE(variants.size() == 4);
 
-    REQUIRE(variants[0] == set<int>{ 0, 1, 2 });
-    REQUIRE(variants[1] == set<int>{ 3, 5 });
-    REQUIRE(variants[2] == set<int>{ 7 });
-    REQUIRE(variants[3] == set<int>{ 4, 6 }); // Reference sequence = remaining sources.
+    REQUIRE(variants[0] == Sopang::SourceSet{ 0, 1, 2 });
+    REQUIRE(variants[1] == Sopang::SourceSet{ 3, 5 });
+    REQUIRE(variants[2] == Sopang::SourceSet{ 7 });
+    REQUIRE(variants[3] == Sopang::SourceSet{ 4, 6 }); // Reference sequence = remaining sources.
 }
 
 TEST_CASE("is parsing compressed sources for multiple segments correct", "[parsing]")
@@ -392,22 +393,22 @@ TEST_CASE("is parsing compressed sources for multiple segments correct", "[parsi
     REQUIRE(sources[1].size() == 2);
     REQUIRE(sources[2].size() == 2);
 
-    REQUIRE(sources[0][0] == set<int>{ 0, 2 });
-    REQUIRE(sources[0][1] == set<int>{ 1 });
+    REQUIRE(sources[0][0] == Sopang::SourceSet{ 0, 2 });
+    REQUIRE(sources[0][1] == Sopang::SourceSet{ 1 });
 
-    REQUIRE(sources[1][0] == set<int>{ 0 });
-    REQUIRE(sources[1][1] == set<int>{ 1, 2 });
+    REQUIRE(sources[1][0] == Sopang::SourceSet{ 0 });
+    REQUIRE(sources[1][1] == Sopang::SourceSet{ 1, 2 });
 
-    REQUIRE(sources[2][0] == set<int>{ 1, 2 });
-    REQUIRE(sources[2][1] == set<int>{ 0 });
+    REQUIRE(sources[2][0] == Sopang::SourceSet{ 1, 2 });
+    REQUIRE(sources[2][1] == Sopang::SourceSet{ 0 });
 }
 
 TEST_CASE("is converting sources to source map correct", "[parsing]")
 {
-    vector<vector<set<int>>> sources { { { 1, 2 }, { 3, 4 } }, { { 1 }, { 2, 3 }, { 4 } }, { { 3, 4 }, { 1, 2 } } };
+    vector<vector<Sopang::SourceSet>> sources { { { 1, 2 }, { 3, 4 } }, { { 1 }, { 2, 3 }, { 4 } }, { { 3, 4 }, { 1, 2 } } };
     vector<unsigned> segmentSizes { 1, 2, 3, 2, 1 };
 
-    unordered_map<unsigned, vector<set<int>>> sourceMap = Sopang::sourcesToSourceMap(segmentSizes.size(), segmentSizes.data(), sources);
+    unordered_map<unsigned, vector<Sopang::SourceSet>> sourceMap = Sopang::sourcesToSourceMap(segmentSizes.size(), segmentSizes.data(), sources);
 
     REQUIRE(sourceMap.size() == 3);
 
