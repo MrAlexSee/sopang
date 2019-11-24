@@ -7,7 +7,7 @@ INCLUDE    = -I$(BOOST_DIR)
 TEST_FILES = catch.hpp repeat.hpp
 
 EXE 	   = main_tests
-OBJ        = main_tests.o helpers_tests.o parsing_tests.o sopang_approx_tests.o sopang_exact_tests.o sopang_sources_tests.o parsing.o sopang.o
+OBJ        = main_tests.o bitset_tests.o helpers_tests.o parsing_tests.o sopang_approx_tests.o sopang_exact_tests.o sopang_sources_tests.o parsing.o sopang.o
 
 all: $(EXE)
 
@@ -16,6 +16,9 @@ $(EXE): $(OBJ)
 
 main_tests.o: main_tests.cpp catch.hpp
 	$(CC) $(CCFLAGS) $(INCLUDE) -c main_tests.cpp
+
+bitset_tests.o: bitset_tests.cpp ../bitset.hpp $(TEST_FILES)
+	$(CC) $(CCFLAGS) $(INCLUDE) -c bitset_tests.cpp
 
 helpers_tests.o: helpers_tests.cpp ../helpers.hpp $(TEST_FILES)
 	$(CC) $(CCFLAGS) $(INCLUDE) -c helpers_tests.cpp
