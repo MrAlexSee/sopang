@@ -53,7 +53,7 @@ In order to use SOPanG for matching with sources, supply the path to the sources
 
 Add Boost library to the path for compilation by setting `BOOST_DIR` in the makefile. 
 Requires Boost program options module to be compiled for static linking.
-Requires support for the C++11 standard.
+Requires support for the C++17 standard.
 
 Type `make` for optimized compile.
 Comment out `OPTFLAGS` in the makefile in order to disable optimization.
