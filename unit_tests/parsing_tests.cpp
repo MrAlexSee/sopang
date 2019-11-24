@@ -6,6 +6,7 @@
 #include "catch.hpp"
 
 #include "../helpers.hpp"
+#include "../parsing.hpp"
 #include "../sopang.hpp"
 
 using namespace std;
@@ -22,19 +23,19 @@ const string alphabet = "ACGTN";
 
 TEST_CASE("is parsing text for an empty string correct", "[parsing]")
 {
-    unsigned nSegments = 1000;
-    unsigned *segmentSizes;
+    int nSegments;
+    int *segmentSizes;
 
-    Sopang::parseTextArray("", &nSegments, &segmentSizes);
+    parsing::parseTextArray("", &nSegments, &segmentSizes);
     REQUIRE(nSegments == 0);
 }
 
 TEST_CASE("is parsing text for a single determinate segment correct", "[parsing]")
 {
-    unsigned nSegments = 1000;
-    unsigned *segmentSizes;
+    int nSegments;
+    int *segmentSizes;
 
-    const string *const *segments = Sopang::parseTextArray("ACGT", &nSegments, &segmentSizes);
+    const string *const *segments = parsing::parseTextArray("ACGT", &nSegments, &segmentSizes);
 
     REQUIRE(nSegments == 1);
     REQUIRE(segmentSizes[0] == 1);
@@ -44,10 +45,10 @@ TEST_CASE("is parsing text for a single determinate segment correct", "[parsing]
 
 TEST_CASE("is parsing text for a single indeterminate segment correct", "[parsing]")
 {
-    unsigned nSegments = 1000;
-    unsigned *segmentSizes;
+    int nSegments;
+    int *segmentSizes;
 
-    const string *const *segments = Sopang::parseTextArray("{A,C,G,T}", &nSegments, &segmentSizes);
+    const string *const *segments = parsing::parseTextArray("{A,C,G,T}", &nSegments, &segmentSizes);
 
     REQUIRE(nSegments == 1);
     REQUIRE(segmentSizes[0] == 4);
@@ -60,10 +61,10 @@ TEST_CASE("is parsing text for a single indeterminate segment correct", "[parsin
 
 TEST_CASE("is parsing text for determinate and indeterminate segments correct where start and end are indeterminate", "[parsing]")
 {
-    unsigned nSegments = 1000;
-    unsigned *segmentSizes;
+    int nSegments;
+    int *segmentSizes;
 
-    const string *const *segments = Sopang::parseTextArray("{A,C}AAA{A,C,G,GGT}AAA{A,C}", &nSegments, &segmentSizes);
+    const string *const *segments = parsing::parseTextArray("{A,C}AAA{A,C,G,GGT}AAA{A,C}", &nSegments, &segmentSizes);
 
     REQUIRE(nSegments == 5);
 
@@ -87,10 +88,10 @@ TEST_CASE("is parsing text for determinate and indeterminate segments correct wh
 
 TEST_CASE("is parsing text for determinate and indeterminate segments correct where start and end is determinate", "[parsing]")
 {
-    unsigned nSegments = 1000;
-    unsigned *segmentSizes;
+    int nSegments;
+    int *segmentSizes;
 
-    const string *const *segments = Sopang::parseTextArray("AAA{A,C,G,GGT}AAA{A,C}{A,C}ACG", &nSegments, &segmentSizes);
+    const string *const *segments = parsing::parseTextArray("AAA{A,C,G,GGT}AAA{A,C}{A,C}ACG", &nSegments, &segmentSizes);
 
     REQUIRE(nSegments == 6);
 
@@ -116,10 +117,10 @@ TEST_CASE("is parsing text for determinate and indeterminate segments correct wh
 
 TEST_CASE("is parsing text for a repeated indeterminate segment correct", "[parsing]")
 {
-    unsigned nSegments = 1000;
-    unsigned *segmentSizes;
+    int nSegments;
+    int *segmentSizes;
 
-    const string *const *segments = Sopang::parseTextArray("{A,C}{A,C}{A,C}{A,C}", &nSegments, &segmentSizes);
+    const string *const *segments = parsing::parseTextArray("{A,C}{A,C}{A,C}{A,C}", &nSegments, &segmentSizes);
 
     REQUIRE(nSegments == 4);
 
@@ -140,10 +141,10 @@ TEST_CASE("is parsing text for a repeated indeterminate segment correct", "[pars
 
 TEST_CASE("is parsing text for indeterminate segments with empty words correct", "[parsing]")
 {
-    unsigned nSegments = 1000;
-    unsigned *segmentSizes;
+    int nSegments;
+    int *segmentSizes;
 
-    const string *const *segments = Sopang::parseTextArray("{A,C,}{A,,C}{,A,C}", &nSegments, &segmentSizes);
+    const string *const *segments = parsing::parseTextArray("{A,C,}{A,,C}{,A,C}", &nSegments, &segmentSizes);
 
     REQUIRE(nSegments == 3);
 
@@ -164,10 +165,10 @@ TEST_CASE("is parsing text for indeterminate segments with empty words correct",
 
 TEST_CASE("is parsing text with spaces correct", "[parsing]")
 {
-    unsigned nSegments = 1000;
-    unsigned *segmentSizes;
+    int nSegments;
+    int *segmentSizes;
 
-    const string *const *segments = Sopang::parseTextArray("{AC, CG}{A,,C C C}", &nSegments, &segmentSizes);
+    const string *const *segments = parsing::parseTextArray("{AC, CG}{A,,C C C}", &nSegments, &segmentSizes);
 
     REQUIRE(nSegments == 2);
 
@@ -184,14 +185,14 @@ TEST_CASE("is parsing text with spaces correct", "[parsing]")
 
 TEST_CASE("is parsing patterns for an empty string correct", "[parsing]")
 {
-    vector<string> empty = Sopang::parsePatterns("");
+    vector<string> empty = parsing::parsePatterns("");
     REQUIRE(empty.empty());
 }
 
 TEST_CASE("is parsing patterns for a single pattern correct", "[parsing]")
 {
     string str = "1";
-    vector<string> patterns = Sopang::parsePatterns(str);
+    vector<string> patterns = parsing::parsePatterns(str);
 
     REQUIRE(patterns.size() == 1);
     REQUIRE(patterns[0] == str);
@@ -200,34 +201,34 @@ TEST_CASE("is parsing patterns for a single pattern correct", "[parsing]")
 TEST_CASE("is parsing patterns with single newlines correct", "[parsing]")
 {
     string str = "1\n2\n3\n4\n5";
-    vector<string> patterns = Sopang::parsePatterns(str);
+    vector<string> patterns = parsing::parsePatterns(str);
 
     REQUIRE(patterns.size() == 5);
-    REQUIRE(Helpers::join(patterns, "") == "12345");
+    REQUIRE(helpers::join(patterns, "") == "12345");
 }
 
 TEST_CASE("is parsing patterns correct for multiple empty and trailing lines", "[parsing]")
 {
     string str = "\n\n\n\n1\n\n2\n3\n4\n\n\n5\n\n\n\n\n\n";
-    vector<string> patterns = Sopang::parsePatterns(str);
+    vector<string> patterns = parsing::parsePatterns(str);
 
     REQUIRE(patterns.size() == 5);
-    REQUIRE(Helpers::join(patterns, "") == "12345");
+    REQUIRE(helpers::join(patterns, "") == "12345");
 }
 
 TEST_CASE("is parsing patterns correct for trailing whitespace", "[parsing]")
 {
     string str = "  1   \t\n\n2  \n 3\n  4\n\n 5\t\t  ";
-    vector<string> patterns = Sopang::parsePatterns(str);
+    vector<string> patterns = parsing::parsePatterns(str);
 
     REQUIRE(patterns.size() == 5);
-    REQUIRE(Helpers::join(patterns, "") == "12345");
+    REQUIRE(helpers::join(patterns, "") == "12345");
 }
 
 TEST_CASE("is parsing sources for an empty string correct", "[parsing]")
 {
     int sourceCount;
-    const auto empty = Sopang::parseSources("", sourceCount);
+    const auto empty = parsing::parseSources("", sourceCount);
 
     REQUIRE(empty.empty());
 }
@@ -239,14 +240,14 @@ TEST_CASE("does parsing sources throw for bad strings", "[parsing]")
     for (const string &sources : vector<string>{ "{{0,1,2}{3,5}{7}}", "5\n{{0,X,2}{3,5}{7}}",
         "5\n{{0,1,2}{3,5}{7}", "5\n{{0;2}{3,5}{7}" })
     {
-        REQUIRE_THROWS_AS(Sopang::parseSources(sources, sourceCount), runtime_error);
+        REQUIRE_THROWS_AS(parsing::parseSources(sources, sourceCount), runtime_error);
     }
 }
 
 TEST_CASE("is parsing sources for a single segment correct", "[parsing]")
 {
     int sourceCount;
-    const auto sources = Sopang::parseSources("8\n{{0,1,2}{3,5}{7}}", sourceCount);
+    const auto sources = parsing::parseSources("8\n{{0,1,2}{3,5}{7}}", sourceCount);
     
     REQUIRE(sourceCount == 8);
     REQUIRE(sources.size() == 1);
@@ -263,7 +264,7 @@ TEST_CASE("is parsing sources for a single segment correct", "[parsing]")
 TEST_CASE("is parsing sources correct for a single segment with leading and trailing whitespace correct", "[parsing]")
 {
     int sourceCount;
-    const auto sources = Sopang::parseSources("    \t    \t\t   8\n{{0,1,2}{3,5}{7}}            \t", sourceCount);
+    const auto sources = parsing::parseSources("    \t    \t\t   8\n{{0,1,2}{3,5}{7}}            \t", sourceCount);
 
     REQUIRE(sourceCount == 8);
     REQUIRE(sources.size() == 1);
@@ -280,7 +281,7 @@ TEST_CASE("is parsing sources correct for a single segment with leading and trai
 TEST_CASE("is parsing sources for multiple single segments correct", "[parsing]")
 {
     int sourceCount;
-    const auto sources = Sopang::parseSources("3\n{0,2}{0}{1,2}", sourceCount);
+    const auto sources = parsing::parseSources("3\n{0,2}{0}{1,2}", sourceCount);
 
     REQUIRE(sourceCount == 3);
     REQUIRE(sources.size() == 3);
@@ -302,7 +303,7 @@ TEST_CASE("is parsing sources for multiple single segments correct", "[parsing]"
 TEST_CASE("is parsing sources for multiple segments correct", "[parsing]")
 {
     int sourceCount;
-    const auto sources = Sopang::parseSources("5\n{{1,2}{0}}{0}{{0}{1}{2}}", sourceCount);
+    const auto sources = parsing::parseSources("5\n{{1,2}{0}}{0}{{0}{1}{2}}", sourceCount);
 
     REQUIRE(sourceCount == 5);
     REQUIRE(sources.size() == 3);
@@ -327,7 +328,7 @@ TEST_CASE("is parsing sources for multiple segments correct", "[parsing]")
 TEST_CASE("is parsing sources for multiple segments correct 2", "[parsing]")
 {
     int sourceCount;
-    const auto sources = Sopang::parseSources("10\n{{3}{7}{8}{1}{2}}{{6}{7}{0}{4}{1}{8}}", sourceCount);
+    const auto sources = parsing::parseSources("10\n{{3}{7}{8}{1}{2}}{{6}{7}{0}{4}{1}{8}}", sourceCount);
 
     REQUIRE(sourceCount == 10);
     REQUIRE(sources.size() == 2);
@@ -354,7 +355,7 @@ TEST_CASE("is parsing compressed sources for a single segment correct", "[parsin
     sourcesStr += static_cast<unsigned char>(135); // 7 (+128)
 
     int sourceCount;
-    const auto sources = Sopang::parseSourcesCompressed(sourcesStr, sourceCount);
+    const auto sources = parsing::parseSourcesCompressed(sourcesStr, sourceCount);
 
     REQUIRE(sourceCount == 8);
     REQUIRE(sources.size() == 1);
@@ -384,7 +385,7 @@ TEST_CASE("is parsing compressed sources for multiple segments correct", "[parsi
     sourcesStr += static_cast<unsigned char>(129); // diff = 1 (+128)
 
     int sourceCount;
-    const auto sources = Sopang::parseSourcesCompressed(sourcesStr, sourceCount);
+    const auto sources = parsing::parseSourcesCompressed(sourcesStr, sourceCount);
 
     REQUIRE(sourceCount == 3);
     REQUIRE(sources.size() == 3);
@@ -406,9 +407,9 @@ TEST_CASE("is parsing compressed sources for multiple segments correct", "[parsi
 TEST_CASE("is converting sources to source map correct", "[parsing]")
 {
     vector<vector<Sopang::SourceSet>> sources { { { 1, 2 }, { 3, 4 } }, { { 1 }, { 2, 3 }, { 4 } }, { { 3, 4 }, { 1, 2 } } };
-    vector<unsigned> segmentSizes { 1, 2, 3, 2, 1 };
+    vector<int> segmentSizes { 1, 2, 3, 2, 1 };
 
-    unordered_map<unsigned, vector<Sopang::SourceSet>> sourceMap = Sopang::sourcesToSourceMap(segmentSizes.size(), segmentSizes.data(), sources);
+    unordered_map<int, vector<Sopang::SourceSet>> sourceMap = parsing::sourcesToSourceMap(segmentSizes.size(), segmentSizes.data(), sources);
 
     REQUIRE(sourceMap.size() == 3);
 

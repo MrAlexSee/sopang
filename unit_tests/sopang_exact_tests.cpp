@@ -8,6 +8,7 @@
 #include "sopang_whitebox.hpp"
 
 #include "../helpers.hpp"
+#include "../parsing.hpp"
 #include "../sopang.hpp"
 
 using namespace std;
@@ -29,13 +30,13 @@ constexpr int nTextRepeats = 1000;
 
 TEST_CASE("is matching a single segment correct for whole segment match", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGT", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "ACGT", alphabet);
 
     REQUIRE(res.size() == 1);
     REQUIRE(res.count(0) == 1); // 0 = index of the first segment.
@@ -43,15 +44,15 @@ TEST_CASE("is matching a single segment correct for whole segment match", "[exac
 
 TEST_CASE("is matching a single segment correct for partial segment match", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
     for (const string &pattern : { "ACG", "CGT" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
 
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(0) == 1);
@@ -60,13 +61,13 @@ TEST_CASE("is matching a single segment correct for partial segment match", "[ex
 
 TEST_CASE("is matching single letter pattern correct for single match", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{A,CA}ACN{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{A,CA}ACN{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "N", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "N", alphabet);
 
     REQUIRE(res.size() == 1);
     REQUIRE(res.count(2) == 1);
@@ -74,16 +75,16 @@ TEST_CASE("is matching single letter pattern correct for single match", "[exact]
 
 TEST_CASE("is matching single letter pattern correct for multiple matches", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{A,CA}ACN{,A}CGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{A,CA}ACN{,A}CGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "A", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "A", alphabet);
     REQUIRE(res.size() == 6);
     
-    for (unsigned i : { 0, 1, 2, 3, 5, 6 })
+    for (int i : { 0, 1, 2, 3, 5, 6 })
     {
         REQUIRE(res.count(i) == 1);
     }
@@ -91,16 +92,16 @@ TEST_CASE("is matching single letter pattern correct for multiple matches", "[ex
 
 TEST_CASE("is matching multiple determinate segments correct for whole segment match", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGT", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "ACGT", alphabet);
     REQUIRE(res.size() == 4);
 
-    for (unsigned i : { 0, 2, 4, 6 })
+    for (int i : { 0, 2, 4, 6 })
     {
         REQUIRE(res.count(i) == 1);
     }
@@ -108,18 +109,18 @@ TEST_CASE("is matching multiple determinate segments correct for whole segment m
 
 TEST_CASE("is matching multiple determinate segments correct for partial segment match", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
     for (const string &pattern : { "ACG", "CGT" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
         REQUIRE(res.size() == 4);
 
-        for (unsigned i : { 0, 2, 4, 6 })
+        for (int i : { 0, 2, 4, 6 })
         {
             REQUIRE(res.count(i) == 1);
         }
@@ -138,13 +139,13 @@ TEST_CASE("is matching multiple determinate segments correct for whole segment m
 
     text += det;
 
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray(text, &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, det, alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, det, alphabet);
     REQUIRE(res.size() == 2);
 
     REQUIRE(res.count(0) == 1);
@@ -163,15 +164,15 @@ TEST_CASE("is matching multiple determinate segments correct for partial segment
 
     text += det;
 
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray(text, &nSegments, &segmentSizes);
 
     Sopang sopang;
 
     for (const string &pattern : { "AACTA", "ACTA", "CTA", "GAACT", "GAAC" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
         REQUIRE(res.size() == 2);
 
         REQUIRE(res.count(0) == 1);
@@ -193,16 +194,16 @@ TEST_CASE("is matching multiple determinate segments correct for whole segment m
 
     text += ndet;
 
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray(text, &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, det, alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, det, alphabet);
     REQUIRE(res.size() == nTextRepeats);
 
-    for (unsigned i = 1; i < 2 * nTextRepeats; i += 2)
+    for (int i = 1; i < 2 * nTextRepeats; i += 2)
     {
         REQUIRE(res.count(i) == 1);
     }
@@ -222,18 +223,18 @@ TEST_CASE("is matching multiple determinate segments correct for partial segment
 
     text += ndet;
 
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray(text, &nSegments, &segmentSizes);
 
     Sopang sopang;
 
     for (const string &pattern : { "GAACTA", "AACTA", "ACTA", "CTA", "GAACT", "GAAC" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
         REQUIRE(res.size() == nTextRepeats);
 
-        for (unsigned i = 1; i < 2 * nTextRepeats; i += 2)
+        for (int i = 1; i < 2 * nTextRepeats; i += 2)
         {
             REQUIRE(res.count(i) == 1);
         }
@@ -242,15 +243,15 @@ TEST_CASE("is matching multiple determinate segments correct for partial segment
 
 TEST_CASE("is matching single indeterminate and determinate segments for spanning correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{A,C}ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{A,C}ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
     for (const string &pattern : { "CAC", "AAC", "TAA", "TCA" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
 
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(2) == 1);
@@ -259,15 +260,15 @@ TEST_CASE("is matching single indeterminate and determinate segments for spannin
 
 TEST_CASE("is matching single indeterminate and determinate segments for repeated spanning multiple variants correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{A,C,G,T}{AAA,CCC,GGG,TTT}{ACGT,TGCA}ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{A,C,G,T}{AAA,CCC,GGG,TTT}{ACGT,TGCA}ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
     for (const string &pattern : { "TAAAAAC", "TAAAATG", "TCCCCAC", "TCCCCTG", "TGGGGAC", "TGGGGTG", "TTTTTAC", "TTTTTTG" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
 
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(3) == 1);
@@ -276,16 +277,16 @@ TEST_CASE("is matching single indeterminate and determinate segments for repeate
 
 TEST_CASE("is matching multiple indeterminate and determinate segments for spanning correct for determinate start and end", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT}ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTA", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "ACGTA", alphabet);
     REQUIRE(res.size() == 4);
     
-    for (unsigned i : { 1, 3, 4, 5 })
+    for (int i : { 1, 3, 4, 5 })
     {
         REQUIRE(res.count(i) == 1);
     }
@@ -293,16 +294,16 @@ TEST_CASE("is matching multiple indeterminate and determinate segments for spann
 
 TEST_CASE("is matching multiple indeterminate and determinate segments for spanning correct for indeterminate start and end", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("{A,C}ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT,C}ACGT{A,C}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("{A,C}ACGT{A,C}ACGT{,A}ACGT{AAAAA,TTTT,C}ACGT{A,C}", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "CAC", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "CAC", alphabet);
     REQUIRE(res.size() == 3);
     
-    for (unsigned i : { 1, 3, 7 })
+    for (int i : { 1, 3, 7 })
     {
         REQUIRE(res.count(i) == 1);
     }
@@ -310,13 +311,13 @@ TEST_CASE("is matching multiple indeterminate and determinate segments for spann
 
 TEST_CASE("is matching multiple short contiguous indeterminate segments correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("AC{A,G,C}T{,A}{A,T}{C,GC}{A,CA,T}{CA,GG}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("AC{A,G,C}T{,A}{A,T}{C,GC}{A,CA,T}{CA,GG}", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "CTATGCTC", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "CTATGCTC", alphabet);
    
     REQUIRE(res.size() == 1);
     REQUIRE(res.count(7) == 1);
@@ -324,13 +325,13 @@ TEST_CASE("is matching multiple short contiguous indeterminate segments correct"
 
 TEST_CASE("is matching pattern starting and ending with text correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("{A,C}ACGT{G,C}ACGT{,T}ACGT{GGGG,TTTT,C}AAC{A,G}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("{A,C}ACGT{G,C}ACGT{,T}ACGT{GGGG,TTTT,C}AAC{A,G}", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "AACG", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "AACG", alphabet);
     REQUIRE(res.size() == 2);
 
     REQUIRE(res.count(1) == 1);
@@ -339,16 +340,16 @@ TEST_CASE("is matching pattern starting and ending with text correct", "[exact]"
 
 TEST_CASE("is matching multiple indeterminate and determinate segments with multiple empty words for spanning correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "TAC", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "TAC", alphabet);
     REQUIRE(res.size() == 4);
     
-    for (unsigned i : { 2, 4, 6, 8 })
+    for (int i : { 2, 4, 6, 8 })
     {
         REQUIRE(res.count(i) == 1);
     }
@@ -356,16 +357,16 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
 
 TEST_CASE("is matching multiple indeterminate and determinate segments with multiple empty words at different positions for spanning correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{,AA,CC,GG}{AA,,CC,GG}{AA,CC,,GG}{AA,CC,GG,}ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{,AA,CC,GG}{AA,,CC,GG}{AA,CC,,GG}{AA,CC,GG,}ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
     // Only letters from the first and the last segment.
     for (const string &pattern : { "ACGTACGT", "CGTACG", "GTACGT", "GTACG", "GTAC", "TACGT", "TACG", "TAC" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
 
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(5) == 1);
@@ -374,7 +375,7 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
     // Letters from the first, the last, and one (any) of the duplicated segments located in the middle.
     for (const string &pattern : { "ACGTAAACGT", "ACGTCCACGT", "ACGTGGACGT" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
 
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(5) == 1);
@@ -383,7 +384,7 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
     // Letters from the first, the last, and two (any) of the duplicated segments located in the middle.
     for (const string &pattern : { "ACGTAAAAACGT", "ACGTCCCCACGT", "ACGTGGGGACGT", "ACGTAACCACGT", "ACGTCCAAACGT", "ACGTCCGGACGT", "ACGTGGCCACGT", "ACGTAAGGACGT", "ACGTGGAAACGT" })
     {
-        unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
+        unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, pattern, alphabet);
 
         REQUIRE(res.size() == 1);
         REQUIRE(res.count(5) == 1);
@@ -392,16 +393,16 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
 
 TEST_CASE("is matching pattern for contiguous indeterminate segments correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}{,AA}{,AAAAA,TTTT}{A,}C", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{,A,C}{,AA}{,AAAAA,TTTT}{A,}C", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "AAA", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "AAA", alphabet);
     REQUIRE(res.size() == 3);
     
-    for (unsigned i : { 2, 3, 4 })
+    for (int i : { 2, 3, 4 })
     {
         REQUIRE(res.count(i) == 1);
     }
@@ -409,16 +410,16 @@ TEST_CASE("is matching pattern for contiguous indeterminate segments correct", "
 
 TEST_CASE("is matching multiple indeterminate and determinate segments with multiple words for spanning correct for non-dna alphabet", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("AACABBCBBC{A,AAB,ACCA}BB{C,ACABBCBB,CBA}BACABBC{B,CABB,BBC,AACABB,CBC}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("AACABBCBBC{A,AAB,ACCA}BB{C,ACABBCBB,CBA}BACABBC{B,CABB,BBC,AACABB,CBC}", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "CABBCB", "ABC");
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "CABBCB", "ABC");
     REQUIRE(res.size() == 4);
     
-    for (unsigned i : { 0, 3, 4, 5 })
+    for (int i : { 0, 3, 4, 5 })
     {
         REQUIRE(res.count(i) == 1);
     }
@@ -426,16 +427,16 @@ TEST_CASE("is matching multiple indeterminate and determinate segments with mult
 
 TEST_CASE("is matching pattern length 8 correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGT", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGT", alphabet);
     REQUIRE(res.size() == 3);
 
-    for (unsigned i : { 2, 4, 6 })
+    for (int i : { 2, 4, 6 })
     {
         REQUIRE(res.count(i) == 1);
     }
@@ -443,13 +444,13 @@ TEST_CASE("is matching pattern length 8 correct", "[exact]")
 
 TEST_CASE("is matching pattern length 16 correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}C", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGTACGTACGT", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGTACGTACGT", alphabet);
 
     REQUIRE(res.size() == 1);
     REQUIRE(res.count(6) == 1);
@@ -457,13 +458,13 @@ TEST_CASE("is matching pattern length 16 correct", "[exact]")
 
 TEST_CASE("is matching pattern length 32 correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}CGTACGT{A,}CGTACGT{A,CGT}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}CGTACGT{A,}CGTACGT{A,CGT}", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGTACGTACGTACGTACGTACGTACGT",alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGTACGTACGTACGTACGTACGTACGT",alphabet);
 
     REQUIRE(res.size() == 1);
     REQUIRE(res.count(10) == 1);
@@ -471,13 +472,13 @@ TEST_CASE("is matching pattern length 32 correct", "[exact]")
 
 TEST_CASE("is matching pattern length 64 correct", "[exact]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}CGTACGT{A,}CGTACGT{A,}CGTACGTACGTACGTACGTACGTACGTACGT{A,CGT}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT{,A,C}ACGT{,A}CGT{,AAAAA,TTTT}ACGT{A,}CGTACGT{A,}CGTACGT{A,}CGTACGTACGTACGTACGTACGTACGTACGT{A,CGT}", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
-    unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT", alphabet);
+    unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, "ACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT", alphabet);
 
     REQUIRE(res.size() == 1);
     REQUIRE(res.count(12) == 1);
@@ -488,17 +489,17 @@ TEST_CASE("is matching pattern equal to text correct", "[exact]")
     repeat(nRandIter, [] {
         for (int size = 1; size <= maxPatSize; ++size)
         {    
-            string text = Helpers::genRandomString(size, alphabet);
+            string text = helpers::genRandomString(size, alphabet);
             Sopang sopang;
 
-            unsigned nSegments;
-            unsigned *segmentSizes;
-            const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+            int nSegments;
+            int *segmentSizes;
+            const string *const *segments = parsing::parseTextArray(text, &nSegments, &segmentSizes);
         
             REQUIRE(nSegments == 1);
             REQUIRE(segmentSizes[0] == 1);
 
-            unordered_set<unsigned> res = sopang.match(segments, nSegments, segmentSizes, text, alphabet);
+            unordered_set<int> res = sopang.match(segments, nSegments, segmentSizes, text, alphabet);
         
             REQUIRE(res.size() == 1);
             REQUIRE(res.count(0) == 1);
@@ -516,7 +517,7 @@ TEST_CASE("is filling mask buffer correct for a predefined pattern", "[exact]")
     const uint64_t *maskBuffer = SopangWhitebox::getMaskBuffer(sopang);
 
     uint64_t maskA = maskBuffer[static_cast<size_t>('A')];
-    const vector<unsigned> expectedA { 0x0, 0x1, 0x0, 0x0, 0x1, 0x1, 0x1 };
+    const vector<uint64_t> expectedA { 0x0, 0x1, 0x0, 0x0, 0x1, 0x1, 0x1 };
 
     for (size_t i = 0; i < pattern.size(); ++i)
     {
@@ -524,7 +525,7 @@ TEST_CASE("is filling mask buffer correct for a predefined pattern", "[exact]")
     }
 
     uint64_t maskC = maskBuffer[static_cast<size_t>('C')];
-    const vector<unsigned> expectedC { 0x1, 0x0, 0x1, 0x1, 0x0, 0x1, 0x1 };
+    const vector<uint64_t> expectedC { 0x1, 0x0, 0x1, 0x1, 0x0, 0x1, 0x1 };
     
     for (size_t i = 0; i < pattern.size(); ++i)
     {
@@ -532,7 +533,7 @@ TEST_CASE("is filling mask buffer correct for a predefined pattern", "[exact]")
     }
 
     uint64_t maskG = maskBuffer[static_cast<size_t>('G')];
-    const vector<unsigned> expectedG { 0x1, 0x1, 0x1, 0x1, 0x1, 0x0, 0x1 };
+    const vector<uint64_t> expectedG { 0x1, 0x1, 0x1, 0x1, 0x1, 0x0, 0x1 };
     
     for (size_t i = 0; i < pattern.size(); ++i)
     {
@@ -540,7 +541,7 @@ TEST_CASE("is filling mask buffer correct for a predefined pattern", "[exact]")
     }
 
     uint64_t maskT = maskBuffer[static_cast<size_t>('T')];
-    const vector<unsigned> expectedT { 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x0 };
+    const vector<uint64_t> expectedT { 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x0 };
     
     for (size_t i = 0; i < pattern.size(); ++i)
     {
@@ -548,7 +549,7 @@ TEST_CASE("is filling mask buffer correct for a predefined pattern", "[exact]")
     }
 
     uint64_t maskN = maskBuffer[static_cast<size_t>('N')];
-    const vector<unsigned> expectedN { 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 };
+    const vector<uint64_t> expectedN { 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 };
     
     for (size_t i = 0; i < pattern.size(); ++i)
     {

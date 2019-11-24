@@ -4,6 +4,7 @@
 
 #include "catch.hpp"
 
+#include "../parsing.hpp"
 #include "../sopang.hpp"
 
 using namespace std;
@@ -20,32 +21,32 @@ const string alphabet = "ACGTN";
 
 TEST_CASE("is matching a single segment with empty sources correct", "[sources]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("ACGT", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("ACGT", &nSegments, &segmentSizes);
 
     Sopang sopang;
 
     for (const string &pattern : { "ACGT", "ACG", "CGT", "AC", "CG", "GT", "A", "C", "G", "T" })
     {
-        unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, { }, pattern, alphabet);
-        REQUIRE(res == unordered_set<unsigned>{ 0 });
+        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, { }, pattern, alphabet);
+        REQUIRE(res == unordered_set<int>{ 0 });
     }
 }
 
 TEST_CASE("is matching sources for 3 non-deterministic segments correct", "[sources]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("{ANT,AC,GGT}{CG,A}{AG,C}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("{ANT,AC,GGT}{CG,A}{AG,C}", &nSegments, &segmentSizes);
 
     const vector<vector<Sopang::SourceSet>> sources { { { 0 }, { 1 }, { 2 } }, { { 0, 1 }, { 2 } }, { { 0 }, { 1, 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<unsigned> &expected) {
-        unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
+        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -63,17 +64,17 @@ TEST_CASE("is matching sources for 3 non-deterministic segments correct", "[sour
 
 TEST_CASE("is matching sources for 3 segments with deterministic correct", "[sources]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("{ANT,AC,GGT}CGGA{CGAAA,A}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("{ANT,AC,GGT}CGGA{CGAAA,A}", &nSegments, &segmentSizes);
 
     const vector<vector<Sopang::SourceSet>> sources { { { 0 }, { 1 }, { 2 } }, { { 0 }, { 1, 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<unsigned> &expected) {
-        unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
+        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -91,17 +92,17 @@ TEST_CASE("is matching sources for 3 segments with deterministic correct", "[sou
 
 TEST_CASE("is matching sources for 4 segments with deterministic correct", "[sources]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("{ANT,AC,GGT}CGGA{CGAAA,TTT,GGG}{AAC,TC}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("{ANT,AC,GGT}CGGA{CGAAA,TTT,GGG}{AAC,TC}", &nSegments, &segmentSizes);
 
     const vector<vector<Sopang::SourceSet>> sources { { { 0 }, { 1 }, { 2 } }, { { 0 }, { 1 }, { 2 } }, { { 0, 1 }, { 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<unsigned> &expected) {
-        unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
+        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -132,17 +133,17 @@ TEST_CASE("is matching sources for 4 segments with deterministic correct", "[sou
 
 TEST_CASE("is matching sources for 3 non-deterministic segments multiple matches correct", "[sources]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("{ANT,AC,GGT}{CGGA,ANT}{CG,AC}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("{ANT,AC,GGT}{CGGA,ANT}{CG,AC}", &nSegments, &segmentSizes);
 
     const vector<vector<Sopang::SourceSet>> sources { { { 0 }, { 1 }, { 2 } }, { { 0, 1 }, { 2 } }, { { 0, 2 }, { 1 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<unsigned> &expected) {
-        unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
+        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -155,17 +156,17 @@ TEST_CASE("is matching sources for 3 non-deterministic segments multiple matches
 
 TEST_CASE("is matching sources for 5 segments with deterministic and empty variants correct", "[sources]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("AA{ANT,AC,GGT,}CGGA{CGAAA,}{AAC,TC}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("AA{ANT,AC,GGT,}CGGA{CGAAA,}{AAC,TC}", &nSegments, &segmentSizes);
 
     const vector<vector<Sopang::SourceSet>> sources { { { 0 }, { 1 }, { 2 }, { 3 } }, { { 0 }, { 1, 2, 3 } }, { { 0, 1 }, { 2, 3 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<unsigned> &expected) {
-        unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
+        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -217,18 +218,18 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
 
 TEST_CASE("is matching sources for 5 segments with deterministic and empty variants v2 correct", "[sources]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("{ANT,AC,}AC{CGGA,ANT,}{CG,AC,}{AC,AT}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("{ANT,AC,}AC{CGGA,ANT,}{CG,AC,}{AC,AT}", &nSegments, &segmentSizes);
 
     const vector<vector<Sopang::SourceSet>> sources { { { 0 }, { 1 }, { 2, 3 } }, { { 0, 1 }, { 3 }, { 2 } },
                                                     { { 0, 2 }, { 1 }, { 3 } }, { { 0 , 3 }, { 1, 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<unsigned> &expected) {
-        unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
+        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -243,18 +244,18 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
 
 TEST_CASE("is matching sources for 5 segments with deterministic and empty variants v3 correct", "[sources]")
 {
-    unsigned nSegments;
-    unsigned *segmentSizes;
-    const string *const *segments = Sopang::parseTextArray("{ANT,AC,}AC{CGGA,ANT,}{CG,AC,}{AC,AT}", &nSegments, &segmentSizes);
+    int nSegments;
+    int *segmentSizes;
+    const string *const *segments = parsing::parseTextArray("{ANT,AC,}AC{CGGA,ANT,}{CG,AC,}{AC,AT}", &nSegments, &segmentSizes);
 
     const vector<vector<Sopang::SourceSet>> sources { { { 0 }, { 1 }, { 2, 3 } }, { { 2 }, { 3 }, { 0, 1 } },
                                                     { { 1 }, { 3 }, { 0, 2 } }, { { 0 , 3 }, { 1, 2 } } };
-    const auto sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+    const auto sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<unsigned> &expected) {
-        unordered_set<unsigned> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
+        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 

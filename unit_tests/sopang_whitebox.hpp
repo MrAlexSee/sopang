@@ -31,19 +31,19 @@ public:
         return sopang.maskBuffer;
     }
 
-    inline static unsigned getWordSize(const Sopang &sopang) 
+    inline static int getMaxSourceCount(const Sopang &sopang)
+    {
+        return sopang.maxSourceCount;
+    }
+
+    inline static size_t getWordSize(const Sopang &sopang) 
     {
         return sopang.wordSize;
     }
 
-    inline static unsigned getSACounterSize(const Sopang &sopang) 
+    inline static size_t getSACounterSize(const Sopang &sopang) 
     {
         return sopang.saCounterSize;
-    }
-
-    inline static size_t getMaxSourceCount(const Sopang &sopang)
-    {
-        return sopang.maxSourceCount;
     }
 };
 
