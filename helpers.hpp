@@ -11,72 +11,66 @@
 #include <sstream>
 #include <type_traits>
 
-namespace sopang
+namespace sopang::helpers
 {
 
-class Helpers
-{
-public:
-    Helpers() = delete;
+/*
+*** COLLECTIONS
+*/
 
-    /*
-     *** COLLECTIONS
-     */
+/** Calculates a median from [vec] and stores it in [median]. */
+template<typename T>
+void calcStatsMedian(const std::vector<T> &vec, T *median);
 
-    /** Calculates a median from [vec] and stores it in [median]. */
-    template<typename T>
-    static void calcStatsMedian(const std::vector<T> &vec, T *median);
- 
-    /*
-     *** FILES
-     */
+/*
+*** FILES
+*/
 
-    inline static bool isFileReadable(const std::string &filePath);
-    inline static std::string readFile(const std::string &filePath);
+inline bool isFileReadable(const std::string &filePath);
+inline std::string readFile(const std::string &filePath);
 
-    /** Appends [text] to file with [filePath] followed by an optional newline if [newline] is true. */
-    inline static void dumpToFile(const std::string &text, const std::string &filePath, bool newline = false);
-    inline static bool removeFile(const std::string &filePath);
+/** Appends [text] to file with [filePath] followed by an optional newline if [newline] is true. */
+inline void dumpToFile(const std::string &text, const std::string &filePath, bool newline = false);
+inline bool removeFile(const std::string &filePath);
 
-    /*
-     *** RANDOM
-     */
+/*
+*** RANDOM
+*/
 
-    /** Returns a random integer from range [start] to [end] (both inclusive) not equal to [excluded]. */
-    inline static int randIntRangeExcluded(int start, int end, int excluded);
+/** Returns a random integer from range [start] to [end] (both inclusive) not equal to [excluded]. */
+inline int randIntRangeExcluded(int start, int end, int excluded);
 
-    /*
-     *** STRINGS
-     */
-
-    template<typename T>
-    static std::string join(const std::vector<T> &vec, const std::string &delim);
-    inline static void removeEmptyStrings(std::vector<std::string> &vec);
-
-    /** Returns a random string having [size] characters sampled uniformly from [alphabet]. */
-    inline static std::string genRandomString(int size, const std::string &alphabet);
-    /** Returns a random alphanumeric string having [size] characters. */
-    inline static std::string genRandomStringAlphNum(int size);
-   
-private:
-    template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
-    inline static std::string toString(T val)
-    {
-        return std::to_string(val);
-    }
-    inline static std::string toString(const std::string &str)
-    {
-        return str;
-    }
-
-    /** Lookup table for alphanumeric characters. */
-    static constexpr const char *alnumLUT = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    /** Size of alnumLUT exluding the terminating '\0'. */
-    static constexpr int alnumLUTSize = 62;
-};
+/*
+*** STRINGS
+*/
 
 template<typename T>
-void Helpers::calcStatsMedian(const std::vector<T> &vec, T *median)
+std::string join(const std::vector<T> &vec, const std::string &delim);
+
+inline void removeEmptyStrings(std::vector<std::string> &vec);
+
+/** Returns a random string having [size] characters sampled uniformly from [alphabet]. */
+inline std::string genRandomString(int size, const std::string &alphabet);
+/** Returns a random alphanumeric string having [size] characters. */
+inline std::string genRandomStringAlphNum(int size);
+
+namespace
+{
+
+template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+inline std::string toString(T val)
+{
+    return std::to_string(val);
+}
+inline std::string toString(const std::string &str)
+{
+    return str;
+}
+
+} // namespace (anonymous)
+
+template<typename T>
+void calcStatsMedian(const std::vector<T> &vec, T *median)
 {
     if (vec.empty())
     {
@@ -89,13 +83,13 @@ void Helpers::calcStatsMedian(const std::vector<T> &vec, T *median)
     *median = tmp[tmp.size() / 2];
 }
 
-bool Helpers::isFileReadable(const std::string &filePath)
+bool isFileReadable(const std::string &filePath)
 {
     std::ifstream inStream(filePath);
     return inStream.good();
 }
 
-std::string Helpers::readFile(const std::string &filePath)
+std::string readFile(const std::string &filePath)
 {
     using namespace std;
 
@@ -109,7 +103,7 @@ std::string Helpers::readFile(const std::string &filePath)
     return static_cast<stringstream const&>(stringstream() << inStream.rdbuf()).str();
 }
 
-void Helpers::dumpToFile(const std::string &text, const std::string &filePath, bool newline)
+void dumpToFile(const std::string &text, const std::string &filePath, bool newline)
 {
     std::ofstream outStream(filePath, std::ios_base::app);
 
@@ -126,12 +120,12 @@ void Helpers::dumpToFile(const std::string &text, const std::string &filePath, b
     }
 }
 
-bool Helpers::removeFile(const std::string &filePath)
+bool removeFile(const std::string &filePath)
 {
     return remove(filePath.c_str()) == 0;
 }
 
-int Helpers::randIntRangeExcluded(int start, int end, int excluded)
+int randIntRangeExcluded(int start, int end, int excluded)
 {
     using namespace std;
 
@@ -155,7 +149,7 @@ int Helpers::randIntRangeExcluded(int start, int end, int excluded)
 }
 
 template<typename T>
-std::string Helpers::join(const std::vector<T> &vec, const std::string &delim)
+std::string join(const std::vector<T> &vec, const std::string &delim)
 {
     if (vec.empty())
     {
@@ -172,7 +166,7 @@ std::string Helpers::join(const std::vector<T> &vec, const std::string &delim)
     return res + toString(vec.back());
 }
 
-void Helpers::removeEmptyStrings(std::vector<std::string> &vec)
+void removeEmptyStrings(std::vector<std::string> &vec)
 {
     std::vector<std::string>::iterator it = vec.begin();
 
@@ -189,7 +183,7 @@ void Helpers::removeEmptyStrings(std::vector<std::string> &vec)
     }
 }
 
-std::string Helpers::genRandomString(int size, const std::string &alphabet)
+std::string genRandomString(int size, const std::string &alphabet)
 {   
     using namespace std;
 
@@ -207,9 +201,14 @@ std::string Helpers::genRandomString(int size, const std::string &alphabet)
     return res;
 }
 
-std::string Helpers::genRandomStringAlphNum(int size)
+std::string genRandomStringAlphNum(int size)
 {
     using namespace std;
+
+    /** Lookup table for alphanumeric characters. */
+    static constexpr const char *alnumLUT = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    /** Size of alnumLUT exluding the terminating '\0'. */
+    static constexpr int alnumLUTSize = 62;
 
     random_device rd;
     mt19937 mt(rd());
@@ -225,6 +224,6 @@ std::string Helpers::genRandomStringAlphNum(int size)
     return res;
 }
 
-} // namespace sopang
+} // namespace sopang::helpers
 
 #endif // HELPERS_HPP

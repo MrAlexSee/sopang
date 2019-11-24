@@ -28,23 +28,6 @@ public:
     Sopang();
     ~Sopang();
 
-    /*
-     *** PARSING
-     */
-
-    static const std::string *const *parseTextArray(std::string text, int *nSegments, int **segmentSizes);
-    static std::vector<std::string> parsePatterns(std::string patternsStr);
-
-    static std::vector<std::vector<SourceSet>> parseSources(std::string text, int &sourceCount);
-    static std::vector<std::vector<SourceSet>> parseSourcesCompressed(std::string text, int &sourceCount);
-
-    static std::unordered_map<int, std::vector<SourceSet>> sourcesToSourceMap(int nSegments,
-        const int *segmentSizes, const std::vector<std::vector<SourceSet>> &sources);
-
-    /*
-     *** MATCHING
-     */
-
     std::unordered_set<int> match(const std::string *const *segments,
         int nSegments, const int *segmentSizes,
         const std::string &pattern, const std::string &alphabet);
@@ -65,7 +48,7 @@ private:
     void fillPatternMaskBuffer(const std::string &pattern, const std::string &alphabet);
     void fillPatternMaskBufferApprox(const std::string &pattern, const std::string &alphabet);
 
-    /** Buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants) 
+    /** Buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants)
      * from the input file cannot be larger than this value. */
     static constexpr size_t dBufferSize = 262144;
     /** Buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code, 
@@ -86,8 +69,6 @@ private:
     /** Counter with all bits set. */
     static constexpr uint64_t allOnes = ~(0x0ULL);
 
-    /** Segment start mark value in the compressed sources file. */
-    static constexpr char segmentStartMark = static_cast<char>(127);
     /** Initial memory reserve size for a map storing matches for verification with sources. */
     static constexpr size_t matchMapReserveSize = 32;
 

@@ -8,6 +8,7 @@
 
 #include "helpers.hpp"
 #include "params.hpp"
+#include "parsing.hpp"
 #include "sopang.hpp"
 #include "zstd_helper.hpp"
 
@@ -179,20 +180,20 @@ int handleParams(int argc, const char **argv)
 
 bool checkInputFiles()
 {
-    if (not Helpers::isFileReadable(params.inTextFile))
+    if (not helpers::isFileReadable(params.inTextFile))
     {
         cerr << "Cannot access input text file (doesn't exist or insufficient permissions): " << params.inTextFile << endl;
         return false;
     }
 
-    if (not Helpers::isFileReadable(params.inPatternFile))
+    if (not helpers::isFileReadable(params.inPatternFile))
     {
         cerr << "Cannot access input patterns file (doesn't exist or insufficient permissions): " << params.inPatternFile << endl;
         return false;
     }
 
     if (not params.inSourcesFile.empty() and
-        not Helpers::isFileReadable(params.inSourcesFile))
+        not helpers::isFileReadable(params.inSourcesFile))
     {
         cerr << "Cannot access input sources file (doesn't exist or insufficient permissions): " << params.inSourcesFile << endl;
         return false;
@@ -213,7 +214,7 @@ int run()
         int nSegments = 0;
         int *segmentSizes = nullptr;
 
-        const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
+        const string *const *segments = parsing::parseTextArray(text, &nSegments, &segmentSizes);
         cout << "Parsed #segments = " << nSegments << endl;
 
         if (nSegments == 0)
@@ -229,7 +230,7 @@ int run()
         if (not params.inSourcesFile.empty())
         {
             vector<vector<Sopang::SourceSet>> sources = readSources(nSegments, segmentSizes);
-            sourceMap = Sopang::sourcesToSourceMap(nSegments, segmentSizes, sources);
+            sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
         }
 
         runSopang(segmentData, sourceMap, patterns);
@@ -246,7 +247,7 @@ int run()
 
 string readInputText()
 {
-    string text = Helpers::readFile(params.inTextFile);
+    string text = helpers::readFile(params.inTextFile);
     cout << "Read file: " << params.inTextFile << endl;
 
     if (params.decompressInput)
@@ -259,7 +260,7 @@ string readInputText()
     if (params.dumpToFile)
     {
         string outStr = params.inTextFile + " " + to_string(textSizeMB) + " ";
-        Helpers::dumpToFile(outStr, params.outFile, false);
+        helpers::dumpToFile(outStr, params.outFile, false);
     }
 
     cout << boost::format("Read input text, #chars = %1%, MB = %2%") % text.size() % textSizeMB << endl;
@@ -268,10 +269,10 @@ string readInputText()
 
 vector<string> readPatterns()
 {
-    string patternsStr = Helpers::readFile(params.inPatternFile);
+    string patternsStr = helpers::readFile(params.inPatternFile);
     cout << "Read file: " << params.inPatternFile << endl;
 
-    vector<string> patterns = Sopang::parsePatterns(patternsStr);
+    vector<string> patterns = parsing::parsePatterns(patternsStr);
 
     if (params.nPatterns > 0 and static_cast<size_t>(params.nPatterns) < patterns.size())
     {
@@ -290,7 +291,7 @@ vector<string> readPatterns()
 
 vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentSizes)
 {
-    string sourcesStr = Helpers::readFile(params.inSourcesFile);
+    string sourcesStr = helpers::readFile(params.inSourcesFile);
     cout << "Read file: " << params.inSourcesFile << endl;
 
     vector<vector<Sopang::SourceSet>> sources;
@@ -301,11 +302,11 @@ vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentS
         sourcesStr = decompressZstd(sourcesStr, params.zstdBufferSize);
         cout << "Decompressed sources text" << endl;
 
-        sources = Sopang::parseSourcesCompressed(sourcesStr, sourceCount);
+        sources = parsing::parseSourcesCompressed(sourcesStr, sourceCount);
     }
     else
     {
-        sources = Sopang::parseSources(sourcesStr, sourceCount);
+        sources = parsing::parseSources(sourcesStr, sourceCount);
     }
 
     cout << boost::format("Parsed sources for non-deterministic #segments = %1%, #chars = %2%")
@@ -490,11 +491,11 @@ void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB)
     assert(elapsedSecVec.size() > 0);
     double medianTotal = 0.0;
 
-    Helpers::calcStatsMedian(elapsedSecVec, &medianTotal);
-    Helpers::dumpToFile(to_string(medianTotal) + " ", params.outFile);
+    helpers::calcStatsMedian(elapsedSecVec, &medianTotal);
+    helpers::dumpToFile(to_string(medianTotal) + " ", params.outFile);
 
     double throughputMedian = textSizeMB / medianTotal;
-    Helpers::dumpToFile(to_string(throughputMedian) + "\n", params.outFile);
+    helpers::dumpToFile(to_string(throughputMedian) + "\n", params.outFile);
 
     cout << endl << "Dumped to: " << params.outFile << " ([input file name] [input text size MB] [median elapsed sec] [median throughput MB/s])" << endl;
 }
