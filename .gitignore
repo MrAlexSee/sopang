@@ -1,5 +1,6 @@
-/*.o
+.vscode
 data
 sopang
+/*.o
 unit_tests/*.o
 unit_tests/main_tests
