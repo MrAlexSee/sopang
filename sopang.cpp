@@ -29,7 +29,7 @@ Sopang::~Sopang()
     delete[] dBuffer;
 }
 
-const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, unsigned **segmentSizes)
+const string *const *Sopang::parseTextArray(string text, int *nSegments, int **segmentSizes)
 {
     boost::trim(text);
 
@@ -107,7 +107,7 @@ const string *const *Sopang::parseTextArray(string text, unsigned *nSegments, un
 
     *nSegments = segments.size();
 
-    *segmentSizes = new unsigned[segments.size()];
+    *segmentSizes = new int[segments.size()];
     string **res = new string *[segments.size()];
 
     for (size_t iSeg = 0; iSeg < segments.size(); ++iSeg)
@@ -447,13 +447,13 @@ vector<vector<Sopang::SourceSet>> Sopang::parseSourcesCompressed(string text, in
     return ret;
 }
 
-unordered_map<unsigned, vector<Sopang::SourceSet>> Sopang::sourcesToSourceMap(unsigned nSegments,
-    const unsigned *segmentSizes, const vector<vector<Sopang::SourceSet>> &sources)
+unordered_map<int, vector<Sopang::SourceSet>> Sopang::sourcesToSourceMap(int nSegments,
+    const int *segmentSizes, const vector<vector<Sopang::SourceSet>> &sources)
 {
-    unordered_map<unsigned, vector<SourceSet>> ret;
+    unordered_map<int, vector<SourceSet>> ret;
     size_t arrayIdx = 0;
 
-    for (unsigned iS = 0; iS < nSegments; ++iS)
+    for (int iS = 0; iS < nSegments; ++iS)
     {
         if (segmentSizes[iS] > 1)
         {
@@ -465,8 +465,8 @@ unordered_map<unsigned, vector<Sopang::SourceSet>> Sopang::sourcesToSourceMap(un
     return ret;
 }
 
-unordered_set<unsigned> Sopang::match(const string *const *segments,
-    unsigned nSegments, const unsigned *segmentSizes,
+unordered_set<int> Sopang::match(const string *const *segments,
+    int nSegments, const int *segmentSizes,
     const string &pattern, const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
@@ -476,13 +476,13 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
     const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
     uint64_t D = allOnes;
 
-    unordered_set<unsigned> res;
+    unordered_set<int> res;
 
-    for (unsigned iS = 0; iS < nSegments; ++iS)
+    for (int iS = 0; iS < nSegments; ++iS)
     {
         assert(segmentSizes[iS] > 0 and segmentSizes[iS] <= dBufferSize);
 
-        for (unsigned iD = 0; iD < segmentSizes[iS]; ++iD)
+        for (int iD = 0; iD < segmentSizes[iS]; ++iD)
         {
             dBuffer[iD] = D;
 
@@ -506,7 +506,7 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
 
         D = dBuffer[0];
 
-        for (unsigned iD = 1; iD < segmentSizes[iS]; ++iD)
+        for (int iD = 1; iD < segmentSizes[iS]; ++iD)
         {
             // As a join operation we want to preserve 0s (active states):
             // a match can occur in any segment alternative.
@@ -517,15 +517,15 @@ unordered_set<unsigned> Sopang::match(const string *const *segments,
     return res;
 }
 
-unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
-    unsigned nSegments, const unsigned *segmentSizes,
+unordered_set<int> Sopang::matchApprox(const string *const *segments,
+    int nSegments, const int *segmentSizes,
     const string &pattern, const string &alphabet,
-    unsigned k)
+    int k)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= maxPatternApproxSize);
     assert(k > 0);
 
-    unordered_set<unsigned> res;
+    unordered_set<int> res;
 
     fillPatternMaskBufferApprox(pattern, alphabet);
 
@@ -543,11 +543,11 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
         D |= (saFullCounter << (i * saCounterSize));
     }
 
-    for (unsigned iS = 0; iS < nSegments; ++iS)
+    for (int iS = 0; iS < nSegments; ++iS)
     {
         assert(segmentSizes[iS] > 0 and segmentSizes[iS] <= dBufferSize);
 
-        for (unsigned iD = 0; iD < segmentSizes[iS]; ++iD)
+        for (int iD = 0; iD < segmentSizes[iS]; ++iD)
         {
             dBuffer[iD] = D;
 
@@ -577,7 +577,7 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
         {
             uint64_t min = (dBuffer[0] & counterPosMasks[i]);
 
-            for (unsigned iD = 1; iD < segmentSizes[iS]; ++iD)
+            for (int iD = 1; iD < segmentSizes[iS]; ++iD)
             {
                 uint64_t cur = (dBuffer[iD] & counterPosMasks[i]);
                 
@@ -597,11 +597,11 @@ unordered_set<unsigned> Sopang::matchApprox(const string *const *segments,
 namespace
 {
     bool verifyMatch(const string *const *segments,
-        const unsigned *segmentSizes,
-        const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
+        const int *segmentSizes,
+        const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
         const string &pattern,
-        unsigned matchIdx,
-        const pair<unsigned, size_t> &match)
+        int matchIdx,
+        const pair<int, int> &match)
     {
         using SourceSet = Sopang::SourceSet;
         int patternCharIdx = static_cast<int>(pattern.size()) - match.second - 2;
@@ -645,13 +645,13 @@ namespace
                 
                 for (const auto &leaf : leaves)
                 {
-                    for (unsigned variantIdx = 0; variantIdx < segmentSizes[segmentIdx]; ++variantIdx)
+                    for (int variantIdx = 0; variantIdx < segmentSizes[segmentIdx]; ++variantIdx)
                     {
                         const SourceSet &variantSources = sourceMap.at(segmentIdx)[variantIdx];
 
                         if (segments[segmentIdx][variantIdx].empty())
                         {
-                            const SourceSet newSources = (variantSources & leaf.first);
+                            const SourceSet newSources = (variantSources & leaf.first);segmentIdx
 
                             if (newSources.any())
                             {
@@ -711,9 +711,9 @@ namespace
     }
 } // namespace (anonymous)
 
-unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
-    unsigned nSegments, const unsigned *segmentSizes,
-    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
+unordered_set<int> Sopang::matchWithSources(const string *const *segments,
+    int nSegments, const int *segmentSizes,
+    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
     const string &pattern, const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
@@ -723,14 +723,14 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
     uint64_t D = allOnes;
 
     // segment index -> [(variant index, char in variant index)]
-    unordered_map<unsigned, vector<pair<unsigned, size_t>>> indexToMatch;
+    unordered_map<int, vector<pair<int, int>>> indexToMatch;
     indexToMatch.reserve(matchMapReserveSize);
 
-    for (unsigned iS = 0; iS < nSegments; ++iS)
+    for (int iS = 0; iS < nSegments; ++iS)
     {
         assert(segmentSizes[iS] > 0 and segmentSizes[iS] <= dBufferSize);
 
-        for (unsigned iD = 0; iD < segmentSizes[iS]; ++iD)
+        for (int iD = 0; iD < segmentSizes[iS]; ++iD)
         {
             dBuffer[iD] = D;
 
@@ -751,20 +751,21 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
                         indexToMatch[iS] = {};
                     }
 
-                    indexToMatch[iS].emplace_back(make_pair(iD, iC));
+                    indexToMatch[iS].emplace_back(make_pair(iD, static_cast<int>(iC)));
                 }
             }
         }
 
         D = dBuffer[0];
 
-        for (unsigned iD = 1; iD < segmentSizes[iS]; ++iD)
+        for (int iD = 1; iD < segmentSizes[iS]; ++iD)
         {
             D &= dBuffer[iD];
         }
     }
 
-    unordered_set<unsigned> res;
+    unordered_set<int> res;
+
     for (const auto &kv : indexToMatch)
     {
         for (const auto &match : kv.second)
@@ -781,7 +782,7 @@ unordered_set<unsigned> Sopang::matchWithSources(const string *const *segments,
 
 void Sopang::initCounterPositionMasks()
 {
-    for (unsigned i = 0; i < maxPatternApproxSize; ++i)
+    for (size_t i = 0; i < maxPatternApproxSize; ++i)
     {
         counterPosMasks[i] = (saCounterAllSet << (i * saCounterSize));
     }

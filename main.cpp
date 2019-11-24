@@ -42,8 +42,8 @@ constexpr int paramsResContinue = -1;
 struct SegmentData
 {
     const string *const *segments;
-    unsigned nSegments; // Number of segments.
-    const unsigned *segmentSizes; // Size of each segment (number of variants).
+    int nSegments; // Number of segments.
+    const int *segmentSizes; // Size of each segment (number of variants).
 };
 
 /** Handles cmd-line parameters, returns paramsResContinue if program execution should continue. */
@@ -55,11 +55,11 @@ int run();
 
 string readInputText();
 vector<string> readPatterns();
-vector<vector<Sopang::SourceSet>> readSources(unsigned nSegments, const unsigned *segmentSizes);
+vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentSizes);
 
 /** Runs sopang for [segmentData] and [sourceMap] (which may be empty), searching for [patterns]. */
 void runSopang(const SegmentData &segmentData, 
-    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
+    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
     const vector<string> &patterns);
 
 /** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segmentData]. */
@@ -67,11 +67,11 @@ void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSiz
 
 /** Searches for [pattern] in [segmentData] and [sourceMap] (which may be empty) and returns elapsed time in seconds. */
 double measure(const SegmentData &segmentData,
-    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
+    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
     const string &pattern);
 
 void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
-void dumpIndexes(const unordered_set<unsigned> &indexes);
+void dumpIndexes(const unordered_set<int> &indexes);
 
 void clearMemory(SegmentData &segmentData);
 
@@ -210,8 +210,8 @@ int run()
         string text = readInputText();
         cout << "Parsing segments..." << endl;
 
-        unsigned nSegments = 0;
-        unsigned *segmentSizes = nullptr;
+        int nSegments = 0;
+        int *segmentSizes = nullptr;
 
         const string *const *segments = Sopang::parseTextArray(text, &nSegments, &segmentSizes);
         cout << "Parsed #segments = " << nSegments << endl;
@@ -224,7 +224,7 @@ int run()
         vector<string> patterns = readPatterns();
 
         SegmentData segmentData{ segments, nSegments, segmentSizes };
-        unordered_map<unsigned, vector<Sopang::SourceSet>> sourceMap;
+        unordered_map<int, vector<Sopang::SourceSet>> sourceMap;
 
         if (not params.inSourcesFile.empty())
         {
@@ -288,7 +288,7 @@ vector<string> readPatterns()
     return patterns;
 }
 
-vector<vector<Sopang::SourceSet>> readSources(unsigned nSegments, const unsigned *segmentSizes)
+vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentSizes)
 {
     string sourcesStr = Helpers::readFile(params.inSourcesFile);
     cout << "Read file: " << params.inSourcesFile << endl;
@@ -321,14 +321,14 @@ vector<vector<Sopang::SourceSet>> readSources(unsigned nSegments, const unsigned
     // We check whether the source counts match the segments in text.
     size_t sourceIdx = 0;
 
-    for (unsigned segmentIdx = 0; segmentIdx < nSegments; ++segmentIdx)
+    for (int segmentIdx = 0; segmentIdx < nSegments; ++segmentIdx)
     {
         if (segmentSizes[segmentIdx] == 1)
         {
             continue;
         }
 
-        if (segmentSizes[segmentIdx] != sources[sourceIdx].size())
+        if (static_cast<size_t>(segmentSizes[segmentIdx]) != sources[sourceIdx].size())
         {
             throw runtime_error("source segment variant count does not match text segment variant count, source segment index = "
                 + to_string(sourceIdx));
@@ -365,7 +365,7 @@ vector<vector<Sopang::SourceSet>> readSources(unsigned nSegments, const unsigned
 }
 
 void runSopang(const SegmentData &segmentData,
-    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
+    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
     const vector<string> &patterns)
 {
     assert(segmentData.nSegments > 0);
@@ -415,9 +415,9 @@ void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSiz
 {
     *textSize = 0;
 
-    for (unsigned iS = 0; iS < segmentData.nSegments; ++iS)
+    for (int iS = 0; iS < segmentData.nSegments; ++iS)
     {
-        for (unsigned iSS = 0; iSS < segmentData.segmentSizes[iS]; ++iSS)
+        for (int iSS = 0; iSS < segmentData.segmentSizes[iS]; ++iSS)
         {
             *textSize += segmentData.segments[iS][iSS].size();
         }
@@ -427,10 +427,10 @@ void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSiz
 }
 
 double measure(const SegmentData &segmentData,
-    const unordered_map<unsigned, vector<Sopang::SourceSet>> &sourceMap,
+    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
     const string &pattern)
 {
-    unordered_set<unsigned> res;
+    unordered_set<int> res;
     clock_t start, end;
 
     {
@@ -499,16 +499,16 @@ void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB)
     cout << endl << "Dumped to: " << params.outFile << " ([input file name] [input text size MB] [median elapsed sec] [median throughput MB/s])" << endl;
 }
 
-void dumpIndexes(const unordered_set<unsigned> &indexes)
+void dumpIndexes(const unordered_set<int> &indexes)
 {
     if (indexes.size() == 0)
     {
         return;
     }
 
-    set<unsigned> resSorted(indexes.begin(), indexes.end()); // ordered set
+    set<int> resSorted(indexes.begin(), indexes.end()); // ordered set
 
-    for (const unsigned r : resSorted)
+    for (const int r : resSorted)
     {
         cout << r << " ";
     }
@@ -521,7 +521,7 @@ void clearMemory(SegmentData &segmentData)
     assert(segmentData.nSegments > 0);
     assert(segmentData.segments != nullptr and segmentData.segmentSizes != nullptr);
 
-    for (unsigned iSeg = 0; iSeg < segmentData.nSegments; ++iSeg)
+    for (int iSeg = 0; iSeg < segmentData.nSegments; ++iSeg)
     {
         delete[] segmentData.segments[iSeg];
     }

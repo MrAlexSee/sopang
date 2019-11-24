@@ -3,7 +3,6 @@
 
 #include "bitset.hpp"
 
-#include <bitset>
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -21,7 +20,7 @@ class Sopang
 {
 private:
     /** Maximum number of sources (upper bound on source set size). */
-    static constexpr size_t maxSourceCount = 8192;
+    static constexpr int maxSourceCount = 8192;
 
 public:
     using SourceSet = BitSet<maxSourceCount>;
@@ -33,31 +32,31 @@ public:
      *** PARSING
      */
 
-    static const std::string *const *parseTextArray(std::string text, unsigned *nSegments, unsigned **segmentSizes);
+    static const std::string *const *parseTextArray(std::string text, int *nSegments, int **segmentSizes);
     static std::vector<std::string> parsePatterns(std::string patternsStr);
 
     static std::vector<std::vector<SourceSet>> parseSources(std::string text, int &sourceCount);
     static std::vector<std::vector<SourceSet>> parseSourcesCompressed(std::string text, int &sourceCount);
 
-    static std::unordered_map<unsigned, std::vector<SourceSet>> sourcesToSourceMap(unsigned nSegments,
-        const unsigned *segmentSizes, const std::vector<std::vector<SourceSet>> &sources);
+    static std::unordered_map<int, std::vector<SourceSet>> sourcesToSourceMap(int nSegments,
+        const int *segmentSizes, const std::vector<std::vector<SourceSet>> &sources);
 
     /*
      *** MATCHING
      */
 
-    std::unordered_set<unsigned> match(const std::string *const *segments,
-        unsigned nSegments, const unsigned *segmentSizes,
+    std::unordered_set<int> match(const std::string *const *segments,
+        int nSegments, const int *segmentSizes,
         const std::string &pattern, const std::string &alphabet);
 
-    std::unordered_set<unsigned> matchApprox(const std::string *const *segments,
-        unsigned nSegments, const unsigned *segmentSizes,
+    std::unordered_set<int> matchApprox(const std::string *const *segments,
+        int nSegments, const int *segmentSizes,
         const std::string &pattern, const std::string &alphabet, 
-        unsigned k);
+        int k);
 
-    std::unordered_set<unsigned> matchWithSources(const std::string *const *segments,
-        unsigned nSegments, const unsigned *segmentSizes,
-        const std::unordered_map<unsigned, std::vector<SourceSet>> &sourceMap,
+    std::unordered_set<int> matchWithSources(const std::string *const *segments,
+        int nSegments, const int *segmentSizes,
+        const std::unordered_map<int, std::vector<SourceSet>> &sourceMap,
         const std::string &pattern, const std::string &alphabet);
 
 private:
@@ -68,17 +67,17 @@ private:
 
     /** Buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants) 
      * from the input file cannot be larger than this value. */
-    static constexpr unsigned dBufferSize = 262144;
+    static constexpr size_t dBufferSize = 262144;
     /** Buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code, 
      * up to 'Z' = 90. */
-    static constexpr unsigned maskBufferSize = 91;
+    static constexpr size_t maskBufferSize = 91;
     /** Word size (in bits) used by the Shift-Or algorithm. */
-    static constexpr unsigned wordSize = 64;
+    static constexpr size_t wordSize = 64;
 
     /** Maximum pattern size for approximate search. */
-    static constexpr unsigned maxPatternApproxSize = 12;
+    static constexpr size_t maxPatternApproxSize = 12;
     /** Shift-Add counter size in bits. */
-    static constexpr unsigned saCounterSize = 5;
+    static constexpr size_t saCounterSize = 5;
     
     /** Full single Shift-Add counter indicating no match. */
     static constexpr uint64_t saFullCounter = 0x10ULL;
