@@ -447,4 +447,4 @@ unordered_map<int, vector<Sopang::SourceSet>> sourcesToSourceMap(int nSegments,
     return ret;
 }
 
-} // namespace sopang
+} // namespace sopang::parsing

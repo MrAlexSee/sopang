@@ -54,21 +54,6 @@ inline std::string genRandomString(int size, const std::string &alphabet);
 /** Returns a random alphanumeric string having [size] characters. */
 inline std::string genRandomStringAlphNum(int size);
 
-namespace
-{
-
-template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
-inline std::string toString(T val)
-{
-    return std::to_string(val);
-}
-inline std::string toString(const std::string &str)
-{
-    return str;
-}
-
-} // namespace (anonymous)
-
 template<typename T>
 void calcStatsMedian(const std::vector<T> &vec, T *median)
 {
@@ -147,6 +132,22 @@ int randIntRangeExcluded(int start, int end, int excluded)
         }
     }
 }
+
+
+namespace
+{
+
+template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+inline std::string toString(T val)
+{
+    return std::to_string(val);
+}
+inline std::string toString(const std::string &str)
+{
+    return str;
+}
+
+} // namespace (anonymous)
 
 template<typename T>
 std::string join(const std::vector<T> &vec, const std::string &delim)

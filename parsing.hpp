@@ -19,6 +19,6 @@ std::vector<std::vector<Sopang::SourceSet>> parseSourcesCompressed(std::string t
 std::unordered_map<int, std::vector<Sopang::SourceSet>> sourcesToSourceMap(int nSegments,
     const int *segmentSizes, const std::vector<std::vector<Sopang::SourceSet>> &sources);
 
-} // namespace sopang
+} // namespace sopang::parsing
 
 #endif // PARSING_HPP
