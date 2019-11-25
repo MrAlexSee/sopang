@@ -41,7 +41,7 @@ private:
     static constexpr uint64_t allZeros = 0x0ULL;
 
     static constexpr int bufferSize = (N + 1) / 64;
-    static constexpr int bufferSizeBytes = (N + 1) / 8;
+    static constexpr size_t bufferSizeBytes = bufferSize * 8;
 
     uint64_t buffer[bufferSize];
 };
