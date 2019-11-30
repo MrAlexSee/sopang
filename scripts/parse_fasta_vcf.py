@@ -76,7 +76,7 @@ def getSourcesMapFromVcfReader(vcfReader, lineCount):
 
         for sample in record.samples:
             indexes = [int(i) for i in sample.data.GT.split("|")]
-            assert len(indexes) == 2
+            assert len(indexes) == 2, 'indexes = {0}'.format(indexes)
 
             # We take the 1st index of the diploid as one source and the 2nd index as another source.
             for diploidIndex, altIndex in enumerate(indexes):
