@@ -300,12 +300,13 @@ vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentS
     if (params.decompressInput)
     {
         sourcesStr = decompressZstd(sourcesStr, params.zstdBufferSize);
-        cout << "Decompressed sources text" << endl;
+        cout << "Decompressed sources text, parsing sources..." << endl;
 
         sources = parsing::parseSourcesCompressed(sourcesStr, sourceCount);
     }
     else
     {
+        cout << "Parsing sources..." << endl;
         sources = parsing::parseSources(sourcesStr, sourceCount);
     }
 
