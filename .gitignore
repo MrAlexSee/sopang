@@ -1,6 +1,6 @@
 .vscode
+*.o
 data
+scripts/parse_fasta_vcf_cpp/parse_fasta_vcf
 sopang
-/*.o
-unit_tests/*.o
 unit_tests/main_tests
