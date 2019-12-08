@@ -18,7 +18,7 @@ struct Params
     const std::string alphabet = "ACGTN";
 
     /** Input and output buffer size used for Zstandard library streaming decompression. */
-    const size_t zstdBufferSize = 2048;
+    const size_t zstdBufferSize = 1024;
 
     /*
      *** COMMAND-LINE PARAMS
