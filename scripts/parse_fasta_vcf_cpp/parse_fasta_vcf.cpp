@@ -1,11 +1,14 @@
 #include <cassert>
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
+#include <boost/algorithm/string.hpp>
 #include <Variant.h> // vcflib
 #include <zstd.h>
 
@@ -17,7 +20,11 @@ using SourcesMap = unordered_map<int, unordered_map<string, set<int>>>;
 SourcesMap parseVcfFile(string filePath, string &chrID, int &sourceCount);
 bool shouldProcessVariant(const vcflib::Variant &variant);
 
-void parseFastaFile(const string &filePath, const SourcesMap &sourcesMap, const string &chrID);
+pair<string, string> parseFastaFile(const string &filePath, const SourcesMap &sourcesMap, const string &chrID);
+pair<string, string> processLine(int &charIdx, int &vcfPositionCount, const string &line, const SourcesMap &sourcesMap);
+string packNumber(const int n);
+
+void dumpFiles(const string &textChars, const string &sourceChars, const string &outTextFilePath, const string &outSourcesFilePath);
 
 int main(int argc, char **argv)
 {
@@ -38,7 +45,14 @@ int main(int argc, char **argv)
     if (sourcesMap.empty())
         return 1;
 
-    parseFastaFile(args.at(2), sourcesMap, chrID);
+    cout << "Parsing the fasta file..." << endl;
+
+    string textChars, sourceChars;
+    tie(textChars, sourceChars) = parseFastaFile(args.at(0), sourcesMap, chrID);
+
+    sourceChars = to_string(sourceCount) + "\n" + sourceChars;
+    
+    dumpFiles(textChars, sourceChars, args.at(2), args.at(3));
 
     cout << "All finished" << endl;
     return 0;
@@ -51,7 +65,7 @@ SourcesMap parseVcfFile(string filePath, string &chrID, int &sourceCount)
     ifstream inStream(filePath);
     const int lineCount = count(istreambuf_iterator<char>(inStream), istreambuf_iterator<char>(), '\n');
 
-    cout << "Initializing the parser..." << endl;
+    cout << "Parsing the VCF file..." << endl;
 
     vcflib::VariantCallFile vcfParser;
     vcfParser.open(filePath);
@@ -76,7 +90,7 @@ SourcesMap parseVcfFile(string filePath, string &chrID, int &sourceCount)
 
     while (vcfParser.getNextVariant(variant))
     {
-        const double processedPercentage = (100.0 * parsedCount++) / lineCount;
+        const double processedPercentage = (100.0 * ++parsedCount) / lineCount;
         cout << "\rRough progress: " << fixed << processedPercentage << "%" << flush;
 
         parsedCount += 1;
@@ -103,8 +117,11 @@ SourcesMap parseVcfFile(string filePath, string &chrID, int &sourceCount)
         {
             for (const string &val : sampleValues.at("GT"))
             {
-                assert(val.size() == 3);
-                const std::vector<int> indexes({stoi(string(1, val[0])), stoi(string(1, val[2]))});
+                vector<string> parts;
+                boost::algorithm::split(parts, val, boost::is_any_of("|"));
+
+                assert(parts.size() == 2);
+                const std::vector<int> indexes({stoi(parts[0]), stoi(parts[1])});
 
                 for (int diploidIndex = 0; diploidIndex < static_cast<int>(indexes.size()); ++diploidIndex)
                 {
@@ -170,7 +187,7 @@ bool shouldProcessVariant(const vcflib::Variant &variant)
     {
         for (const char c : sequence)
         {
-            if (alphabet.find(c) == string::npos)
+            if (alphabet.find(toupper(c)) == string::npos)
                 return false;
         }
     }
@@ -178,29 +195,138 @@ bool shouldProcessVariant(const vcflib::Variant &variant)
     return true;
 }
 
-void parseFastaFile(const string &filePath, const SourcesMap &sourcesMap, const string &chrID)
+pair<string, string> parseFastaFile(const string &filePath, const SourcesMap &sourcesMap, const string &chrID)
 {
     std::ifstream inStream(filePath);
-    string line;
 
+    if (not inStream.good())
+    {
+        cerr << "Failed to open fasta file: " << filePath << endl;
+        return {};
+    }
+
+    string line;
     bool inGenome = false;
+
+    int vcfPositionCount = 0, lineCount = 0;
+    int charIdx = 0;
+
+    string textChars = "", sourceChars = "";
 
     while (getline(inStream, line))
     {
         if (line[0] == '>')
         {
             if (inGenome) // Encountered the next genome -> finish processing.
+            {
+                cout << "Exited genome" << endl;
                 break;
+            }
 
-            const string curChrID = line.substr(1);
+            vector<string> parts;
+            boost::algorithm::split(parts, line, boost::is_any_of(" "));
 
-            if (curChrID == chrID)
+            string curID = parts[0].substr(1);
+            boost::trim(curID);
+
+            if (curID == chrID)
             {
                 inGenome = true;
-                cout << "Entered genome = " << chrID;
+                cout << "Entered genome = " << chrID << endl;
 
                 continue;
             }
         }
+
+        if (not inGenome)
+            continue;
+
+        const auto &[curTextChars, curSourceChars] = processLine(charIdx, vcfPositionCount, line, sourcesMap);
+
+        textChars += curTextChars;
+        sourceChars += curSourceChars;
+
+        charIdx += line.size();
+        lineCount += 1;
     }
+
+    cout << endl << "Finished parsing the fasta file, ED text size = " << textChars.size() << endl;
+    cout << "Processed VCF #positions = " << vcfPositionCount << " lines = " << lineCount << endl;
+
+    return {move(textChars), move(sourceChars)};
+}
+
+pair<string, string> processLine(int &charIdx, int &vcfPositionCount, const string &line, const SourcesMap &sourcesMap)
+{
+    string textChars = "", sourceChars = "";
+    const char sourceSegmentStartMark = 127;
+
+    for (const char curChar : line)
+    {
+        if (sourcesMap.count(charIdx) == 0)
+        {
+            textChars += toupper(curChar);
+            charIdx += 1;
+
+            continue;
+        }
+
+        textChars += "{";
+        sourceChars += sourceSegmentStartMark;
+
+        for (const auto &[altSequence, sampleIndexes] : sourcesMap.at(charIdx))
+        {
+            textChars += altSequence + ",";
+
+            vector<int> sampleIndexesSorted(sampleIndexes.begin(), sampleIndexes.end());
+            sort(sampleIndexesSorted.begin(), sampleIndexesSorted.end());
+
+            sourceChars += packNumber(sampleIndexesSorted.size());
+            sourceChars += packNumber(sampleIndexesSorted[0]);
+
+            for (int i = 1; i < static_cast<int>(sampleIndexesSorted.size()); ++i)
+            {
+                const int diff = sampleIndexesSorted[i] - sampleIndexesSorted[i - 1];
+                assert(diff > 0);
+
+                sourceChars += packNumber(diff);
+            }
+        }
+
+        textChars += toupper(curChar) + "}";
+        charIdx += 1;
+
+        vcfPositionCount += 1;
+    }
+
+    return {move(textChars), move(sourceChars)};
+}
+
+string packNumber(const int n)
+{
+    assert(n >= 0 and n < 16'384);
+
+    if (n < 128)
+    {
+        return {static_cast<char>(128 + n)};
+    }
+    else
+    {
+        return {static_cast<char>(n / 128), static_cast<char>(128 + (n % 128))};
+    }
+}
+
+void dumpFiles(const string &textChars, const string &sourceChars, const string &outTextFilePath, const string &outSourcesFilePath)
+{
+    cout << "Original text size = " << textChars.size() << endl;
+    
+    ofstream outTextStream(outTextFilePath);
+    outTextStream << textChars;
+
+    cout << "Original sources size = " << sourceChars.size() << endl;
+
+    ofstream outSourcesStream(outSourcesFilePath);
+    outSourcesStream << sourceChars;
+
+    cout << "Dumped to files: " << outTextFilePath << ' ' << outSourcesFilePath << endl;
 }
