@@ -99,7 +99,11 @@ def getSourcesMapFromVcfReader(vcfReader, lineCount):
 
         if curSources:
             if record.POS in ret:
-                ret[record.POS].update(curSources)
+                for altSequence, indexes in curSources.items():
+                    if altSequence not in ret[record.POS]:
+                        ret[record.POS][altSequence] = indexes
+                    else:
+                        ret[record.POS][altSequence].update(indexes)
             else:
                 ret[record.POS] = curSources
 
