@@ -2,15 +2,16 @@ CC        	   = g++
 CCFLAGS   	   = -Wall -pedantic -std=c++17
 # OPTFLAGS     = -DNDEBUG -O3
 
-VCFLIB_DIR     = /home/alex/vcflib
+VCFLIB_DIR     = "/home/alex/vcflib"
+ZSTD_DIR  	   = "/home/alex/zstd/lib"
 
 VCFLIB_INCLUDE = -I$(VCFLIB_DIR)/include -I$(VCFLIB_DIR)/tabixpp/htslib
 VCFLIB_LDFLAGS = -L$(VCFLIB_DIR)/tabixpp/htslib -L$(VCFLIB_DIR)/lib
 VCFLIB_LDLIBS  = -lvcflib -lhts -lz -lm -llzma -lbz2 -pthread
 
-INCLUDE        = $(VCFLIB_INCLUDE)
-LDFLAGS        = $(VCFLIB_LDFLAGS)
-LDLIBS	  	   = $(VCFLIB_LDLIBS)
+INCLUDE        = $(VCFLIB_INCLUDE) -I$(ZSTD_DIR)
+LDFLAGS        = $(VCFLIB_LDFLAGS) -L$(ZSTD_DIR)
+LDLIBS	  	   = $(VCFLIB_LDLIBS) -lzstd
 
 EXE       	   = parse_fasta_vcf
 OBJ       	   = parse_fasta_vcf.o
