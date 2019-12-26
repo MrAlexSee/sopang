@@ -29,6 +29,7 @@ pair<string, string> processLine(int &charIdx, int &vcfPositionCount, const stri
 string packNumber(const int n);
 
 void dumpFiles(const string &textChars, const string &sourceChars, const string &outTextFilePath, const string &outSourcesFilePath);
+string zstdCompress(const string &data, int compressionLevel);
 
 int main(int argc, char **argv)
 {
@@ -223,8 +224,10 @@ pair<string, string> processFastaFile(const string &filePath, const SourcesMap &
 
     string textChars = "", sourceChars = "";
 
-    textChars.reserve(10 * lineCount);
-    sourceChars.reserve(10 * lineCount);
+    const int expectedLineLength = 10;
+
+    textChars.reserve(expectedLineLength * lineCount);
+    sourceChars.reserve(expectedLineLength * lineCount);
 
     while (getline(inStream, line))
     {
@@ -235,7 +238,7 @@ pair<string, string> processFastaFile(const string &filePath, const SourcesMap &
         {
             if (inGenome) // Encountered the next genome -> finish processing.
             {
-                cout << endl << "Exited genome" << endl;
+                cout << endl << "Exited genome = " << chrID << endl;
                 break;
             }
 
@@ -347,15 +350,36 @@ string packNumber(const int n)
 
 void dumpFiles(const string &textChars, const string &sourceChars, const string &outTextFilePath, const string &outSourcesFilePath)
 {
-    cout << "Original text size = " << textChars.size() << endl;
-    
-    ofstream outTextStream(outTextFilePath);
-    outTextStream << textChars;
+    const int zstdCompressionLevel = 22;
+    cout << "Using zstd compression level = " << zstdCompressionLevel << endl;
 
+    {
+    cout << "Original text size = " << textChars.size() << endl;
+        
+    ofstream outTextStream(outTextFilePath);
+    outTextStream << zstdCompress(textChars, zstdCompressionLevel);
+    }
+
+    {
     cout << "Original sources size = " << sourceChars.size() << endl;
 
     ofstream outSourcesStream(outSourcesFilePath);
-    outSourcesStream << sourceChars;
+    outSourcesStream << zstdCompress(sourceChars, zstdCompressionLevel);
+    }
 
     cout << "Dumped to files: " << outTextFilePath << ' ' << outSourcesFilePath << endl;
+}
+
+string zstdCompress(const string &data, int compressionLevel)
+{
+    cout << "Compressing..." << endl;
+
+    size_t const bufferSize = ZSTD_compressBound(data.size());
+    char *dstBuffer = new char[bufferSize];
+
+    size_t const compressedSize = ZSTD_compress(dstBuffer, bufferSize, data.c_str(), data.size(), compressionLevel);
+    string ret(dstBuffer, dstBuffer + compressedSize);
+
+    delete[] dstBuffer;
+    return move(ret);
 }
