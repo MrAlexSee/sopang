@@ -1,10 +1,10 @@
 CC        	   = g++
 CCFLAGS   	   = -Wall -pedantic -std=c++17 -funsigned-char
-# OPTFLAGS       = -DNDEBUG -O3
+OPTFLAGS       = -DNDEBUG -O3
 
-BOOST_DIR 	   = "/home/alex/boost_1_67_0"
-VCFLIB_DIR     = "/home/alex/vcflib"
-ZSTD_DIR  	   = "/home/alex/zstd/lib"
+BOOST_DIR 	   = /home/alex/boost_1_67_0
+VCFLIB_DIR     = /home/alex/vcflib
+ZSTD_DIR  	   = /home/alex/zstd/lib
 
 VCFLIB_INCLUDE = -I$(VCFLIB_DIR)/include -I$(VCFLIB_DIR)/tabixpp/htslib
 VCFLIB_LDFLAGS = -L$(VCFLIB_DIR)/tabixpp/htslib -L$(VCFLIB_DIR)/lib
