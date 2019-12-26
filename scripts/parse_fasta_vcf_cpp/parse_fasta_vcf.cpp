@@ -25,7 +25,7 @@ bool shouldProcessVariant(const vcflib::Variant &variant);
 /** Returns a pair of (text chars, source chars). **/
 pair<string, string> processFastaFile(const string &filePath, const SourcesMap &sourcesMap, const string &chrID);
 /** Returns a pair of (text chars, source chars) obtained from the current line. **/
-pair<string, string> processLine(int &charIdx, int &vcfPositionCount, const string &line, const SourcesMap &sourcesMap);
+pair<string, string> processLine(int &vcfPositionCount, int charIdx, const string &line, const SourcesMap &sourcesMap);
 string packNumber(const int n);
 
 void dumpFiles(const string &textChars, const string &sourceChars, const string &outTextFilePath, const string &outSourcesFilePath);
@@ -46,13 +46,13 @@ int main(int argc, char **argv)
     string chrID;
     int sourceCount;
 
-    cout << "Building the sources map..." << endl;
+    cout << "Building the sources map (stage 1/2)..." << endl;
     SourcesMap sourcesMap = processVcfFile(args.at(1), chrID, sourceCount);
 
     if (sourcesMap.empty())
         return 1;
 
-    cout << endl << "Processing the fasta file..." << endl;
+    cout << endl << "Processing the fasta file (stage 2/2)..." << endl;
     auto [textChars, sourceChars] = processFastaFile(args.at(0), sourcesMap, chrID);
 
     sourceChars = to_string(sourceCount) + "\n" + sourceChars;
@@ -176,7 +176,7 @@ SourcesMap processVcfFile(string filePath, string &chrID, int &sourceCount)
     sourceCount = nextSampleIndex;
 
     cout << endl << "Sources map: variant #positions = " << ret.size() << " #sources = " << sourceCount << endl;
-    cout << "Processed VCF #records = " << processedCount << " #ignored = " << ignoredCount << endl;
+    cout << "Processed VCF #records = " << processedCount << ", #ignored = " << ignoredCount << endl;
 
     return ret;
 }
@@ -210,35 +210,26 @@ pair<string, string> processFastaFile(const string &filePath, const SourcesMap &
         return {};
     }
 
-    cout << "Counting lines..." << endl;
-
-    const int lineCount = count(istreambuf_iterator<char>(inStream), istreambuf_iterator<char>(), '\n');    
-    inStream.clear();
-    inStream.seekg(0);
-
     string line;
     bool inGenome = false;
 
-    int vcfPositionCount = 0, processedCount = 0;
+    int vcfPositionCount = 0, genomeLineCount = 0;
     int charIdx = 0;
 
     string textChars = "", sourceChars = "";
 
-    const int expectedLineLength = 10;
+    const int expectedSize = 1024 * 1024 * 1024;
 
-    textChars.reserve(expectedLineLength * lineCount);
-    sourceChars.reserve(expectedLineLength * lineCount);
+    textChars.reserve(expectedSize);
+    sourceChars.reserve(expectedSize);
 
     while (getline(inStream, line))
     {
-        const double processedPercentage = (100.0 * ++processedCount) / lineCount;
-        cout << "\rFasta progress (stage 2/2): " << fixed << processedPercentage << "%" << flush;
-
         if (line[0] == '>')
         {
             if (inGenome) // Encountered the next genome -> finish processing.
             {
-                cout << endl << "Exited genome = " << chrID << endl;
+                cout << "Exited genome = " << chrID << endl;
                 break;
             }
 
@@ -260,21 +251,22 @@ pair<string, string> processFastaFile(const string &filePath, const SourcesMap &
         if (not inGenome)
             continue;
 
-        const auto &[curTextChars, curSourceChars] = processLine(charIdx, vcfPositionCount, line, sourcesMap);
+        const auto &[curTextChars, curSourceChars] = processLine(vcfPositionCount, charIdx, line, sourcesMap);
 
         textChars += move(curTextChars);
         sourceChars += move(curSourceChars);
 
         charIdx += line.size();
+        genomeLineCount += 1;
     }
 
     cout << "Finished parsing the fasta file, ED text size = " << textChars.size() << endl;
-    cout << "Processed VCF #positions = " << vcfPositionCount << " #lines = " << lineCount << endl;
+    cout << "Processed VCF #positions = " << vcfPositionCount << ", genome #lines = " << genomeLineCount << endl;
 
     return {move(textChars), move(sourceChars)};
 }
 
-pair<string, string> processLine(int &charIdx, int &vcfPositionCount, const string &line, const SourcesMap &sourcesMap)
+pair<string, string> processLine(int &vcfPositionCount, int charIdx, const string &line, const SourcesMap &sourcesMap)
 {
     string textChars = "", sourceChars = "";
 
@@ -351,7 +343,7 @@ string packNumber(const int n)
 void dumpFiles(const string &textChars, const string &sourceChars, const string &outTextFilePath, const string &outSourcesFilePath)
 {
     const int zstdCompressionLevel = 22;
-    cout << "Using zstd compression level = " << zstdCompressionLevel << endl;
+    cout << endl << "Using zstd compression level = " << zstdCompressionLevel << endl;
 
     {
     cout << "Original text size = " << textChars.size() << endl;
