@@ -369,12 +369,21 @@ void dumpFiles(const string &textChars, const string &sourceChars, const string 
 string zstdCompress(const string &data, int compressionLevel)
 {
     cout << "Compressing..." << endl;
+    const double bufferSizeFactor = 1.5;
 
-    size_t const bufferSize = ZSTD_compressBound(data.size());
+    const size_t bufferSize = bufferSizeFactor * ZSTD_compressBound(data.size());
     char *dstBuffer = new char[bufferSize];
 
-    size_t const compressedSize = ZSTD_compress(dstBuffer, bufferSize, data.c_str(), data.size(), compressionLevel);
-    string ret(dstBuffer, dstBuffer + compressedSize);
+    const size_t compressedSize = ZSTD_compress(dstBuffer, bufferSize, data.c_str(), data.size(), compressionLevel);
+    assert(compressedSize <= bufferSize);
+
+    if (ZSTD_isError(compressedSize))
+    {
+        cerr << "Zstd compression failed" << endl;
+        return "";
+    }
+
+    const string ret(dstBuffer, dstBuffer + compressedSize);
 
     delete[] dstBuffer;
     return move(ret);
