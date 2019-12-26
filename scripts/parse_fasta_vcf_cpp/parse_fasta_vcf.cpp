@@ -1,7 +1,9 @@
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -17,10 +19,12 @@ using namespace std;
 
 using SourcesMap = unordered_map<int, unordered_map<string, set<int>>>;
 
-SourcesMap parseVcfFile(string filePath, string &chrID, int &sourceCount);
+SourcesMap processVcfFile(string filePath, string &chrID, int &sourceCount);
 bool shouldProcessVariant(const vcflib::Variant &variant);
 
-pair<string, string> parseFastaFile(const string &filePath, const SourcesMap &sourcesMap, const string &chrID);
+/** Returns a pair of (text chars, source chars). **/
+pair<string, string> processFastaFile(const string &filePath, const SourcesMap &sourcesMap, const string &chrID);
+/** Returns a pair of (text chars, source chars) obtained from the current line. **/
 pair<string, string> processLine(int &charIdx, int &vcfPositionCount, const string &line, const SourcesMap &sourcesMap);
 string packNumber(const int n);
 
@@ -36,19 +40,19 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    cout.precision(2);
+
     string chrID;
     int sourceCount;
 
-    cout << "Building sources map..." << endl;
-    SourcesMap sourcesMap = parseVcfFile(args.at(1), chrID, sourceCount);
+    cout << "Building the sources map..." << endl;
+    SourcesMap sourcesMap = processVcfFile(args.at(1), chrID, sourceCount);
 
     if (sourcesMap.empty())
         return 1;
 
-    cout << "Parsing the fasta file..." << endl;
-
-    string textChars, sourceChars;
-    tie(textChars, sourceChars) = parseFastaFile(args.at(0), sourcesMap, chrID);
+    cout << endl << "Processing the fasta file..." << endl;
+    auto [textChars, sourceChars] = processFastaFile(args.at(0), sourcesMap, chrID);
 
     sourceChars = to_string(sourceCount) + "\n" + sourceChars;
     
@@ -58,14 +62,14 @@ int main(int argc, char **argv)
     return 0;
 }
 
-SourcesMap parseVcfFile(string filePath, string &chrID, int &sourceCount)
+SourcesMap processVcfFile(string filePath, string &chrID, int &sourceCount)
 {
     cout << "Counting lines..." << endl;
 
     ifstream inStream(filePath);
     const int lineCount = count(istreambuf_iterator<char>(inStream), istreambuf_iterator<char>(), '\n');
 
-    cout << "Parsing the VCF file..." << endl;
+    cout << endl << "Processing the VCF file, #lines = " << lineCount << endl;
 
     vcflib::VariantCallFile vcfParser;
     vcfParser.open(filePath);
@@ -81,19 +85,17 @@ SourcesMap parseVcfFile(string filePath, string &chrID, int &sourceCount)
     map<string, int> sampleNameToIndex;
     int nextSampleIndex = 0;
 
-    vcflib::Variant variant(vcfParser);
+    int parsedCount = count(vcfParser.header.begin(), vcfParser.header.end(), '\n') + 1;
+    int processedCount = 0, ignoredCount = 0;
 
-    int parsedCount = 0, processedCount = 0, ignoredCount = 0;
     chrID = "";
 
-    cout.precision(2);
+    vcflib::Variant variant(vcfParser);
 
     while (vcfParser.getNextVariant(variant))
     {
         const double processedPercentage = (100.0 * ++parsedCount) / lineCount;
-        cout << "\rRough progress: " << fixed << processedPercentage << "%" << flush;
-
-        parsedCount += 1;
+        cout << "\rVCF progress (stage 1/2): " << fixed << processedPercentage << "%" << flush;
 
         if (shouldProcessVariant(variant) == false)
         {
@@ -121,13 +123,13 @@ SourcesMap parseVcfFile(string filePath, string &chrID, int &sourceCount)
                 boost::algorithm::split(parts, val, boost::is_any_of("|"));
 
                 assert(parts.size() == 2);
-                const std::vector<int> indexes({stoi(parts[0]), stoi(parts[1])});
+                const vector<int> indexes({stoi(parts[0]), stoi(parts[1])});
 
                 for (int diploidIndex = 0; diploidIndex < static_cast<int>(indexes.size()); ++diploidIndex)
                 {
                     const int altIndex = indexes[diploidIndex];
 
-                    if (altIndex == 0)
+                    if (altIndex == 0) // Reference sequence.
                         continue;
 
                     assert(altIndex >= 1 and altIndex <= static_cast<int>(variant.alt.size()));
@@ -172,7 +174,9 @@ SourcesMap parseVcfFile(string filePath, string &chrID, int &sourceCount)
 
     sourceCount = nextSampleIndex;
 
-    cout << endl << "Processed VCF #records = " << processedCount << " #ignored = " << ignoredCount << endl;
+    cout << endl << "There are #sources = " << sourceCount << endl;
+    cout << "Processed VCF #records = " << processedCount << " #ignored = " << ignoredCount << endl;
+
     return ret;
 }
 
@@ -195,9 +199,9 @@ bool shouldProcessVariant(const vcflib::Variant &variant)
     return true;
 }
 
-pair<string, string> parseFastaFile(const string &filePath, const SourcesMap &sourcesMap, const string &chrID)
+pair<string, string> processFastaFile(const string &filePath, const SourcesMap &sourcesMap, const string &chrID)
 {
-    std::ifstream inStream(filePath);
+    ifstream inStream(filePath);
 
     if (not inStream.good())
     {
@@ -205,16 +209,25 @@ pair<string, string> parseFastaFile(const string &filePath, const SourcesMap &so
         return {};
     }
 
+    cout << "Counting lines..." << endl;
+
+    const int lineCount = count(istreambuf_iterator<char>(inStream), istreambuf_iterator<char>(), '\n');    
+    inStream.clear();
+    inStream.seekg(0);
+
     string line;
     bool inGenome = false;
 
-    int vcfPositionCount = 0, lineCount = 0;
+    int vcfPositionCount = 0, processCount = 0;
     int charIdx = 0;
 
     string textChars = "", sourceChars = "";
 
     while (getline(inStream, line))
     {
+        const double processedPercentage = (100.0 * ++processCount) / lineCount;
+        cout << "\rFasta progress (stage 2/2): " << fixed << processedPercentage << "%" << flush;
+
         if (line[0] == '>')
         {
             if (inGenome) // Encountered the next genome -> finish processing.
@@ -247,11 +260,10 @@ pair<string, string> parseFastaFile(const string &filePath, const SourcesMap &so
         sourceChars += curSourceChars;
 
         charIdx += line.size();
-        lineCount += 1;
     }
 
     cout << endl << "Finished parsing the fasta file, ED text size = " << textChars.size() << endl;
-    cout << "Processed VCF #positions = " << vcfPositionCount << " lines = " << lineCount << endl;
+    cout << "Processed VCF #positions = " << vcfPositionCount << " #lines = " << lineCount << endl;
 
     return {move(textChars), move(sourceChars)};
 }
