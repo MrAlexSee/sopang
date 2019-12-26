@@ -279,7 +279,7 @@ pair<string, string> processLine(int &vcfPositionCount, int charIdx, const strin
     {
         if (sourcesMap.count(charIdx) == 0)
         {
-            textChars += toupper(curChar);
+            textChars += string(1, toupper(curChar));
             charIdx += 1;
 
             continue;
@@ -288,10 +288,12 @@ pair<string, string> processLine(int &vcfPositionCount, int charIdx, const strin
         textChars += "{";
         sourceChars += sourceSegmentStartMark;
 
+        assert(not sourcesMap.at(charIdx).empty());
+
         for (const auto &[altSequence, sampleIndexes] : sourcesMap.at(charIdx))
         {
             {
-            string altSequenceUpper;
+            string altSequenceUpper(altSequence.size(), ' ');
             std::transform(altSequence.begin(), altSequence.end(), altSequenceUpper.begin(),
                 [](char c) -> char { return toupper(c); });
 
@@ -317,7 +319,9 @@ pair<string, string> processLine(int &vcfPositionCount, int charIdx, const strin
             }
         }
 
-        textChars += toupper(curChar) + "}";
+        textChars += string(1, toupper(curChar));
+        textChars += "}";
+
         charIdx += 1;
 
         vcfPositionCount += 1;
