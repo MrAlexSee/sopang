@@ -174,7 +174,7 @@ SourcesMap processVcfFile(string filePath, string &chrID, int &sourceCount)
 
     sourceCount = nextSampleIndex;
 
-    cout << endl << "There are #sources = " << sourceCount << endl;
+    cout << endl << "Sources map: variant #positions = " << ret.size() << " #sources = " << sourceCount << endl;
     cout << "Processed VCF #records = " << processedCount << " #ignored = " << ignoredCount << endl;
 
     return ret;
@@ -218,21 +218,24 @@ pair<string, string> processFastaFile(const string &filePath, const SourcesMap &
     string line;
     bool inGenome = false;
 
-    int vcfPositionCount = 0, processCount = 0;
+    int vcfPositionCount = 0, processedCount = 0;
     int charIdx = 0;
 
     string textChars = "", sourceChars = "";
 
+    textChars.reserve(10 * lineCount);
+    sourceChars.reserve(10 * lineCount);
+
     while (getline(inStream, line))
     {
-        const double processedPercentage = (100.0 * ++processCount) / lineCount;
+        const double processedPercentage = (100.0 * ++processedCount) / lineCount;
         cout << "\rFasta progress (stage 2/2): " << fixed << processedPercentage << "%" << flush;
 
         if (line[0] == '>')
         {
             if (inGenome) // Encountered the next genome -> finish processing.
             {
-                cout << "Exited genome" << endl;
+                cout << endl << "Exited genome" << endl;
                 break;
             }
 
@@ -256,13 +259,13 @@ pair<string, string> processFastaFile(const string &filePath, const SourcesMap &
 
         const auto &[curTextChars, curSourceChars] = processLine(charIdx, vcfPositionCount, line, sourcesMap);
 
-        textChars += curTextChars;
-        sourceChars += curSourceChars;
+        textChars += move(curTextChars);
+        sourceChars += move(curSourceChars);
 
         charIdx += line.size();
     }
 
-    cout << endl << "Finished parsing the fasta file, ED text size = " << textChars.size() << endl;
+    cout << "Finished parsing the fasta file, ED text size = " << textChars.size() << endl;
     cout << "Processed VCF #positions = " << vcfPositionCount << " #lines = " << lineCount << endl;
 
     return {move(textChars), move(sourceChars)};
@@ -271,6 +274,10 @@ pair<string, string> processFastaFile(const string &filePath, const SourcesMap &
 pair<string, string> processLine(int &charIdx, int &vcfPositionCount, const string &line, const SourcesMap &sourcesMap)
 {
     string textChars = "", sourceChars = "";
+
+    textChars.reserve(line.size());
+    sourceChars.reserve(line.size());
+
     const char sourceSegmentStartMark = 127;
 
     for (const char curChar : line)
@@ -288,10 +295,19 @@ pair<string, string> processLine(int &charIdx, int &vcfPositionCount, const stri
 
         for (const auto &[altSequence, sampleIndexes] : sourcesMap.at(charIdx))
         {
-            textChars += altSequence + ",";
+            {
+            string altSequenceUpper;
+            std::transform(altSequence.begin(), altSequence.end(), altSequenceUpper.begin(),
+                [](char c) -> char { return toupper(c); });
 
+            textChars += altSequenceUpper + ",";
+            }
+
+            {
             vector<int> sampleIndexesSorted(sampleIndexes.begin(), sampleIndexes.end());
             sort(sampleIndexesSorted.begin(), sampleIndexesSorted.end());
+
+            assert(sampleIndexesSorted.size() >= 1);
 
             sourceChars += packNumber(sampleIndexesSorted.size());
             sourceChars += packNumber(sampleIndexesSorted[0]);
@@ -302,6 +318,7 @@ pair<string, string> processLine(int &charIdx, int &vcfPositionCount, const stri
                 assert(diff > 0);
 
                 sourceChars += packNumber(diff);
+            }
             }
         }
 
