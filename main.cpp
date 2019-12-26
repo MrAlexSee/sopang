@@ -257,7 +257,7 @@ string readInputText()
 
     if (params.decompressInput)
     {
-        text = decompressZstd(text, params.zstdBufferSize);
+        text = zstd::decompress(text);
         cout << "Decompressed input text" << endl;
     }
 
@@ -304,7 +304,7 @@ vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentS
 
     if (params.decompressInput)
     {
-        sourcesStr = decompressZstd(sourcesStr, params.zstdBufferSize);
+        sourcesStr = zstd::decompress(sourcesStr);
         cout << "Decompressed sources text, parsing sources..." << endl;
 
         sources = parsing::parseSourcesCompressed(sourcesStr, sourceCount);
@@ -468,13 +468,21 @@ double measure(const SegmentData &segmentData,
             {
                 if (params.fullSourcesOutput)
                 {
-                    throw logic_error("not implemented");
+                    start = std::clock();
+                    const auto fullMatches = sopang.matchWithSources(segmentData.segments, segmentData.nSegments,
+                        segmentData.segmentSizes, sourceMap, pattern, params.alphabet);
+                    end = std::clock();
+
+                    for (const auto &kv : fullMatches)
+                    {
+                        res.insert(kv.first);
+                    }
                 }
                 else
                 {
                     start = std::clock();
-                    res = sopang.matchWithSourcesVerify(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
-                    sourceMap, pattern, params.alphabet);
+                    res = sopang.matchWithSourcesVerify(segmentData.segments, segmentData.nSegments,
+                        segmentData.segmentSizes, sourceMap, pattern, params.alphabet);
                     end = std::clock();
                 }
             }

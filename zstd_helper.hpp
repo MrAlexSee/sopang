@@ -3,6 +3,11 @@
 
 #include <string>
 
-std::string decompressZstd(const std::string &compressed, size_t bufferSize);
+namespace zstd
+{
+
+std::string decompress(const std::string &compressed);
+
+}
 
 #endif // ZSTD_HELPER_HPP

@@ -7,41 +7,32 @@
 
 using namespace std;
 
-string decompressZstd(const string &compressed, size_t bufferSize)
+namespace zstd
 {
-    cout << "Decompressing Zstd with buffer size = " << bufferSize << endl;
 
-    string ret;
-    ZSTD_DCtx *zstdContext = ZSTD_createDCtx();
+string decompress(const string &compressed)
+{
+    const unsigned long long frameSize = ZSTD_getFrameContentSize(compressed.c_str(), compressed.size());
 
-    char *inBuffer = new char[bufferSize];
-    char *outBuffer = new char[bufferSize];
-
-    size_t inputSize = bufferSize;
-
-    for (size_t i = 0; i < compressed.size(); i += bufferSize)
+    if (frameSize == ZSTD_CONTENTSIZE_ERROR or frameSize == ZSTD_CONTENTSIZE_UNKNOWN)
     {
-        if (i + bufferSize > compressed.size())
-        {
-            bufferSize = compressed.size() - i;
-        }
-
-        memcpy(inBuffer, compressed.c_str() + i, inputSize);
-        ZSTD_inBuffer input = { inBuffer, inputSize, 0 };
-
-        while (input.pos < input.size)
-        {
-            ZSTD_outBuffer output = { outBuffer, bufferSize, 0 };
-            const size_t zstdCode = ZSTD_decompressStream(zstdContext, &output, &input);
-
-            if (ZSTD_isError(zstdCode))
-            {
-                break;
-            }
-
-            ret += string(outBuffer, output.pos);
-        }
+        cerr << "Zstd decompression failed, missing frame content size" << endl;
+        return "";
     }
 
-    return ret;
+    char *dstBuffer = new char[frameSize];
+    const size_t decompressedSize = ZSTD_decompress(dstBuffer, frameSize, compressed.c_str(), compressed.size());
+
+    if (ZSTD_isError(decompressedSize))
+    {
+        cerr << "Zstd compression failed" << endl;
+        return "";
+    }
+
+    const string ret(dstBuffer, dstBuffer + decompressedSize);
+
+    delete[] dstBuffer;
+    return move(ret);
+}
+
 }
