@@ -271,7 +271,7 @@ bool verifyMatch(const string *const *segments,
 
 } // namespace (anonymous)
 
-unordered_set<int> Sopang::matchWithSources(const string *const *segments,
+unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
     int nSegments, const int *segmentSizes,
     const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
     const string &pattern, const string &alphabet)

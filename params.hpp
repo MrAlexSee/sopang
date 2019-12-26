@@ -32,6 +32,9 @@ struct Params
     bool dumpToFile = false;
     /** Dump resulting indexes (full results) to stdout. Cmd arg -D. */
     bool dumpIndexes = false;
+    /** When matching with sources, return all matching source (strain) indexes
+     * rather than only verify if the match is correct. */
+    bool fullSourcesOutput = false;
 
     /** Number of errors for approximate search (Hamming distance). noValue = perform exact search. Cmd arg -k. */
     int kApprox = noValue;

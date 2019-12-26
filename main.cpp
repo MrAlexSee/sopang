@@ -104,6 +104,7 @@ int handleParams(int argc, const char **argv)
     options.add_options()
        ("dump,d", "dump input file info and throughput to output file (useful for throughput testing)")
        ("dump-indexes,D", "dump resulting indexes (full results) to stdout")
+       ("full-sources-output", "when matching with sources, return all matching source (strain) indexes rather than only verify if the match is correct")
        ("help,h", "display help message")
        ("help-verbose", "display verbose help message")
        ("in-text-file,i", po::value<string>(&params.inTextFile)->required(), "input text file path (positional arg 1)")
@@ -169,6 +170,10 @@ int handleParams(int argc, const char **argv)
     if (vm.count("dump-indexes"))
     {
         params.dumpIndexes = true;
+    }
+    if (vm.count("full-sources-output"))
+    {
+        params.fullSourcesOutput = true;
     }
     if (vm.count("in-compressed"))
     {
@@ -461,10 +466,17 @@ double measure(const SegmentData &segmentData,
             }
             else
             {
-                start = std::clock();
-                res = sopang.matchWithSources(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
+                if (params.fullSourcesOutput)
+                {
+                    throw logic_error("not implemented");
+                }
+                else
+                {
+                    start = std::clock();
+                    res = sopang.matchWithSourcesVerify(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
                     sourceMap, pattern, params.alphabet);
-                end = std::clock();
+                    end = std::clock();
+                }
             }
         }
     }

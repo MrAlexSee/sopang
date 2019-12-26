@@ -37,7 +37,12 @@ public:
         const std::string &pattern, const std::string &alphabet, 
         int k);
 
-    std::unordered_set<int> matchWithSources(const std::string *const *segments,
+    std::unordered_set<int> matchWithSourcesVerify(const std::string *const *segments,
+        int nSegments, const int *segmentSizes,
+        const std::unordered_map<int, std::vector<SourceSet>> &sourceMap,
+        const std::string &pattern, const std::string &alphabet);
+
+    std::unordered_map<int, std::unordered_set<int>> matchWithSources(const std::string *const *segments,
         int nSegments, const int *segmentSizes,
         const std::unordered_map<int, std::vector<SourceSet>> &sourceMap,
         const std::string &pattern, const std::string &alphabet);
