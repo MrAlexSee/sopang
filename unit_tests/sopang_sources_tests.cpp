@@ -29,7 +29,7 @@ TEST_CASE("is matching a single segment with empty sources correct", "[sources]"
 
     for (const string &pattern : { "ACGT", "ACG", "CGT", "AC", "CG", "GT", "A", "C", "G", "T" })
     {
-        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, { }, pattern, alphabet);
+        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, { }, pattern, alphabet);
         REQUIRE(res == unordered_set<int>{ 0 });
     }
 }
@@ -46,7 +46,7 @@ TEST_CASE("is matching sources for 3 non-deterministic segments correct", "[sour
     Sopang sopang;
 
     const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -74,7 +74,7 @@ TEST_CASE("is matching sources for 3 segments with deterministic correct", "[sou
     Sopang sopang;
 
     const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -102,7 +102,7 @@ TEST_CASE("is matching sources for 4 segments with deterministic correct", "[sou
     Sopang sopang;
 
     const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -143,7 +143,7 @@ TEST_CASE("is matching sources for 3 non-deterministic segments multiple matches
     Sopang sopang;
 
     const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -166,7 +166,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
     Sopang sopang;
 
     const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -229,7 +229,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
     Sopang sopang;
 
     const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 
@@ -255,7 +255,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
     Sopang sopang;
 
     const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(res == expected);
     };
 

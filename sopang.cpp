@@ -24,8 +24,10 @@ Sopang::~Sopang()
 }
 
 unordered_set<int> Sopang::match(const string *const *segments,
-    int nSegments, const int *segmentSizes,
-    const string &pattern, const string &alphabet)
+    int nSegments,
+    const int *segmentSizes,
+    const string &pattern,
+    const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
 
@@ -76,8 +78,10 @@ unordered_set<int> Sopang::match(const string *const *segments,
 }
 
 unordered_set<int> Sopang::matchApprox(const string *const *segments,
-    int nSegments, const int *segmentSizes,
-    const string &pattern, const string &alphabet,
+    int nSegments,
+    const int *segmentSizes,
+    const string &pattern,
+    const string &alphabet,
     int k)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= maxPatternApproxSize);
@@ -272,9 +276,46 @@ bool verifyMatch(const string *const *segments,
 } // namespace (anonymous)
 
 unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
-    int nSegments, const int *segmentSizes,
+    int nSegments,
+    const int *segmentSizes,
     const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
-    const string &pattern, const string &alphabet)
+    const string &pattern,
+    const string &alphabet)
+{
+    const IndexToMatchMap indexToMatch = calcIndexToMatchMap(segments, nSegments, segmentSizes, pattern, alphabet);
+    unordered_set<int> res;
+
+    for (const auto &kv : indexToMatch)
+    {
+        for (const auto &match : kv.second)
+        {
+            if (verifyMatch(segments, segmentSizes, sourceMap, pattern, kv.first, match))
+            {
+                res.insert(kv.first);
+            }
+        }
+    }
+
+    return res;
+}
+
+unordered_map<int, set<int>> Sopang::matchWithSources(const string *const *segments,
+    int nSegments,
+    const int *segmentSizes,
+    const unordered_map<int, vector<SourceSet>> &sourceMap,
+    const string &pattern,
+    const string &alphabet)
+{
+    const IndexToMatchMap indexToMatch = calcIndexToMatchMap(segments, nSegments, segmentSizes, pattern, alphabet);
+
+    return {};
+}
+
+Sopang::IndexToMatchMap Sopang::calcIndexToMatchMap(const string *const *segments,
+    int nSegments,
+    const int *segmentSizes,
+    const string &pattern,
+    const string &alphabet)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
     fillPatternMaskBuffer(pattern, alphabet);
@@ -283,8 +324,8 @@ unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
     uint64_t D = allOnes;
 
     // segment index -> [(variant index, char in variant index)]
-    unordered_map<int, vector<pair<int, int>>> indexToMatch;
-    indexToMatch.reserve(matchMapReserveSize);
+    IndexToMatchMap res;
+    res.reserve(matchMapReserveSize);
 
     for (int iS = 0; iS < nSegments; ++iS)
     {
@@ -306,12 +347,12 @@ unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
 
                 if ((dBuffer[iD] & hitMask) == 0x0ULL)
                 {
-                    if (indexToMatch.count(iS) == 0)
+                    if (res.count(iS) == 0)
                     {
-                        indexToMatch[iS] = {};
+                        res[iS] = {};
                     }
 
-                    indexToMatch[iS].emplace_back(make_pair(iD, static_cast<int>(iC)));
+                    res[iS].emplace_back(make_pair(iD, static_cast<int>(iC)));
                 }
             }
         }
@@ -321,19 +362,6 @@ unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
         for (int iD = 1; iD < segmentSizes[iS]; ++iD)
         {
             D &= dBuffer[iD];
-        }
-    }
-
-    unordered_set<int> res;
-
-    for (const auto &kv : indexToMatch)
-    {
-        for (const auto &match : kv.second)
-        {
-            if (verifyMatch(segments, segmentSizes, sourceMap, pattern, kv.first, match))
-            {
-                res.insert(kv.first);
-            }
         }
     }
 

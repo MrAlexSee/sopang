@@ -4,9 +4,11 @@
 #include "bitset.hpp"
 
 #include <map>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #ifndef SOPANG_WHITEBOX
@@ -29,25 +31,41 @@ public:
     ~Sopang();
 
     std::unordered_set<int> match(const std::string *const *segments,
-        int nSegments, const int *segmentSizes,
-        const std::string &pattern, const std::string &alphabet);
+        int nSegments,
+        const int *segmentSizes,
+        const std::string &pattern,
+        const std::string &alphabet);
 
     std::unordered_set<int> matchApprox(const std::string *const *segments,
-        int nSegments, const int *segmentSizes,
-        const std::string &pattern, const std::string &alphabet, 
+        int nSegments,
+        const int *segmentSizes,
+        const std::string &pattern,
+        const std::string &alphabet,
         int k);
 
     std::unordered_set<int> matchWithSourcesVerify(const std::string *const *segments,
-        int nSegments, const int *segmentSizes,
+        int nSegments,
+        const int *segmentSizes,
         const std::unordered_map<int, std::vector<SourceSet>> &sourceMap,
-        const std::string &pattern, const std::string &alphabet);
+        const std::string &pattern,
+        const std::string &alphabet);
 
-    std::unordered_map<int, std::unordered_set<int>> matchWithSources(const std::string *const *segments,
-        int nSegments, const int *segmentSizes,
+    std::unordered_map<int, std::set<int>> matchWithSources(const std::string *const *segments,
+        int nSegments,
+        const int *segmentSizes,
         const std::unordered_map<int, std::vector<SourceSet>> &sourceMap,
-        const std::string &pattern, const std::string &alphabet);
+        const std::string &pattern,
+        const std::string &alphabet);
 
 private:
+    using IndexToMatchMap = std::unordered_map<int, std::vector<std::pair<int, int>>>;
+
+    IndexToMatchMap calcIndexToMatchMap(const std::string *const *segments,
+        int nSegments,
+        const int *segmentSizes,
+        const std::string &pattern,
+        const std::string &alphabet);
+
     void initCounterPositionMasks();
 
     void fillPatternMaskBuffer(const std::string &pattern, const std::string &alphabet);
