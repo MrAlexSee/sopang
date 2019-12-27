@@ -316,6 +316,9 @@ Sopang::SourceSet calcMatchSources(const string *const *segments,
 
     while (not leaves.empty() and segmentIdx >= 0)
     {
+        vector<pair<SourceSet, int>> newLeaves;
+        newLeaves.reserve(leaves.size() * segmentSizes[segmentIdx]);
+
         if (segmentSizes[segmentIdx] == 1)
         {
             for (auto &leaf : leaves)
@@ -326,18 +329,18 @@ Sopang::SourceSet calcMatchSources(const string *const *segments,
                 {
                     res |= leaf.first;
                 }
-
-                const auto leafCheck = [](const pair<SourceSet, int> &leaf) { return leaf.second >= 0;};
-                leaves.erase(std::remove_if(leaves.begin(), leaves.end(), leafCheck), leaves.end());
+                else
+                {
+                    newLeaves.push_back(leaf);
+                }
             }
+
+            leaves = newLeaves;
         }
         else
         {
             assert(sourceMap.count(segmentIdx) > 0 and sourceMap.at(segmentIdx).size() == static_cast<size_t>(segmentSizes[segmentIdx]));
 
-            vector<pair<SourceSet, int>> newLeaves;
-            newLeaves.reserve(leaves.size() * segmentSizes[segmentIdx]);
-            
             for (const auto &leaf : leaves)
             {
                 for (int variantIdx = 0; variantIdx < segmentSizes[segmentIdx]; ++variantIdx)
