@@ -37,11 +37,8 @@ public:
     void reset(int n);
 
 private:
-    static constexpr uint64_t allOnes = ~(0x0ULL);
-    static constexpr uint64_t allZeros = 0x0ULL;
-
     static constexpr int bufferSize = (N + 1) / 64;
-    static constexpr size_t bufferSizeBytes = bufferSize * 8;
+    static constexpr size_t bufferSizeBytes = bufferSize * sizeof(uint64_t);
 
     uint64_t buffer[bufferSize];
 };
@@ -176,10 +173,7 @@ bool BitSet<N>::test(int n) const
 template <int N>
 void BitSet<N>::set()
 {
-    for (int i = 0; i < bufferSize; ++i)
-    {
-        buffer[i] = allOnes;
-    }
+    __builtin_memset(buffer, ~0x0, bufferSizeBytes);
 }
 
 template <int N>
@@ -191,10 +185,7 @@ void BitSet<N>::set(int n)
 template <int N>
 void BitSet<N>::reset()
 {
-    for (int i = 0; i < bufferSize; ++i)
-    {
-        buffer[i] = allZeros;
-    }
+    __builtin_memset(buffer, 0, bufferSizeBytes);
 }
 
 template <int N>
