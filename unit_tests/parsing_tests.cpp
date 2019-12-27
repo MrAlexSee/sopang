@@ -409,7 +409,7 @@ TEST_CASE("is converting sources to source map correct", "[parsing]")
     vector<vector<Sopang::SourceSet>> sources { { { 1, 2 }, { 3, 4 } }, { { 1 }, { 2, 3 }, { 4 } }, { { 3, 4 }, { 1, 2 } } };
     vector<int> segmentSizes { 1, 2, 3, 2, 1 };
 
-    unordered_map<int, vector<Sopang::SourceSet>> sourceMap = parsing::sourcesToSourceMap(segmentSizes.size(), segmentSizes.data(), sources);
+    Sopang::SourceMap sourceMap = parsing::sourcesToSourceMap(segmentSizes.size(), segmentSizes.data(), sources);
 
     REQUIRE(sourceMap.size() == 3);
 
