@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     int sourceCount;
 
     cout << "Building the sources map (stage 1/2)..." << endl;
-    SourcesMap sourcesMap = processVcfFile(args.at(1), chrID, sourceCount);
+    const SourcesMap sourcesMap = processVcfFile(args.at(1), chrID, sourceCount);
 
     if (sourcesMap.empty())
         return 1;
@@ -66,9 +66,12 @@ int main(int argc, char **argv)
 SourcesMap processVcfFile(string filePath, string &chrID, int &sourceCount)
 {
     cout << "Counting lines..." << endl;
+    int lineCount;
 
+    {
     ifstream inStream(filePath);
-    const int lineCount = count(istreambuf_iterator<char>(inStream), istreambuf_iterator<char>(), '\n');
+    lineCount = count(istreambuf_iterator<char>(inStream), istreambuf_iterator<char>(), '\n');
+    }
 
     cout << endl << "Processing the VCF file, #lines = " << lineCount << endl;
 
@@ -85,6 +88,8 @@ SourcesMap processVcfFile(string filePath, string &chrID, int &sourceCount)
 
     map<string, int> sampleNameToIndex;
     int nextSampleIndex = 0;
+
+    vector<string> parts;
 
     int parsedCount = count(vcfParser.header.begin(), vcfParser.header.end(), '\n') + 1;
     int processedCount = 0, ignoredCount = 0;
@@ -120,21 +125,14 @@ SourcesMap processVcfFile(string filePath, string &chrID, int &sourceCount)
         {
             for (const string &val : sampleValues.at("GT"))
             {
-                vector<string> parts;
                 boost::algorithm::split(parts, val, boost::is_any_of("|"));
-
                 assert(parts.size() == 2);
-                const vector<int> indexes({stoi(parts[0]), stoi(parts[1])});
 
-                for (int diploidIndex = 0; diploidIndex < static_cast<int>(indexes.size()); ++diploidIndex)
-                {
-                    const int altIndex = indexes[diploidIndex];
-
+                const auto processIndex = [&](int diploidIndex, int altIndex) {
                     if (altIndex == 0) // Reference sequence.
-                        continue;
+                        return;
 
                     assert(altIndex >= 1 and altIndex <= static_cast<int>(variant.alt.size()));
-                    const string &altSequence = variant.alt[altIndex - 1];
 
                     const string fullSampleName = sampleName + "_" + to_string(diploidIndex);
 
@@ -143,8 +141,12 @@ SourcesMap processVcfFile(string filePath, string &chrID, int &sourceCount)
                         sampleNameToIndex[fullSampleName] = nextSampleIndex++;
                     }
 
+                    const string &altSequence = variant.alt[altIndex - 1];
                     curSources[altSequence].insert(sampleNameToIndex[fullSampleName]);
-                }
+                };
+
+                processIndex(0, stoi(parts[0]));
+                processIndex(1, stoi(parts[1]));
             }
         }
 
@@ -218,7 +220,7 @@ pair<string, string> processFastaFile(const string &filePath, const SourcesMap &
 
     string textChars = "", sourceChars = "";
 
-    const int expectedSize = 1024 * 1024 * 1024;
+    const size_t expectedSize = 10 * 1024 * 1024;
 
     textChars.reserve(expectedSize);
     sourceChars.reserve(expectedSize);
