@@ -110,34 +110,37 @@ TEST_CASE("is matching sources for 4 segments with deterministic correct", "[sou
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
-        REQUIRE(res == expected);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+        const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resSet == expectedSet);
+
+        const auto resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resMap == expectedMap);
     };
 
-    testMatch("A", { 0, 1, 2, 3 });
-    testMatch("AN", { 0 });
-    testMatch("ANT", { 0 });
-    testMatch("GATTTAA", { 3 });
-    testMatch("GAGGGAA", { });
-    testMatch("ANTCGGACGA", { 2 });
-    testMatch("GGTCGGACGA", { });
-    testMatch("CGGA", { 1 });
-    testMatch("ANTC", { 1 });
-    testMatch("ANTCG", { 1 });
-    testMatch("ANTCGG", { 1 });
-    testMatch("ANTCGGA", { 1 });
-    testMatch("ANTCGGAC", { 2 });
-    testMatch("ANTCGGACG", { 2 });
-    testMatch("ANTCGGACGA", { 2 });
-    testMatch("ANTCGGACGAA", { 2 });
-    testMatch("ANTCGGACGAAA", { 2 });
-    testMatch("ANTCGGAT", { });
-    testMatch("ANTCGGATT", { });
-    testMatch("ANTCGGATTT", { });
-    testMatch("ANTCGGAG", { });
-    testMatch("ANTCGGAGG", { });
-    testMatch("ANTCGGAGGG", { });
+    testMatch("A", { 0, 1, 2, 3 }, { {0, {0, 1}}, {1, {}}, {2, {0}}, {3, {0, 1}} });
+    testMatch("AN", { 0 }, { {0, {0}} });
+    testMatch("ANT", { 0 }, { {0, {0}} });
+    testMatch("GATTTAA", { 3 }, { {3, {1}} });
+    testMatch("GAGGGAA", { }, { });
+    testMatch("ANTCGGACGA", { 2 }, { {2, {0}} });
+    testMatch("GGTCGGACGA", { }, { });
+    testMatch("CGGA", { 1 }, { {1, {}} });
+    testMatch("ANTC", { 1 }, { {1, {0}} });
+    testMatch("ANTCG", { 1 }, { {1, {0}} });
+    testMatch("ANTCGG", { 1 }, { {1, {0}} });
+    testMatch("ANTCGGA", { 1 }, { {1, {0}} });
+    testMatch("ANTCGGAC", { 2 }, { {2, {0}} });
+    testMatch("ANTCGGACG", { 2 }, { {2, {0}} });
+    testMatch("ANTCGGACGA", { 2 }, { {2, {0}} });
+    testMatch("ANTCGGACGAA", { 2 }, { {2, {0}} });
+    testMatch("ANTCGGACGAAA", { 2 }, { {2, {0}} });
+    testMatch("ANTCGGAT", { }, { });
+    testMatch("ANTCGGATT", { }, { });
+    testMatch("ANTCGGATTT", { }, { });
+    testMatch("ANTCGGAG", { }, { });
+    testMatch("ANTCGGAGG", { }, { });
+    testMatch("ANTCGGAGGG", { }, { });
 }
 
 TEST_CASE("is matching sources for 3 non-deterministic segments multiple matches correct", "[sources]")
@@ -151,16 +154,19 @@ TEST_CASE("is matching sources for 3 non-deterministic segments multiple matches
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
-        REQUIRE(res == expected);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+        const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resSet == expectedSet);
+
+        const auto resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resMap == expectedMap);
     };
 
-    testMatch("ANTC", { 1, 2 });
-    testMatch("TC", { 1, 2 });
-    testMatch("AC", { 0, 2 });
-    testMatch("TA", { 1 });
-    testMatch("CC", { 1 });
+    testMatch("ANTC", { 1, 2 }, { {1, {0}}, {2, {2}} });
+    testMatch("TC", { 1, 2 }, { {1, {0}}, {2, {2}} });
+    testMatch("AC", { 0, 2 }, { {0, {1}}, {2, {1}} });
+    testMatch("TA", { 1 }, { {1, {2}} });
+    testMatch("CC", { 1 }, { {1, {1}} });
 }
 
 TEST_CASE("is matching sources for 5 segments with deterministic and empty variants correct", "[sources]")
@@ -174,55 +180,58 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
-        REQUIRE(res == expected);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+        const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resSet == expectedSet);
+
+        const auto resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resMap == expectedMap);
     };
 
-    testMatch("ACG", { 2, 3 });
-    testMatch("AACG", { 2 });
+    testMatch("ACG", { 2, 3 }, { {2, {3}}, {3, {0}} });
+    testMatch("AACG", { 2 }, { {2, {3}} });
 
-    testMatch("AANTC", { 2 });
-    testMatch("AANTCG", { 2 });
-    testMatch("AANTCGG", { 2 });
-    testMatch("AANTCGGA", { 2 });
+    testMatch("AANTC", { 2 }, { {2, {0}} });
+    testMatch("AANTCG", { 2 }, { {2, {0}} });
+    testMatch("AANTCGG", { 2 }, { {2, {0}} });
+    testMatch("AANTCGGA", { 2 }, { {2, {0}} });
 
-    testMatch("AANTCGGAC", { 3 });
-    testMatch("AANTCGGACG", { 3 });
-    testMatch("AANTCGGACGA", { 3 });
-    testMatch("AANTCGGACGAA", { 3 });
-    testMatch("AANTCGGACGAAA", { 3 });
+    testMatch("AANTCGGAC", { 3 }, { {3, {0}} });
+    testMatch("AANTCGGACG", { 3 }, { {3, {0}} });
+    testMatch("AANTCGGACGA", { 3 }, { {3, {0}} });
+    testMatch("AANTCGGACGAA", { 3 }, { {3, {0}} });
+    testMatch("AANTCGGACGAAA", { 3 }, { {3, {0}} });
 
-    testMatch("AANTCGGACGAAAA", { 4 });
-    testMatch("AANTCGGACGAAAAA", { 4 });
-    testMatch("AANTCGGACGAAAAAC", { 4 });
+    testMatch("AANTCGGACGAAAA", { 4 }, { {4, {0}} });
+    testMatch("AANTCGGACGAAAAA", { 4 }, { {4, {0}} });
+    testMatch("AANTCGGACGAAAAAC", { 4 }, { {4, {0}} });
 
-    testMatch("AACGGAC", { });
-    testMatch("AACGGACG", { });
-    testMatch("AACGGACGA", { });
-    testMatch("AACGGACGAA", { });
-    testMatch("AACGGACGAAA", { });
+    testMatch("AACGGAC", { }, { });
+    testMatch("AACGGACG", { }, { });
+    testMatch("AACGGACGA", { }, { });
+    testMatch("AACGGACGAA", { }, { });
+    testMatch("AACGGACGAAA", { }, { });
 
-    testMatch("CGGAAAC", { 4 });
-    testMatch("CGGATC", { 4 });
+    testMatch("CGGAAAC", { 4 }, { {4, {1}} });
+    testMatch("CGGATC", { 4 }, { {4, {2, 3}} });
 
-    testMatch("ACCGGAA", { 4 }); // 1-123-01
-    testMatch("ACCGGAAA", { 4 }); // 1-123-01
-    testMatch("ACCGGAAAC", { 4 }); // 1-123-01
-    testMatch("AAACCGGAT", { }); // 1-123-23
-    testMatch("AAACCGGATC", { }); // 1-123-23
-    testMatch("AAANTCGGAT", { }); // 0-123-23
-    testMatch("AAANTCGGATC", { }); // 0-123-23
-    testMatch("AAGGTCGGAA", { }); // 2-123-01
-    testMatch("AAGGTCGGAAA", { }); // 2-123-01
-    testMatch("AAGGTCGGAAAC", { }); // 2-123-01
-    testMatch("AAGGTCGGAT", { 4 }); // 2-123-23
-    testMatch("AAGGTCGGATC", { 4 }); // 2-123-23
-    testMatch("AACGGAA", { }); // 3-123-01
-    testMatch("AACGGAAA", { }); // 3-123-01
-    testMatch("AACGGAAAC", { }); // 3-123-01
-    testMatch("AACGGAT", { 4 }); // 3-123-23
-    testMatch("AACGGATC", { 4 }); // 3-123-23
+    testMatch("ACCGGAA", { 4 }, { {4, {1}} }); // 1-123-01
+    testMatch("ACCGGAAA", { 4 }, { {4, {1}} }); // 1-123-01
+    testMatch("ACCGGAAAC", { 4 }, { {4, {1}} }); // 1-123-01
+    testMatch("AAACCGGAT", { }, { }); // 1-123-23
+    testMatch("AAACCGGATC", { }, { }); // 1-123-23
+    testMatch("AAANTCGGAT", { }, { }); // 0-123-23
+    testMatch("AAANTCGGATC", { }, { }); // 0-123-23
+    testMatch("AAGGTCGGAA", { }, { }); // 2-123-01
+    testMatch("AAGGTCGGAAA", { }, { }); // 2-123-01
+    testMatch("AAGGTCGGAAAC", { }, { }); // 2-123-01
+    testMatch("AAGGTCGGAT", { 4 }, { {4, {2}} }); // 2-123-23
+    testMatch("AAGGTCGGATC", { 4 }, { {4, {2}} }); // 2-123-23
+    testMatch("AACGGAA", { }, { }); // 3-123-01
+    testMatch("AACGGAAA", { }, { }); // 3-123-01
+    testMatch("AACGGAAAC", { }, { }); // 3-123-01
+    testMatch("AACGGAT", { 4 }, { {4, {3}} }); // 3-123-23
+    testMatch("AACGGATC", { 4 }, { {4, {3}} }); // 3-123-23
 }
 
 TEST_CASE("is matching sources for 5 segments with deterministic and empty variants v2 correct", "[sources]")
@@ -237,18 +246,21 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
-        REQUIRE(res == expected);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+        const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resSet == expectedSet);
+
+        const auto resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resMap == expectedMap);
     };
 
-    testMatch("ACANTAC", { 4 }); // 3-1 | 3-3-03
-    testMatch("ACANTAT", { }); // 3-3-12
-    testMatch("ANTACA", { }); // 0-3 | 3-1-03 | 3-1-12 | 0-2-1 | 0-2-3-03 | 0-2-3-12
-    testMatch("ANTACAC", { }); // 0-2-1 | 0-2-3-03 | 3-1-03
-    testMatch("ANTACAT", { }); // 0-2-3-12 | 3-1-12
-    testMatch("ACACAC", { }); // 1-2-1 | 1-2-3-03 | 2-1-03
-    testMatch("ACACAT", { }); // 1-2-3-12 | 2-1-12
+    testMatch("ACANTAC", { 4 }, { {4, {3}} }); // 3-1 | 3-3-03
+    testMatch("ACANTAT", { }, { }); // 3-3-12
+    testMatch("ANTACA", { }, { }); // 0-3 | 3-1-03 | 3-1-12 | 0-2-1 | 0-2-3-03 | 0-2-3-12
+    testMatch("ANTACAC", { }, { }); // 0-2-1 | 0-2-3-03 | 3-1-03
+    testMatch("ANTACAT", { }, { }); // 0-2-3-12 | 3-1-12
+    testMatch("ACACAC", { }, { }); // 1-2-1 | 1-2-3-03 | 2-1-03
+    testMatch("ACACAT", { }, { }); // 1-2-3-12 | 2-1-12
 }
 
 TEST_CASE("is matching sources for 5 segments with deterministic and empty variants v3 correct", "[sources]")
@@ -258,23 +270,26 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
     const string *const *segments = parsing::parseTextArray("{ANT,AC,}AC{CGGA,ANT,}{CG,AC,}{AC,AT}", &nSegments, &segmentSizes);
 
     const vector<vector<Sopang::SourceSet>> sources { { { 0 }, { 1 }, { 2, 3 } }, { { 2 }, { 3 }, { 0, 1 } },
-                                                    { { 1 }, { 3 }, { 0, 2 } }, { { 0 , 3 }, { 1, 2 } } };
+                                                    { { 1 }, { 3 }, { 0, 2 } }, { { 0, 3 }, { 1, 2 } } };
     const auto sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
-        REQUIRE(res == expected);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+        const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resSet == expectedSet);
+
+        const auto resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resMap == expectedMap);
     };
 
-    testMatch("ACANTAC", { 3 }); // 3-3 | 3-02-03
-    testMatch("ACANTAT", {  }); // 3-02-12
-    testMatch("ANTACA", { 4 }); // 0-3 | 0-01-3 | 0-01-02-0 | 0-01-02-12 | 3-3-03 | 3-3-12
-    testMatch("ANTACAC", { 4 }); // 0-01-3 | 0-01-02-03 | 3-3-03
-    testMatch("ANTACAT", { }); // 0-01-02-12 | 3-3-12
-    testMatch("ACACAC", { }); // 1-01-01-3 | 1-01-02-03 | 01-3-03
-    testMatch("ACACAT", { }); // 1-01-02-12 | 01-3-12
+    testMatch("ACANTAC", { 3 }, { {3, {3}} }); // 3-3 | 3-02-03
+    testMatch("ACANTAT", { }, { }); // 3-02-12
+    testMatch("ANTACA", { 4 }, { {4, {0, 3}} }); // 0-3 | 0-01-3 | 0-01-02-03 | 0-01-02-12 | 3-3-03 | 3-3-12
+    testMatch("ANTACAC", { 4 }, { {4, {0, 3}} }); // 0-01-3 | 0-01-02-03 | 3-3-03
+    testMatch("ANTACAT", { }, { }); // 0-01-02-12 | 3-3-12
+    testMatch("ACACAC", { }, { }); // 1-01-01-3 | 1-01-02-03 | 01-3-03
+    testMatch("ACACAT", { }, { }); // 1-01-02-12 | 01-3-12
 }
 
 } // namespace sopang
