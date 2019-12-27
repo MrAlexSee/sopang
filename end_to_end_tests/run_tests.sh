@@ -22,5 +22,8 @@ python3 check_result.py "2 3 3 3 3 3 1 1"
 ./sopang text_test.eds patterns_test.txt -S sources_test.edss > $outFile
 python3 check_result.py "2 1 1 1 1 2 0 1"
 
+./sopang text_test.eds patterns_test.txt -S sources_test.edss --full-sources-output > $outFile
+python3 check_result.py "2 1 1 1 1 2 0 1"
+
 echo "4/4 Teardown"
 rm -f sopang $outFile
