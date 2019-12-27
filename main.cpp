@@ -60,7 +60,7 @@ vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentS
 
 /** Runs sopang for [segmentData] and [sourceMap] (which may be empty), searching for [patterns]. */
 void runSopang(const SegmentData &segmentData, 
-    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
+    const Sopang::SourceMap &sourceMap,
     const vector<string> &patterns);
 
 /** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segmentData]. */
@@ -68,7 +68,7 @@ void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSiz
 
 /** Searches for [pattern] in [segmentData] and [sourceMap] (which may be empty) and returns elapsed time in seconds. */
 double measure(const SegmentData &segmentData,
-    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
+    const Sopang::SourceMap &sourceMap,
     const string &pattern);
 
 void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
@@ -230,7 +230,7 @@ int run()
         vector<string> patterns = readPatterns();
 
         SegmentData segmentData{ segments, nSegments, segmentSizes };
-        unordered_map<int, vector<Sopang::SourceSet>> sourceMap;
+        Sopang::SourceMap sourceMap;
 
         if (not params.inSourcesFile.empty())
         {
@@ -372,7 +372,7 @@ vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentS
 }
 
 void runSopang(const SegmentData &segmentData,
-    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
+    const Sopang::SourceMap &sourceMap,
     const vector<string> &patterns)
 {
     assert(segmentData.nSegments > 0);
@@ -434,7 +434,7 @@ void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSiz
 }
 
 double measure(const SegmentData &segmentData,
-    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
+    const Sopang::SourceMap &sourceMap,
     const string &pattern)
 {
     unordered_set<int> res;
