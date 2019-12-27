@@ -32,8 +32,8 @@ TEST_CASE("is matching a single segment with empty sources correct", "[sources]"
         const unordered_set<int> resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, { }, pattern, alphabet);
         REQUIRE(resSet == unordered_set<int>{ 0 });
 
-        const unordered_map<int, set<int>> resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, { }, pattern, alphabet);
-        REQUIRE(resMap == unordered_map<int, set<int>>{ {0, {}} });
+        const unordered_map<int, Sopang::SourceSet> resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, { }, pattern, alphabet);
+        REQUIRE(resMap == unordered_map<int, Sopang::SourceSet>{ {0, {}} });
     }
 }
 
@@ -48,7 +48,7 @@ TEST_CASE("is matching sources for 3 non-deterministic segments correct", "[sour
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, Sopang::SourceSet> &expectedMap) {
         const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(resSet == expectedSet);
 
@@ -79,7 +79,7 @@ TEST_CASE("is matching sources for 3 segments with deterministic correct", "[sou
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, Sopang::SourceSet> &expectedMap) {
         const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(resSet == expectedSet);
 
@@ -110,7 +110,7 @@ TEST_CASE("is matching sources for 4 segments with deterministic correct", "[sou
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, Sopang::SourceSet> &expectedMap) {
         const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(resSet == expectedSet);
 
@@ -154,7 +154,7 @@ TEST_CASE("is matching sources for 3 non-deterministic segments multiple matches
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, Sopang::SourceSet> &expectedMap) {
         const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(resSet == expectedSet);
 
@@ -180,7 +180,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, Sopang::SourceSet> &expectedMap) {
         const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(resSet == expectedSet);
 
@@ -246,7 +246,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, Sopang::SourceSet> &expectedMap) {
         const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(resSet == expectedSet);
 
@@ -275,7 +275,7 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, Sopang::SourceSet> &expectedMap) {
         const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
         REQUIRE(resSet == expectedSet);
 
@@ -291,5 +291,6 @@ TEST_CASE("is matching sources for 5 segments with deterministic and empty varia
     testMatch("ACACAC", { }, { }); // 1-01-01-3 | 1-01-02-03 | 01-3-03
     testMatch("ACACAT", { }, { }); // 1-01-02-12 | 01-3-12
 }
+
 
 } // namespace sopang
