@@ -161,13 +161,13 @@ namespace
 
 bool verifyMatch(const string *const *segments,
     const int *segmentSizes,
-    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
+    const Sopang::SourceMap &sourceMap,
     const string &pattern,
     int matchIdx,
     const pair<int, int> &match)
 {
     using SourceSet = Sopang::SourceSet;
-    int patternCharIdx = static_cast<int>(pattern.size()) - match.second - 2;
+    const int patternCharIdx = static_cast<int>(pattern.size()) - match.second - 2;
 
     if (patternCharIdx < 0) // The match is fully contained within a single segment.
         return true;
@@ -184,7 +184,7 @@ bool verifyMatch(const string *const *segments,
         rootSources.set();
     }
 
-    leaves.emplace_back(make_pair(move(rootSources), patternCharIdx));
+    leaves.emplace_back(move(rootSources), patternCharIdx);
     int segmentIdx = static_cast<int>(matchIdx - 1);
 
     while (not leaves.empty() and segmentIdx >= 0)
@@ -218,12 +218,12 @@ bool verifyMatch(const string *const *segments,
 
                         if (newSources.any())
                         {
-                            newLeaves.emplace_back(make_pair(move(newSources), leaf.second));
+                            newLeaves.emplace_back(move(newSources), leaf.second);
                         }
                     }
                     else
                     {
-                        int curCharIdx = static_cast<int>(segments[segmentIdx][variantIdx].size() - 1);
+                        int curCharIdx = static_cast<int>(segments[segmentIdx][variantIdx].size()) - 1;
                         int curPatternIdx = static_cast<int>(leaf.second);
 
                         while (curCharIdx >= 0)
@@ -257,7 +257,7 @@ bool verifyMatch(const string *const *segments,
 
                             if (newSources.any())
                             {
-                                newLeaves.emplace_back(make_pair(move(newSources), curPatternIdx));
+                                newLeaves.emplace_back(move(newSources), curPatternIdx);
                             }
                         }
                     }
@@ -273,12 +273,142 @@ bool verifyMatch(const string *const *segments,
     return false;
 }
 
+Sopang::SourceSet calcMatchSources(const string *const *segments,
+    const int *segmentSizes,
+    const Sopang::SourceMap &sourceMap,
+    const string &pattern,
+    int matchIdx,
+    const pair<int, int> &match,
+    bool &deterministicSegmentMatch)
+{
+    using SourceSet = Sopang::SourceSet;
+    const int patternCharIdx = static_cast<int>(pattern.size()) - match.second - 2;
+
+    if (patternCharIdx < 0) // The match is fully contained within a single segment.
+    {
+        if (sourceMap.count(matchIdx) > 0)
+        {
+            assert(match.first >= 0 and match.first < static_cast<int>(sourceMap.at(matchIdx).size()));
+            return sourceMap.at(matchIdx)[match.first];
+        }
+
+        deterministicSegmentMatch = true;
+        return { };
+    }
+
+    vector<pair<SourceSet, int>> leaves;
+    SourceSet rootSources;
+    
+    if (sourceMap.count(matchIdx) > 0)
+    {
+        assert(match.first >= 0 and match.first < static_cast<int>(sourceMap.at(matchIdx).size()));
+        rootSources = sourceMap.at(matchIdx)[match.first];
+    }
+    else
+    {
+        rootSources.set();
+    }
+
+    leaves.emplace_back(move(rootSources), patternCharIdx);
+    int segmentIdx = static_cast<int>(matchIdx - 1);
+
+    SourceSet res;
+
+    while (not leaves.empty() and segmentIdx >= 0)
+    {
+        if (segmentSizes[segmentIdx] == 1)
+        {
+            for (auto &leaf : leaves)
+            {
+                leaf.second -= segments[segmentIdx][0].size();
+
+                if (leaf.second < 0)
+                {
+                    res |= leaf.first;
+                }
+
+                const auto leafCheck = [](const pair<SourceSet, int> &leaf) { return leaf.second >= 0;};
+                leaves.erase(std::remove_if(leaves.begin(), leaves.end(), leafCheck), leaves.end());
+            }
+        }
+        else
+        {
+            assert(sourceMap.count(segmentIdx) > 0 and sourceMap.at(segmentIdx).size() == static_cast<size_t>(segmentSizes[segmentIdx]));
+
+            vector<pair<SourceSet, int>> newLeaves;
+            newLeaves.reserve(leaves.size() * segmentSizes[segmentIdx]);
+            
+            for (const auto &leaf : leaves)
+            {
+                for (int variantIdx = 0; variantIdx < segmentSizes[segmentIdx]; ++variantIdx)
+                {
+                    const SourceSet &variantSources = sourceMap.at(segmentIdx)[variantIdx];
+
+                    if (segments[segmentIdx][variantIdx].empty())
+                    {
+                        const SourceSet newSources = (variantSources & leaf.first);
+
+                        if (newSources.any())
+                        {
+                            newLeaves.emplace_back(move(newSources), leaf.second);
+                        }
+                    }
+                    else
+                    {
+                        int curCharIdx = static_cast<int>(segments[segmentIdx][variantIdx].size()) - 1;
+                        int curPatternIdx = static_cast<int>(leaf.second);
+
+                        while (curCharIdx >= 0)
+                        {
+                            if (curPatternIdx < 0)
+                                break;
+
+                            if (pattern[curPatternIdx] != segments[segmentIdx][variantIdx][curCharIdx])
+                                break;
+
+                            curCharIdx -= 1;
+                            curPatternIdx -= 1;
+                        }
+
+                        if (curPatternIdx < 0)
+                        {
+                            const SourceSet newSources = (variantSources & leaf.first);
+
+                            if (newSources.any())
+                            {
+                                res |= newSources;
+                                continue;
+                            }
+                        }
+
+                        if (curCharIdx < 0)
+                        {
+                            const SourceSet newSources = (variantSources & leaf.first);
+
+                            if (newSources.any())
+                            {
+                                newLeaves.emplace_back(move(newSources), curPatternIdx);
+                            }
+                        }
+                    }
+                }
+            }
+
+            leaves = newLeaves;
+        }
+
+        segmentIdx -= 1;
+    }
+
+    return res;
+}
+
 } // namespace (anonymous)
 
 unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
     int nSegments,
     const int *segmentSizes,
-    const unordered_map<int, vector<Sopang::SourceSet>> &sourceMap,
+    const Sopang::SourceMap &sourceMap,
     const string &pattern,
     const string &alphabet)
 {
@@ -292,6 +422,7 @@ unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
             if (verifyMatch(segments, segmentSizes, sourceMap, pattern, kv.first, match))
             {
                 res.insert(kv.first);
+                break;
             }
         }
     }
@@ -299,16 +430,43 @@ unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
     return res;
 }
 
-unordered_map<int, set<int>> Sopang::matchWithSources(const string *const *segments,
+unordered_map<int, Sopang::SourceSet> Sopang::matchWithSources(const string *const *segments,
     int nSegments,
     const int *segmentSizes,
-    const unordered_map<int, vector<SourceSet>> &sourceMap,
+    const Sopang::SourceMap &sourceMap,
     const string &pattern,
     const string &alphabet)
 {
     const IndexToMatchMap indexToMatch = calcIndexToMatchMap(segments, nSegments, segmentSizes, pattern, alphabet);
 
-    return {};
+    unordered_map<int, SourceSet> res;
+
+    for (const auto &kv : indexToMatch)
+    {
+        for (const auto &match : kv.second)
+        {
+            bool deterministicSegmentMatch = false;
+            const SourceSet curSources = calcMatchSources(segments, segmentSizes, sourceMap, pattern, kv.first, match, deterministicSegmentMatch);
+
+            if (not curSources.empty())
+            {
+                if (res.count(kv.first) > 0)
+                {
+                    res[kv.first] |= curSources;
+                }
+                else
+                {
+                    res[kv.first] = move(curSources);
+                }
+            }
+            else if (deterministicSegmentMatch)
+            {
+                res[kv.first] = { };
+            }
+        }
+    }
+
+    return res;
 }
 
 Sopang::IndexToMatchMap Sopang::calcIndexToMatchMap(const string *const *segments,
@@ -347,12 +505,7 @@ Sopang::IndexToMatchMap Sopang::calcIndexToMatchMap(const string *const *segment
 
                 if ((dBuffer[iD] & hitMask) == 0x0ULL)
                 {
-                    if (res.count(iS) == 0)
-                    {
-                        res[iS] = {};
-                    }
-
-                    res[iS].emplace_back(make_pair(iD, static_cast<int>(iC)));
+                    res[iS].emplace_back(iD, static_cast<int>(iC));
                 }
             }
         }

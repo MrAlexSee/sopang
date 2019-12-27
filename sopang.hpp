@@ -26,6 +26,7 @@ private:
 
 public:
     using SourceSet = BitSet<maxSourceCount>;
+    using SourceMap = std::unordered_map<int, std::vector<SourceSet>>;
 
     Sopang();
     ~Sopang();
@@ -46,14 +47,14 @@ public:
     std::unordered_set<int> matchWithSourcesVerify(const std::string *const *segments,
         int nSegments,
         const int *segmentSizes,
-        const std::unordered_map<int, std::vector<SourceSet>> &sourceMap,
+        const SourceMap &sourceMap,
         const std::string &pattern,
         const std::string &alphabet);
 
-    std::unordered_map<int, std::set<int>> matchWithSources(const std::string *const *segments,
+    std::unordered_map<int, SourceSet> matchWithSources(const std::string *const *segments,
         int nSegments,
         const int *segmentSizes,
-        const std::unordered_map<int, std::vector<SourceSet>> &sourceMap,
+        const SourceMap &sourceMap,
         const std::string &pattern,
         const std::string &alphabet);
 
