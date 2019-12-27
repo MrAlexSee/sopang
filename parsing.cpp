@@ -429,8 +429,8 @@ vector<vector<Sopang::SourceSet>> parseSourcesCompressed(string text, int &sourc
     return ret;
 }
 
-unordered_map<int, vector<Sopang::SourceSet>> sourcesToSourceMap(int nSegments,
-    const int *segmentSizes, const vector<vector<Sopang::SourceSet>> &sources)
+Sopang::SourceMap sourcesToSourceMap(int nSegments, const int *segmentSizes,
+    const vector<vector<Sopang::SourceSet>> &sources)
 {
     unordered_map<int, vector<Sopang::SourceSet>> ret;
     size_t arrayIdx = 0;
