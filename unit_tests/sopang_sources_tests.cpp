@@ -29,8 +29,11 @@ TEST_CASE("is matching a single segment with empty sources correct", "[sources]"
 
     for (const string &pattern : { "ACGT", "ACG", "CGT", "AC", "CG", "GT", "A", "C", "G", "T" })
     {
-        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, { }, pattern, alphabet);
-        REQUIRE(res == unordered_set<int>{ 0 });
+        const unordered_set<int> resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, { }, pattern, alphabet);
+        REQUIRE(resSet == unordered_set<int>{ 0 });
+
+        const unordered_map<int, set<int>> resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, { }, pattern, alphabet);
+        REQUIRE(resMap == unordered_map<int, set<int>>{ {0, {}} });
     }
 }
 
@@ -45,21 +48,24 @@ TEST_CASE("is matching sources for 3 non-deterministic segments correct", "[sour
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
-        REQUIRE(res == expected);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+        const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resSet == expectedSet);
+
+        const auto resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resMap == expectedMap);
     };
 
-    testMatch("TCGA", { 2 });
-    testMatch("TCGAG", { 2 });
-    testMatch("NTCGA", { 2 });
-    testMatch("NTCGAG", { 2 });
-    testMatch("ANTCGA", { 2 });
-    testMatch("ANTCGAG", { 2 });
-    testMatch("GTCGA", { });
-    testMatch("GTCGAG", { });
-    testMatch("GGTCGA", { });
-    testMatch("GGTCGAG", { });
+    testMatch("TCGA", { 2 }, { {2, {0}} });
+    testMatch("TCGAG", { 2 }, { {2, {0}} });
+    testMatch("NTCGA", { 2 }, { {2, {0}} });
+    testMatch("NTCGAG", { 2 }, { {2, {0}} });
+    testMatch("ANTCGA", { 2 }, { {2, {0}} });
+    testMatch("ANTCGAG", { 2 }, { {2, {0}} });
+    testMatch("GTCGA", { }, { });
+    testMatch("GTCGAG", { }, { });
+    testMatch("GGTCGA", { }, { });
+    testMatch("GGTCGAG", { }, { });
 }
 
 TEST_CASE("is matching sources for 3 segments with deterministic correct", "[sources]")
@@ -73,21 +79,24 @@ TEST_CASE("is matching sources for 3 segments with deterministic correct", "[sou
 
     Sopang sopang;
 
-    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expected) {
-        unordered_set<int> res = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
-        REQUIRE(res == expected);
+    const auto testMatch = [&](const string &pattern, const unordered_set<int> &expectedSet, const unordered_map<int, set<int>> &expectedMap) {
+        const auto resSet = sopang.matchWithSourcesVerify(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resSet == expectedSet);
+
+        const auto resMap = sopang.matchWithSources(segments, nSegments, segmentSizes, sourceMap, pattern, alphabet);
+        REQUIRE(resMap == expectedMap);
     };
 
-    testMatch("AN", { 0 });
-    testMatch("ANT", { 0 });
-    testMatch("CGA", { 2 });
-    testMatch("GGACGA", { 2 });
-    testMatch("CGGACGA", { 2 });
-    testMatch("NTCGGACG", { 2 });
-    testMatch("GTCGGACG", { });
-    testMatch("GGTCGGAA", { 2 });
-    testMatch("ANTCGGACGAA", { 2 });
-    testMatch("ANTCGGACGAAA", { 2 });
+    testMatch("AN", { 0 }, { {0, {0}} });
+    testMatch("ANT", { 0 }, { {0, {0}} });
+    testMatch("CGA", { 2 }, { {2, {0}} });
+    testMatch("GGACGA", { 2 }, { {2, {0}} });
+    testMatch("CGGACGA", { 2 }, { {2, {0}} });
+    testMatch("NTCGGACG", { 2 }, { {2, {0}} });
+    testMatch("GTCGGACG", { }, { });
+    testMatch("GGTCGGAA", { 2 }, { {2, {2}} });
+    testMatch("ANTCGGACGAA", { 2 }, { {2, {0}} });
+    testMatch("ANTCGGACGAAA", { 2 }, { {2, {0}} });
 }
 
 TEST_CASE("is matching sources for 4 segments with deterministic correct", "[sources]")
