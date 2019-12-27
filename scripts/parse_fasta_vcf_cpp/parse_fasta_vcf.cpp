@@ -386,5 +386,5 @@ string zstdCompress(const string &data, int compressionLevel)
     const string ret(dstBuffer, dstBuffer + compressedSize);
 
     delete[] dstBuffer;
-    return move(ret);
+    return ret;
 }
