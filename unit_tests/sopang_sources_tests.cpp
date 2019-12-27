@@ -164,7 +164,7 @@ TEST_CASE("is matching sources for 3 non-deterministic segments multiple matches
 
     testMatch("ANTC", { 1, 2 }, { {1, {0}}, {2, {2}} });
     testMatch("TC", { 1, 2 }, { {1, {0}}, {2, {2}} });
-    testMatch("AC", { 0, 2 }, { {0, {1}}, {2, {1}} });
+    testMatch("AC", { 0, 2 }, { {0, {1}}, {2, {0, 1}} });
     testMatch("TA", { 1 }, { {1, {2}} });
     testMatch("CC", { 1 }, { {1, {1}} });
 }
