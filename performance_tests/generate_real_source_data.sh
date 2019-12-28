@@ -5,7 +5,7 @@ dataDirPath="data"
 scriptsDirPath="scripts/parse_fasta_vcf_cpp"
 
 inputFastaFileName="hs37d5.fa"
-maxChromosomeId=1
+maxChromosomeId=23
 
 cd ..
 mkdir -p ${dataDirPath}
