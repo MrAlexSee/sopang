@@ -168,4 +168,5 @@ Library.
 
 License for Boost library is available at: https://www.boost.org/users/license.html
 License for Catch2 library is available at: https://github.com/catchorg/Catch2/blob/master/LICENSE.txt
+License for vcflib library is available at: https://github.com/vcflib/vcflib/blob/master/LICENSE
 License for Zstandard library is available at: https://github.com/facebook/zstd/blob/master/LICENSE
