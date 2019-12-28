@@ -64,7 +64,7 @@ void runSopang(const SegmentData &segmentData,
     const vector<string> &patterns);
 
 /** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segmentData]. */
-void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSizeMB);
+void calcTextSize(const SegmentData &segmentData, int &textSize, double &textSizeMB);
 
 /** Searches for [pattern] in [segmentData] and [sourceMap] (which may be empty) and returns elapsed time in seconds. */
 double measure(const SegmentData &segmentData,
@@ -384,7 +384,7 @@ void runSopang(const SegmentData &segmentData,
     int textSize;
     double textSizeMB;
 
-    calcTextSize(segmentData, &textSize, &textSizeMB);
+    calcTextSize(segmentData, textSize, textSizeMB);
     cout << boost::format("EDS length = %1%, EDS size = %2% (%3% MB)") 
         % segmentData.nSegments % textSize % textSizeMB << endl;
 
@@ -420,19 +420,27 @@ void runSopang(const SegmentData &segmentData,
     }
 }
 
-void calcTextSize(const SegmentData &segmentData, int *textSize, double *textSizeMB)
+void calcTextSize(const SegmentData &segmentData, int &textSize, double &textSizeMB)
 {
-    *textSize = 0;
+    textSize = 0;
 
     for (int iS = 0; iS < segmentData.nSegments; ++iS)
     {
         for (int iSS = 0; iSS < segmentData.segmentSizes[iS]; ++iSS)
         {
-            *textSize += segmentData.segments[iS][iSS].size();
+            if (segmentData.segments[iS][iSS].empty())
+            {
+                // Empty segment is regarded as having size 1 when counted towards the total size.
+                textSize += 1;
+            }
+            else
+            {
+                textSize += segmentData.segments[iS][iSS].size();
+            }
         }
     }
 
-    *textSizeMB = static_cast<double>(*textSize) / 1000.0 / 1000.0;
+    textSizeMB = static_cast<double>(textSize) / 1'000'000.0;
 }
 
 double measure(const SegmentData &segmentData,
