@@ -72,6 +72,8 @@ double measure(const SegmentData &segmentData,
     const string &pattern);
 
 void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
+
+void dumpSources(int index, const Sopang::SourceSet &sources);
 void dumpIndexes(const unordered_set<int> &indexes);
 
 void clearMemory(SegmentData &segmentData);
@@ -469,13 +471,18 @@ double measure(const SegmentData &segmentData,
                 if (params.fullSourcesOutput)
                 {
                     start = std::clock();
-                    const auto fullMatches = sopang.matchWithSources(segmentData.segments, segmentData.nSegments,
+                    const auto fullSourceMatches = sopang.matchWithSources(segmentData.segments, segmentData.nSegments,
                         segmentData.segmentSizes, sourceMap, pattern, params.alphabet);
                     end = std::clock();
 
-                    for (const auto &kv : fullMatches)
+                    for (const auto &kv : map<int, Sopang::SourceSet>(fullSourceMatches.begin(), fullSourceMatches.end())) // ordered map
                     {
                         res.insert(kv.first);
+
+                        if (params.dumpIndexes)
+                        {
+                            dumpSources(kv.first, kv.second);
+                        }
                     }
                 }
                 else
@@ -521,18 +528,33 @@ void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB)
     cout << endl << "Dumped to: " << params.outFile << " ([input file name] [input text size MB] [median elapsed sec] [median throughput MB/s])" << endl;
 }
 
-void dumpIndexes(const unordered_set<int> &indexes)
+void dumpSources(int index, const Sopang::SourceSet &sources)
 {
-    if (indexes.size() == 0)
+    cout << index << " -> ";
+
+    if (sources.empty())
     {
-        return;
+        cout << "no sources (deterministic segment)";
+    }
+    else
+    {
+        for (const int sourceIndex : sources.toSet()) // ordered set
+        {
+            cout << sourceIndex << ' ';
+        }
     }
 
-    set<int> resSorted(indexes.begin(), indexes.end()); // ordered set
+    cout << endl;
+}
 
-    for (const int r : resSorted)
+void dumpIndexes(const unordered_set<int> &indexes)
+{
+    if (indexes.empty())
+        return;
+
+    for (const int index : set<int>(indexes.begin(), indexes.end())) // ordered set
     {
-        cout << r << " ";
+        cout << index << " ";
     }
 
     cout << endl;
