@@ -22,7 +22,7 @@ More precisely, it returns the set of segment indexes in which pattern occurrenc
 
 Below you can see the pattern search speed for individual human chromosomes (1-22 and X) and on four synthetic datasets (S1–S4).
 Pattern sizes of 8, 16, 32, and 64 characters were tested, without any noticeable differences between them.
-1 MB = 10^6 B (measured with regard to the total input string size).
+1 MB = 10^6 B, throughput measured with regard to the ED string size (delimiters not included).
 Intel i7-4930K@3.4 GHz, 64 GB DDR3 RAM.
 
 <p align="center">
