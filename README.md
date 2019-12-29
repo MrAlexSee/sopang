@@ -40,12 +40,12 @@ Note that the sources are 0-indexed.
 We assume that the last variant of each segment (in the above example: `G` and `TT`, respectively) describes the reference sequence.
 This indicates the following.
 
-* For the 1st segment, `AG` is associated with source `0`, and `G` (the reference sequence) is associated with the remaining sources `1`, `2` and `3`.
+* For the 1st non-deterministic segment, `AG` is associated with source `0`, and `G` (the reference sequence) is associated with the remaining sources `1`, `2` and `3`.
 
-* For the 2nd segment, `CG` is associated with sources `0` and `2`, `N` with source `3`, and `TT` (the reference sequence) is associated with the remaining source `1`.
+* For the 2nd non-deterministic segment, `CG` is associated with sources `0` and `2`, `N` with source `3`, and `TT` (the reference sequence) is associated with the remaining source `1`.
 
 In every segment, each variant is associated with some sources. Moreover, each source must be associated with exactly one variant from every segment.
-The proposed human-readable format of the sources data was described in such a way as to be consistent with the ED text, that is, it also consists of curly braces and commas as delimiters.
+The proposed human-readable format of the sources data was defined in such a way as to be consistent with the ED text, that is, it also consists of curly braces and commas as delimiters.
 
 The sources file should have two lines in total.
 
