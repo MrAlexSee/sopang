@@ -1,11 +1,11 @@
-#include <set>
-#include <string>
-#include <vector>
-
 #include "catch.hpp"
 
 #include "../parsing.hpp"
 #include "../sopang.hpp"
+
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 using namespace std;
 

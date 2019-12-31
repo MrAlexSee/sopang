@@ -2,6 +2,7 @@
 #define BITSET_HPP
 
 #include <cstdint>
+#include <initializer_list>
 #include <set>
 
 namespace sopang

@@ -1,13 +1,12 @@
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
 #include "catch.hpp"
 
 #include "../helpers.hpp"
 #include "../parsing.hpp"
 #include "../sopang.hpp"
+
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 using namespace std;
 

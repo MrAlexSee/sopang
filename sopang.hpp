@@ -3,8 +3,7 @@
 
 #include "bitset.hpp"
 
-#include <map>
-#include <set>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>

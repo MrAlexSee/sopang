@@ -1,8 +1,8 @@
-#include <set>
-
 #include "catch.hpp"
 
 #include "../bitset.hpp"
+
+#include <set>
 
 using namespace std;
 

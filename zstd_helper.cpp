@@ -1,6 +1,5 @@
 #include "zstd_helper.hpp"
 
-#include <cstring>
 #include <iostream>
 
 #include <zstd.h>
@@ -32,7 +31,7 @@ string decompress(const string &compressed)
     const string ret(dstBuffer, dstBuffer + decompressedSize);
 
     delete[] dstBuffer;
-    return move(ret);
+    return ret;
 }
 
 }

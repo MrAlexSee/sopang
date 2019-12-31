@@ -1,8 +1,3 @@
-#include <iostream>
-#include <string>
-#include <unordered_set>
-#include <vector>
-
 #include "catch.hpp"
 #include "repeat.hpp"
 #include "sopang_whitebox.hpp"
@@ -10,6 +5,10 @@
 #include "../helpers.hpp"
 #include "../parsing.hpp"
 #include "../sopang.hpp"
+
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 using namespace std;
 

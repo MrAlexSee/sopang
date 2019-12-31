@@ -2,7 +2,6 @@
 #define PARAMS_HPP
 
 #include <string>
-#include <vector>
 
 namespace sopang
 {

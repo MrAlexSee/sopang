@@ -1,14 +1,14 @@
+#include "catch.hpp"
+#include "repeat.hpp"
+
+#include "../helpers.hpp"
+
 #include <cctype>
 #include <random>
 #include <stdexcept>
 #include <string>
 #include <unordered_set>
 #include <vector>
-
-#include "catch.hpp"
-#include "repeat.hpp"
-
-#include "../helpers.hpp"
 
 using namespace std;
 

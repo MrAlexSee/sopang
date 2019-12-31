@@ -12,11 +12,13 @@
 #include "sopang.hpp"
 #include "zstd_helper.hpp"
 
+#include <cassert>
 #include <ctime>
 #include <functional>
 #include <iostream>
 #include <map>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>
 
