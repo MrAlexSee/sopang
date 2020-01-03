@@ -15,7 +15,7 @@ python3 ./${scriptsDirPath}/generate_synth_ed_text.py ${dataDirPath}/chr26.eds -
 python3 ./${scriptsDirPath}/generate_synth_ed_text.py ${dataDirPath}/chr27.eds --segment-count 1000000 ${additionalArgs}
 python3 ./${scriptsDirPath}/generate_synth_ed_text.py ${dataDirPath}/chr28.eds --segment-count 1600000 ${additionalArgs}
 
-for sourceCount in $(16, 128, 1024, 8192, 16000);
+for sourceCount in 16 128 1024 8192 16000
 do
     python3 ./${scriptsDirPath}/generate_synth_sources.py ${dataDirPath}/chr25.eds ${dataDirPath}/chr25_${sourceCount}.edss --source-count ${sourceCount}
 
