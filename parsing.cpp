@@ -6,6 +6,7 @@
 #include <boost/format.hpp>
 
 #include <cassert>
+#include <stdexcept>
 
 using namespace std;
 
@@ -52,9 +53,9 @@ const string *const *parseTextArray(string text, int *nSegments, int **segmentSi
         {
             assert(not inSegment and curSegment.size() == 0);
 
-            if (not curStr.empty()) // If we enter the segment from the determinate string.
+            if (not curStr.empty()) // If we enter the non-deterministic segment from a deterministic segment (string).
             {
-                segments.emplace_back(vector<string> { move(curStr) });
+                segments.emplace_back(vector<string>{ move(curStr) });
                 curStr.clear();
             }
 
@@ -67,7 +68,7 @@ const string *const *parseTextArray(string text, int *nSegments, int **segmentSi
 
             if (curSegment.empty())
             {
-                throw runtime_error("degenerate segment cannot be empty: char index = " + to_string(i));
+                throw runtime_error("non-deterministic segment cannot be empty: char index = " + to_string(i));
             }
 
             curSegment.emplace_back(move(curStr));
@@ -80,12 +81,10 @@ const string *const *parseTextArray(string text, int *nSegments, int **segmentSi
         }
     }
 
-    if (not curStr.empty()) // If the file ended with a determinate segment.
+    if (not curStr.empty()) // If the file ended with a deterministic segment.
     {
         assert(not inSegment and curSegment.empty());
-
-        curSegment.push_back(curStr);
-        segments.push_back(vector<string>(curSegment));
+        segments.emplace_back(vector<string>{ move(curStr) });
     }
 
     *nSegments = segments.size();
@@ -215,8 +214,8 @@ void handleSourceSegmentEnd(vector<Sopang::SourceSet> &curSegment,
 } // namespace (anonymous)
 
 // We will return a vector with size equal to the number of non-deterministic segments.
-// For each segment, we will store a vector with size equal to the number of variants.
-// For each variant, we will store a set with source indexes, with reference sources stored in the last set.
+// For each segment, we will store a vector with size equal to the number of variants in that segment.
+// For each variant, we will store a set with source indexes, with reference sources stored in the last element (set).
 vector<vector<Sopang::SourceSet>> parseSources(string text, int &sourceCount)
 {
     if (text.empty())
