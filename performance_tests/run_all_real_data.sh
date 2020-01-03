@@ -5,6 +5,7 @@ dataDirPath="data"
 outputFileName="results"
 sopangExe="sopang"
 
+minChromosomeId=1
 maxChromosomeId=23
 
 cd ..
@@ -16,9 +17,8 @@ then
 fi
 
 # Running regular ED-text matching.
-for i in $(seq 1 ${maxChromosomeId});
+for i in $(seq ${minChromosomeId} ${maxChromosomeId});
 do
-    echo $i
     ./${sopangExe} ${dataDirPath}/chr${i}.edz ${dataDirPath}/patterns8.txt -d -o ${outputFileName}_8.txt --in-compressed
 
     ./${sopangExe} ${dataDirPath}/chr${i}.edz ${dataDirPath}/patterns16.txt -d -o ${outputFileName}_16.txt --in-compressed
@@ -28,12 +28,10 @@ do
     ./${sopangExe} ${dataDirPath}/chr${i}.edz ${dataDirPath}/patterns64.txt -d -o ${outputFileName}_64.txt --in-compressed
 done
 
-echo ""
 
 # Running ED-text matching with sources.
-for i in $(seq 1 ${maxChromosomeId});
+for i in $(seq ${minChromosomeId} ${maxChromosomeId});
 do
-    echo $i
     ./${sopangExe} ${dataDirPath}/chr${i}.edz ${dataDirPath}/patterns8.txt -d -o ${outputFileName}_8_sources.txt --in-sources-file ${dataDirPath}/chr${i}.edsz --in-compressed
     ./${sopangExe} ${dataDirPath}/chr${i}.edz ${dataDirPath}/patterns8.txt -d -o ${outputFileName}_8_sources.txt --in-sources-file ${dataDirPath}/chr${i}.edsz --in-compressed --full-sources-output
 

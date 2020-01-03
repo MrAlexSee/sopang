@@ -15,7 +15,5 @@ cd ../..
 
 for i in $(seq 1 ${maxChromosomeId});
 do
-    echo $i
-
     ./${scriptsDirPath}/parse_fasta_vcf ${dataDirPath}/${inputFastaFileName} ${dataDirPath}/chr${i}.vcf ${dataDirPath}/chr${i}.edz ${dataDirPath}/chr${i}.edsz
 done
