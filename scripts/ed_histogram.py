@@ -16,6 +16,7 @@ from docopt import docopt
 import os
 import re
 
+
 def processFile(filePath, sizes):
     print("Reading file: {0}".format(filePath))
 
@@ -29,7 +30,8 @@ def processFile(filePath, sizes):
     totalSizeMB = len(text) / (2 ** 20)
     ratio = detSizeMB / totalSizeMB
 
-    sizes += [(filePath, [round(v, 3) for v in (detSizeMB, totalSizeMB, ratio)])]
+    sizes += [[filePath, detSizeMB, totalSizeMB, ratio]]
+
 
 def main():
     args = docopt(__doc__, version="0.1.0")
@@ -44,7 +46,8 @@ def main():
         processFile(edsFilePath, sizes)
 
     for item in sorted(sizes):
-        print(item)
+        print("File: {0} : deterministic size = {1:.3f} MB, total size = {2:.3f} MB, ratio = {3:.3f}".format(*item))
+
 
 if __name__ == "__main__":
     main()
