@@ -8,10 +8,10 @@ Arguments:
 
 Options:
   --alphabet arg                       alphabet used for character sampling [default: ACGTN]
-  --degenerate-positions-factor arg    number of segments which are non-deterministic (contain multiple variants), e.g., 0.5 = half of all segments [default: 0.1]
+  --degenerate-positions-factor arg    number of segments which are non-deterministic (contain multiple variants), e.g., 0.5 = half of all segments; note that each single character is treated here as a separate deterministic segment [default: 0.1]
   --max-segment-variants arg           maximum number of variants (a), the number of variants for each non-deterministic segment will be sampled from the interval [2, a] [default: 10]
   --max-variant-size arg               maximum size of each segment variant (b), the size for each variant will be sampled from the interval [0, b] (segments might contain empty words) [default: 10]
-  --segment-count arg                  total number of segments: non-deterministic and deterministic; each single character is treated as a deterministic segment [default: 10000]
+  --segment-count arg                  total number of segments: non-deterministic and deterministic; note that each single character is treated here as a separate deterministic segment [default: 10000]
   -h --help                            show this screen
   -v --version                         show version
 """
