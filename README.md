@@ -78,7 +78,6 @@ Basic usage: `./sopang [options] <input text file> <input pattern file>`
 
 Input text file (positional parameter 1 or named parameter `-i` or `--in-text-file`) should contain the elastic-degenerate text in the format `{A,C,}GAAT{AT,A}ATT`.
 Input pattern file (positional parameter 2 or named parameter `-I` or `--in-pattern-file`) should contain the list of patterns, each of the same length, separated with newline characters.
-This package contains a script `run_all.sh`, which allows for processing multiple input text (chromosome) and pattern files, both with and without the sources.
 
 * End-to-end tests are located in the `end_to_end_tests` folder and they can be run using the `run_tests.sh` script in that folder.
 
@@ -137,7 +136,8 @@ Script name                     | Description
 `download_genome_data.sh`       | Downloads 1000 Genomes project data.
 `generate_real_source_data.sh`  | Generates compressed ED-text and source files for the reference .fasta file and a set of .vcf variant files.
 `generate_synthetic_data.sh`    | Generates synthetic ED-text and source files for various output file sizes.
-`run_all.sh`                    | Performs experiments for regular ED-text matching and ED-text matching with sources.
+`run_all_real_data.sh`          | Performs experiments for regular ED-text matching and ED-text matching with sources on real-world data.
+`run_all_synthetic_data.sh`     | Performs experiments for regular ED-text matching and ED-text matching with sources on synthetic data.
 
 A complete testing procedure including data generation is as follows.
 
@@ -154,7 +154,7 @@ A complete testing procedure including data generation is as follows.
 
 1. Compile SoPanG (see above).
 
-1. Run `run_all.sh`.
+1. Run `run_all_real_data.sh` and `run_all_synthetic_data.sh`.
 
 ## Scripts
 
