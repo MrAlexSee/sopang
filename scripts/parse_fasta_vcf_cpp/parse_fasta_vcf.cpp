@@ -334,7 +334,7 @@ pair<string, string> processLine(int &vcfPositionCount, int charIdx, const strin
 
 string packNumber(const int n)
 {
-    assert(n >= 0 and n <= 16'255);
+    assert(n >= 0 and n <= 16'383);
 
     if (n < 128)
     {
