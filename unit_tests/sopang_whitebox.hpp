@@ -16,14 +16,14 @@ class SopangWhitebox
 public:
     SopangWhitebox() = delete;
 
-    inline static void fillPatternMaskBuffer(Sopang &sopang, const std::string &arg1, const std::string &arg2)
+    inline static void fillPatternMaskBuffer(Sopang &sopang, const std::string &arg1)
     {
-        sopang.fillPatternMaskBuffer(arg1, arg2);
+        sopang.fillPatternMaskBuffer(arg1);
     }
 
-    inline static void fillPatternMaskBufferApprox(Sopang &sopang, const std::string &arg1, const std::string &arg2)
+    inline static void fillPatternMaskBufferApprox(Sopang &sopang, const std::string &arg1)
     {
-        sopang.fillPatternMaskBufferApprox(arg1, arg2);
+        sopang.fillPatternMaskBufferApprox(arg1);
     }
 
     inline static const uint64_t *getMaskBuffer(const Sopang &sopang)
