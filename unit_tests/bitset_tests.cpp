@@ -36,6 +36,28 @@ TEST_CASE("is any/empty/count correct for filled bitset", "[bitset]")
     REQUIRE(bitset.count() == 3);
 }
 
+TEST_CASE("is initializer list constructor with max count correct", "[bitset]")
+{
+    BitSet<N> bitset(5, { 1, 2, 4 });
+
+    REQUIRE(not bitset.test(0));
+    REQUIRE(bitset.test(1));
+    REQUIRE(bitset.test(2));
+    REQUIRE(not bitset.test(3));
+    REQUIRE(bitset.test(4));
+}
+
+TEST_CASE("is initializer list constructor without max count correct", "[bitset]")
+{
+    BitSet<N> bitset{ 1, 2, 4 };
+
+    REQUIRE(not bitset.test(0));
+    REQUIRE(bitset.test(1));
+    REQUIRE(bitset.test(2));
+    REQUIRE(not bitset.test(3));
+    REQUIRE(bitset.test(4));
+}
+
 TEST_CASE("is set/reset and test correct", "[bitset]")
 {
     BitSet<N> bitset(N);
@@ -53,7 +75,7 @@ TEST_CASE("is set/reset and test correct", "[bitset]")
     REQUIRE(bitset.test(4));
 
     bitset.reset(2);
-    
+
     REQUIRE(bitset.test(1));
     REQUIRE(not bitset.test(2));
     REQUIRE(bitset.test(4));
@@ -90,7 +112,7 @@ TEST_CASE("is set/reset and test correct for smaller source count", "[bitset]")
     REQUIRE(bitset.test(4));
 
     bitset.reset(2);
-    
+
     REQUIRE(bitset.test(1));
     REQUIRE(not bitset.test(2));
     REQUIRE(bitset.test(4));
