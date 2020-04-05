@@ -8,9 +8,8 @@ using namespace std;
 namespace sopang
 {
 
-Sopang::Sopang(const std::string &alphabet, int sourceCount)
-    :alphabet(alphabet),
-     sourceCount(sourceCount)
+Sopang::Sopang(const std::string &alphabet)
+    :alphabet(alphabet)
 {
     dBuffer = new uint64_t[dBufferSize];
     initCounterPositionMasks();
@@ -410,6 +409,7 @@ unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
     int nSegments,
     const int *segmentSizes,
     const Sopang::SourceMap &sourceMap,
+    int sourceCount,
     const string &pattern)
 {
     const IndexToMatchMap indexToMatch = calcIndexToMatchMap(segments, nSegments, segmentSizes, pattern);
@@ -434,6 +434,7 @@ unordered_map<int, Sopang::SourceSet> Sopang::matchWithSources(const string *con
     int nSegments,
     const int *segmentSizes,
     const Sopang::SourceMap &sourceMap,
+    int sourceCount,
     const string &pattern)
 {
     const IndexToMatchMap indexToMatch = calcIndexToMatchMap(segments, nSegments, segmentSizes, pattern);

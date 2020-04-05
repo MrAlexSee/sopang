@@ -460,7 +460,7 @@ double measure(const SegmentData &segmentData,
     clock_t start, end;
 
     {
-        Sopang sopang(params.alphabet, sourceCount);
+        Sopang sopang(params.alphabet);
 
         if (params.kApprox > 0)
         {
@@ -500,6 +500,7 @@ double measure(const SegmentData &segmentData,
                         segmentData.nSegments,
                         segmentData.segmentSizes,
                         sourceMap,
+                        sourceCount,
                         pattern);
                     end = std::clock();
 
@@ -521,6 +522,7 @@ double measure(const SegmentData &segmentData,
                         segmentData.nSegments,
                         segmentData.segmentSizes,
                         sourceMap,
+                        sourceCount,
                         pattern);
                     end = std::clock();
                 }

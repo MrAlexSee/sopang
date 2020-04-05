@@ -27,7 +27,7 @@ public:
     using SourceSet = BitSet<maxSourceCount>;
     using SourceMap = std::unordered_map<int, std::vector<SourceSet>>;
 
-    Sopang(const std::string &alphabet, int sourceCount);
+    Sopang(const std::string &alphabet);
     ~Sopang();
 
     std::unordered_set<int> match(const std::string *const *segments,
@@ -45,12 +45,14 @@ public:
         int nSegments,
         const int *segmentSizes,
         const SourceMap &sourceMap,
+        int sourceCount,
         const std::string &pattern);
 
     std::unordered_map<int, SourceSet> matchWithSources(const std::string *const *segments,
         int nSegments,
         const int *segmentSizes,
         const SourceMap &sourceMap,
+        int sourceCount,
         const std::string &pattern);
 
 private:
@@ -96,7 +98,7 @@ private:
     uint64_t maskBuffer[maskBufferSize];
 
     const std::string alphabet;
-    const int sourceCount;
+    int sourceCount;
 
     SOPANG_WHITEBOX
 };
