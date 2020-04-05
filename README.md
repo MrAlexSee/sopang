@@ -5,8 +5,8 @@ It can be used for matching patterns in elastic-degenerate (ED) text (simplified
 Authors for the current release version: Aleksander Cisłak, Szymon Grabowski.
 Authors of the SOPanG algorithm: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
 
-Published as an applications note entitled *SOPanG: online text searching over a pan-genome* (Cisłak, Grabowski, Holub), Bioinformatics, Vol. 34, Issue 24, 12/2018, pp. 4290-4292.
-DOI link: https://doi.org/10.1093/bioinformatics/bty506.
+* Published as an applications note entitled *SOPanG: online text searching over a pan-genome* (Cisłak, Grabowski, Holub), Bioinformatics, Vol. 34, Issue 24, 12/2018, pp. 4290-4292. DOI link: https://doi.org/10.1093/bioinformatics/bty506
+* For the second version (follow-up work) see arXiv preprint entitled *SOPanG 2: online searching over a pan-genome without false positives* (Cisłak and Grabowski). DOI link:
 
 ED text is in the following format: `{A,C,}GAAT{AT,A}ATT`.
 Braces determine the start and end of each non-deterministic segment (a segment having multiple variants), and commas delimit segment variants.
@@ -20,7 +20,7 @@ For more information regarding this format, consult, e.g., *Efficient pattern ma
 SOPanG returns the end positions of pattern occurrences in the ED text.
 More precisely, it returns the set of segment indexes in which pattern occurrences end (without possible duplicates).
 
-Below you can see the pattern search speed for individual human chromosomes (1-22 and X) and on four synthetic datasets (S1–S4).
+Below you can see the pattern search speed for individual human chromosomes (1-22) for matching with and without sources (see the following sections for more information).
 Pattern sizes of 8, 16, 32, and 64 characters were tested, without any noticeable differences between them.
 1 MB = 10^6 B, throughput measured with regard to the ED string size (delimiters not included).
 Intel i7-4930K@3.4 GHz, 64 GB DDR3 RAM.
@@ -133,7 +133,7 @@ Testing can be automated with the use of scripts from the `performance_tests` fo
 
 Script name                     | Description
 ------------------------------- | ------------------------------
-`download_genome_data.sh`       | Downloads 1000 Genomes project data.
+`download_genome_data.sh`       | Downloads 1000 Genomes Project data.
 `generate_real_source_data.sh`  | Generates compressed ED-text and source files for the reference .fasta file and a set of .vcf variant files.
 `generate_synthetic_data.sh`    | Generates synthetic ED-text and source files for various output file sizes.
 `run_all_real_data.sh`          | Performs experiments for regular ED-text matching and ED-text matching with sources on real-world data.
@@ -143,7 +143,7 @@ A complete testing procedure including data generation is as follows.
 
 1. Run `generate_synthetic_data.sh`.
 
-1. Download data from the 1000 Genomes project. 
+1. Download data from the 1000 Genomes Project.
 
     * Reference file: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
     * Corresponding variant files: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ (*.vcf.gz files)
@@ -170,4 +170,4 @@ Script name                         | Description
 
 The scripts folder also contains a C++ program in the `parse_fasta_vcf_cpp` folder.
 It offers roughly the same functionality as the `parse_fasta_vcf.py` script but dumps only the compressed output.
-Advantages of the C++ version: faster with less memory consumption.
+The C++ version is faster and consumes less memory, however, it needs to be compiled.
