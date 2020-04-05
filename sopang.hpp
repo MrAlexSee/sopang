@@ -21,41 +21,37 @@ class Sopang
 {
 private:
     /** Maximum number of sources (upper bound on source set size). */
-    static constexpr int maxSourceCount = 8192;
+    static constexpr int maxSourceCount = 5'120;
 
 public:
     using SourceSet = BitSet<maxSourceCount>;
     using SourceMap = std::unordered_map<int, std::vector<SourceSet>>;
 
-    Sopang();
+    Sopang(const std::string &alphabet, int sourceCount);
     ~Sopang();
 
     std::unordered_set<int> match(const std::string *const *segments,
         int nSegments,
         const int *segmentSizes,
-        const std::string &pattern,
-        const std::string &alphabet);
+        const std::string &pattern);
 
     std::unordered_set<int> matchApprox(const std::string *const *segments,
         int nSegments,
         const int *segmentSizes,
         const std::string &pattern,
-        const std::string &alphabet,
         int k);
 
     std::unordered_set<int> matchWithSourcesVerify(const std::string *const *segments,
         int nSegments,
         const int *segmentSizes,
         const SourceMap &sourceMap,
-        const std::string &pattern,
-        const std::string &alphabet);
+        const std::string &pattern);
 
     std::unordered_map<int, SourceSet> matchWithSources(const std::string *const *segments,
         int nSegments,
         const int *segmentSizes,
         const SourceMap &sourceMap,
-        const std::string &pattern,
-        const std::string &alphabet);
+        const std::string &pattern);
 
 private:
     using IndexToMatchMap = std::unordered_map<int, std::vector<std::pair<int, int>>>;
@@ -63,17 +59,16 @@ private:
     IndexToMatchMap calcIndexToMatchMap(const std::string *const *segments,
         int nSegments,
         const int *segmentSizes,
-        const std::string &pattern,
-        const std::string &alphabet);
+        const std::string &pattern);
 
     void initCounterPositionMasks();
 
-    void fillPatternMaskBuffer(const std::string &pattern, const std::string &alphabet);
-    void fillPatternMaskBufferApprox(const std::string &pattern, const std::string &alphabet);
+    void fillPatternMaskBuffer(const std::string &pattern);
+    void fillPatternMaskBufferApprox(const std::string &pattern);
 
     /** Buffer size for processing segment variants, the size of the largest segment (i.e. the number of variants)
      * from the input file cannot be larger than this value. */
-    static constexpr size_t dBufferSize = 262144;
+    static constexpr size_t dBufferSize = 262'144;
     /** Buffer size for Shift-Or masks for the input alphabet, must be larger than the largest input character ASCII code, 
      * up to 'Z' = 90. */
     static constexpr size_t maskBufferSize = 91;
@@ -99,6 +94,9 @@ private:
 
     uint64_t *dBuffer;
     uint64_t maskBuffer[maskBufferSize];
+
+    const std::string alphabet;
+    const int sourceCount;
 
     SOPANG_WHITEBOX
 };

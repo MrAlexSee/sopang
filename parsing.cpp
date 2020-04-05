@@ -167,13 +167,13 @@ void handleSourceNumberEnd(string &curNumber, Sopang::SourceSet &curVariant, siz
 
 void handleSourceVariantEnd(Sopang::SourceSet &curVariant, vector<Sopang::SourceSet> &curSegment)
 {
-    curSegment.emplace_back(move(curVariant));
+    curSegment.push_back(curVariant);
     curVariant.reset();
 }
 
 void addReferenceSources(vector<Sopang::SourceSet> &segment, int sourceCount)
 {
-    Sopang::SourceSet referenceVariant;
+    Sopang::SourceSet referenceVariant(sourceCount);
 
     for (int sourceIdx = 0; sourceIdx < sourceCount; ++sourceIdx)
     {
@@ -229,14 +229,14 @@ vector<vector<Sopang::SourceSet>> parseSources(string text, int &sourceCount)
     bool inSingleVariant = false;
     bool inMultipleVariants = false;
 
-    vector<vector<Sopang::SourceSet>> ret;
-    vector<Sopang::SourceSet> curSegment;
-    Sopang::SourceSet curVariant;
-    
-    string curNumber;
-
     size_t startIdx;
     sourceCount = parseSourceCount(text, startIdx);
+
+    vector<vector<Sopang::SourceSet>> ret;
+    vector<Sopang::SourceSet> curSegment;
+    Sopang::SourceSet curVariant(sourceCount);
+    
+    string curNumber;
 
     for (size_t charIdx = startIdx; charIdx < text.size(); ++charIdx)
     {
@@ -367,13 +367,13 @@ vector<vector<Sopang::SourceSet>> parseSourcesCompressed(string text, int &sourc
     }
 
     boost::trim(text);
-    vector<vector<Sopang::SourceSet>> ret;
-
-    vector<Sopang::SourceSet> curSegment;
-    Sopang::SourceSet curVariant;
 
     size_t charIdx, shift;
     sourceCount = parseSourceCount(text, charIdx);
+
+    vector<vector<Sopang::SourceSet>> ret;
+    vector<Sopang::SourceSet> curSegment;
+    Sopang::SourceSet curVariant(sourceCount);
 
     /** Segment start mark value in the compressed sources file. */
     constexpr char segmentStartMark = static_cast<char>(127);
@@ -416,7 +416,7 @@ vector<vector<Sopang::SourceSet>> parseSourcesCompressed(string text, int &sourc
             charIdx += shift;
         }
 
-        curSegment.emplace_back(move(curVariant));
+        curSegment.push_back(curVariant);
         curVariant.reset();
     }
 

@@ -8,7 +8,9 @@ using namespace std;
 namespace sopang
 {
 
-Sopang::Sopang()
+Sopang::Sopang(const std::string &alphabet, int sourceCount)
+    :alphabet(alphabet),
+     sourceCount(sourceCount)
 {
     dBuffer = new uint64_t[dBufferSize];
     initCounterPositionMasks();
@@ -22,12 +24,11 @@ Sopang::~Sopang()
 unordered_set<int> Sopang::match(const string *const *segments,
     int nSegments,
     const int *segmentSizes,
-    const string &pattern,
-    const string &alphabet)
+    const string &pattern)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
 
-    fillPatternMaskBuffer(pattern, alphabet);
+    fillPatternMaskBuffer(pattern);
 
     const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
     uint64_t D = allOnes;
@@ -77,7 +78,6 @@ unordered_set<int> Sopang::matchApprox(const string *const *segments,
     int nSegments,
     const int *segmentSizes,
     const string &pattern,
-    const string &alphabet,
     int k)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= maxPatternApproxSize);
@@ -85,7 +85,7 @@ unordered_set<int> Sopang::matchApprox(const string *const *segments,
 
     unordered_set<int> res;
 
-    fillPatternMaskBufferApprox(pattern, alphabet);
+    fillPatternMaskBufferApprox(pattern);
 
     // This is the initial position of each counter, after k + 1 errors the most significant bit will be set.
     const uint64_t counterMask = 0xFULL - k;
@@ -158,6 +158,7 @@ namespace
 bool verifyMatch(const string *const *segments,
     const int *segmentSizes,
     const Sopang::SourceMap &sourceMap,
+    int sourceCount,
     const string &pattern,
     int matchIdx,
     const pair<int, int> &match)
@@ -169,7 +170,7 @@ bool verifyMatch(const string *const *segments,
         return true;
 
     vector<pair<SourceSet, int>> leaves;
-    SourceSet rootSources;
+    SourceSet rootSources(sourceCount);
     
     if (sourceMap.count(matchIdx) > 0)
     {
@@ -272,6 +273,7 @@ bool verifyMatch(const string *const *segments,
 Sopang::SourceSet calcMatchSources(const string *const *segments,
     const int *segmentSizes,
     const Sopang::SourceMap &sourceMap,
+    int sourceCount,
     const string &pattern,
     int matchIdx,
     const pair<int, int> &match,
@@ -293,7 +295,7 @@ Sopang::SourceSet calcMatchSources(const string *const *segments,
     }
 
     vector<pair<SourceSet, int>> leaves;
-    SourceSet rootSources;
+    SourceSet rootSources(sourceCount);
     
     if (sourceMap.count(matchIdx) > 0)
     {
@@ -308,7 +310,7 @@ Sopang::SourceSet calcMatchSources(const string *const *segments,
     leaves.emplace_back(move(rootSources), patternCharIdx);
     int segmentIdx = static_cast<int>(matchIdx - 1);
 
-    SourceSet res;
+    SourceSet res(sourceCount);
 
     while (not leaves.empty() and segmentIdx >= 0)
     {
@@ -408,17 +410,16 @@ unordered_set<int> Sopang::matchWithSourcesVerify(const string *const *segments,
     int nSegments,
     const int *segmentSizes,
     const Sopang::SourceMap &sourceMap,
-    const string &pattern,
-    const string &alphabet)
+    const string &pattern)
 {
-    const IndexToMatchMap indexToMatch = calcIndexToMatchMap(segments, nSegments, segmentSizes, pattern, alphabet);
+    const IndexToMatchMap indexToMatch = calcIndexToMatchMap(segments, nSegments, segmentSizes, pattern);
     unordered_set<int> res;
 
     for (const auto &kv : indexToMatch)
     {
         for (const auto &match : kv.second)
         {
-            if (verifyMatch(segments, segmentSizes, sourceMap, pattern, kv.first, match))
+            if (verifyMatch(segments, segmentSizes, sourceMap, sourceCount, pattern, kv.first, match))
             {
                 res.insert(kv.first);
                 break;
@@ -433,10 +434,9 @@ unordered_map<int, Sopang::SourceSet> Sopang::matchWithSources(const string *con
     int nSegments,
     const int *segmentSizes,
     const Sopang::SourceMap &sourceMap,
-    const string &pattern,
-    const string &alphabet)
+    const string &pattern)
 {
-    const IndexToMatchMap indexToMatch = calcIndexToMatchMap(segments, nSegments, segmentSizes, pattern, alphabet);
+    const IndexToMatchMap indexToMatch = calcIndexToMatchMap(segments, nSegments, segmentSizes, pattern);
 
     unordered_map<int, SourceSet> res;
 
@@ -445,22 +445,22 @@ unordered_map<int, Sopang::SourceSet> Sopang::matchWithSources(const string *con
         for (const auto &match : kv.second)
         {
             bool deterministicSegmentMatch = false;
-            const SourceSet curSources = calcMatchSources(segments, segmentSizes, sourceMap, pattern, kv.first, match, deterministicSegmentMatch);
+            const SourceSet curSources = calcMatchSources(segments, segmentSizes, sourceMap, sourceCount, pattern, kv.first, match, deterministicSegmentMatch);
 
             if (not curSources.empty())
             {
                 if (res.count(kv.first) > 0)
                 {
-                    res[kv.first] |= curSources;
+                    res.find(kv.first)->second |= curSources;
                 }
                 else
                 {
-                    res[kv.first] = move(curSources);
+                    res.emplace(kv.first, move(curSources));
                 }
             }
             else if (deterministicSegmentMatch)
             {
-                res[kv.first] = { };
+                res.emplace(kv.first, sourceCount);
             }
         }
     }
@@ -471,11 +471,10 @@ unordered_map<int, Sopang::SourceSet> Sopang::matchWithSources(const string *con
 Sopang::IndexToMatchMap Sopang::calcIndexToMatchMap(const string *const *segments,
     int nSegments,
     const int *segmentSizes,
-    const string &pattern,
-    const string &alphabet)
+    const string &pattern)
 {
     assert(nSegments > 0 and pattern.size() > 0 and pattern.size() <= wordSize);
-    fillPatternMaskBuffer(pattern, alphabet);
+    fillPatternMaskBuffer(pattern);
 
     const uint64_t hitMask = (0x1ULL << (pattern.size() - 1));
     uint64_t D = allOnes;
@@ -528,7 +527,7 @@ void Sopang::initCounterPositionMasks()
     }
 }
 
-void Sopang::fillPatternMaskBuffer(const string &pattern, const string &alphabet)
+void Sopang::fillPatternMaskBuffer(const string &pattern)
 {
     assert(pattern.size() > 0 and pattern.size() <= wordSize);
     assert(alphabet.size() > 0);
@@ -546,7 +545,7 @@ void Sopang::fillPatternMaskBuffer(const string &pattern, const string &alphabet
     }
 }
 
-void Sopang::fillPatternMaskBufferApprox(const string &pattern, const string &alphabet)
+void Sopang::fillPatternMaskBufferApprox(const string &pattern)
 {
     assert(pattern.size() > 0 and pattern.size() <= wordSize);
     assert(alphabet.size() > 0);

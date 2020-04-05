@@ -59,19 +59,21 @@ int run();
 
 string readInputText();
 vector<string> readPatterns();
-vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentSizes);
+vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentSizes, int &sourceCount);
 
-/** Runs sopang for [segmentData] and [sourceMap] (which may be empty), searching for [patterns]. */
+/** Runs sopang for [segmentData] and [sourceMap] (which may be empty) having [sourceCount] sources, searching for [patterns]. */
 void runSopang(const SegmentData &segmentData, 
     const Sopang::SourceMap &sourceMap,
+    int sourceCount,
     const vector<string> &patterns);
 
 /** Calculates total [textSize] in bytes and corresponding [textSizeMB] in megabytes (10^6) for [segmentData]. */
 void calcTextSize(const SegmentData &segmentData, int &textSize, double &textSizeMB);
 
-/** Searches for [pattern] in [segmentData] and [sourceMap] (which may be empty) and returns elapsed time in seconds. */
+/** Searches for [pattern] in [segmentData] and [sourceMap] (which may be empty) having [sourceCount] sources and returns elapsed time in seconds. */
 double measure(const SegmentData &segmentData,
     const Sopang::SourceMap &sourceMap,
+    int sourceCount,
     const string &pattern);
 
 void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB);
@@ -85,7 +87,7 @@ void clearMemory(SegmentData &segmentData);
 
 int main(int argc, const char **argv)
 {
-    int paramsRes = handleParams(argc, argv);
+    const int paramsRes = handleParams(argc, argv);
     if (paramsRes != paramsResContinue)
     {
         return paramsRes;
@@ -218,7 +220,7 @@ int run()
 {
     try
     {
-        string text = readInputText();
+        const string text = readInputText();
         cout << "Parsing segments..." << endl;
 
         int nSegments = 0;
@@ -237,13 +239,15 @@ int run()
         SegmentData segmentData{ segments, nSegments, segmentSizes };
         Sopang::SourceMap sourceMap;
 
+        int sourceCount = 0;
+
         if (not params.inSourcesFile.empty())
         {
-            vector<vector<Sopang::SourceSet>> sources = readSources(nSegments, segmentSizes);
+            const vector<vector<Sopang::SourceSet>> sources = readSources(nSegments, segmentSizes, sourceCount);
             sourceMap = parsing::sourcesToSourceMap(nSegments, segmentSizes, sources);
         }
 
-        runSopang(segmentData, sourceMap, patterns);
+        runSopang(segmentData, sourceMap, sourceCount, patterns);
         clearMemory(segmentData);
     }
     catch (const exception &e)
@@ -266,7 +270,8 @@ string readInputText()
         cout << "Decompressed input text" << endl;
     }
 
-    double textSizeMB = text.size() / 1000.0 / 1000.0;
+    const double textSizeMB = text.size() / 1'000'000.0;
+
     if (params.dumpToFile)
     {
         string outStr = params.inTextFile + " " + to_string(textSizeMB) + " ";
@@ -279,7 +284,7 @@ string readInputText()
 
 vector<string> readPatterns()
 {
-    string patternsStr = helpers::readFile(params.inPatternFile);
+    const string patternsStr = helpers::readFile(params.inPatternFile);
     cout << "Read file: " << params.inPatternFile << endl;
 
     vector<string> patterns = parsing::parsePatterns(patternsStr);
@@ -299,13 +304,12 @@ vector<string> readPatterns()
     return patterns;
 }
 
-vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentSizes)
+vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentSizes, int &sourceCount)
 {
     string sourcesStr = helpers::readFile(params.inSourcesFile);
     cout << "Read file: " << params.inSourcesFile << endl;
 
     vector<vector<Sopang::SourceSet>> sources;
-    int sourceCount;
 
     if (params.decompressInput)
     {
@@ -347,7 +351,7 @@ vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentS
         }
 
         // We check whether all sources are present for the current segment.
-        Sopang::SourceSet sourcesForSegment;
+        Sopang::SourceSet sourcesForSegment(sourceCount);
 
         for (const Sopang::SourceSet &sourcesForVariant : sources[sourceIdx])
         {
@@ -378,6 +382,7 @@ vector<vector<Sopang::SourceSet>> readSources(int nSegments, const int *segmentS
 
 void runSopang(const SegmentData &segmentData,
     const Sopang::SourceMap &sourceMap,
+    int sourceCount,
     const vector<string> &patterns)
 {
     assert(segmentData.nSegments > 0);
@@ -395,8 +400,8 @@ void runSopang(const SegmentData &segmentData,
 
     for (size_t iP = 0; iP < patterns.size(); ++iP)
     {
-        double percProg = static_cast<double>(iP + 1) * 100.0 / patterns.size();
-        string pattern = patterns[iP];
+        const double percProg = static_cast<double>(iP + 1) * 100.0 / patterns.size();
+        const string pattern = patterns[iP];
 
         string msg;
 
@@ -413,7 +418,7 @@ void runSopang(const SegmentData &segmentData,
 
         cout << endl << msg << endl;
 
-        double elapsedSec = measure(segmentData, sourceMap, pattern);
+        const double elapsedSec = measure(segmentData, sourceMap, sourceCount, pattern);
         elapsedSecVec.push_back(elapsedSec);
     }
 
@@ -448,13 +453,14 @@ void calcTextSize(const SegmentData &segmentData, int &textSize, double &textSiz
 
 double measure(const SegmentData &segmentData,
     const Sopang::SourceMap &sourceMap,
+    int sourceCount,
     const string &pattern)
 {
     unordered_set<int> res;
     clock_t start, end;
 
     {
-        Sopang sopang;
+        Sopang sopang(params.alphabet, sourceCount);
 
         if (params.kApprox > 0)
         {
@@ -464,8 +470,12 @@ double measure(const SegmentData &segmentData,
             }
 
             start = std::clock();
-            res = sopang.matchApprox(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
-                pattern, params.alphabet, params.kApprox);
+            res = sopang.matchApprox(
+                segmentData.segments,
+                segmentData.nSegments,
+                segmentData.segmentSizes,
+                pattern,
+                params.kApprox);
             end = std::clock();
         }
         else
@@ -473,8 +483,11 @@ double measure(const SegmentData &segmentData,
             if (sourceMap.empty())
             {
                 start = std::clock();
-                res = sopang.match(segmentData.segments, segmentData.nSegments, segmentData.segmentSizes,
-                    pattern, params.alphabet);
+                res = sopang.match(
+                    segmentData.segments,
+                    segmentData.nSegments,
+                    segmentData.segmentSizes,
+                    pattern);
                 end = std::clock();
             }
             else
@@ -482,8 +495,12 @@ double measure(const SegmentData &segmentData,
                 if (params.fullSourcesOutput)
                 {
                     start = std::clock();
-                    const auto fullSourceMatches = sopang.matchWithSources(segmentData.segments, segmentData.nSegments,
-                        segmentData.segmentSizes, sourceMap, pattern, params.alphabet);
+                    const auto fullSourceMatches = sopang.matchWithSources(
+                        segmentData.segments,
+                        segmentData.nSegments,
+                        segmentData.segmentSizes,
+                        sourceMap,
+                        pattern);
                     end = std::clock();
 
                     for (const auto &kv : map<int, Sopang::SourceSet>(fullSourceMatches.begin(), fullSourceMatches.end())) // ordered map
@@ -499,8 +516,12 @@ double measure(const SegmentData &segmentData,
                 else
                 {
                     start = std::clock();
-                    res = sopang.matchWithSourcesVerify(segmentData.segments, segmentData.nSegments,
-                        segmentData.segmentSizes, sourceMap, pattern, params.alphabet);
+                    res = sopang.matchWithSourcesVerify(
+                        segmentData.segments,
+                        segmentData.nSegments,
+                        segmentData.segmentSizes,
+                        sourceMap,
+                        pattern);
                     end = std::clock();
                 }
             }
@@ -533,7 +554,7 @@ void dumpMedians(const vector<double> &elapsedSecVec, double textSizeMB)
     helpers::calcStatsMedian(elapsedSecVec, &medianTotal);
     helpers::dumpToFile(to_string(medianTotal) + " ", params.outFile);
 
-    double throughputMedian = textSizeMB / medianTotal;
+    const double throughputMedian = textSizeMB / medianTotal;
     helpers::dumpToFile(to_string(throughputMedian) + "\n", params.outFile);
 
     cout << endl << "Dumped to: " << params.outFile << " ([input file name] [input text size MB] [median elapsed sec] [median throughput MB/s])" << endl;

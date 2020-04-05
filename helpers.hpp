@@ -57,9 +57,7 @@ template<typename T>
 void calcStatsMedian(const std::vector<T> &vec, T *median)
 {
     if (vec.empty())
-    {
         return;
-    }
 
     std::vector<T> tmp = vec;
 

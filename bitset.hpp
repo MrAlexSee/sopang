@@ -1,6 +1,7 @@
 #ifndef BITSET_HPP
 #define BITSET_HPP
 
+#include <algorithm>
 #include <cstdint>
 #include <initializer_list>
 #include <set>
@@ -12,7 +13,7 @@ template<int N>
 class BitSet
 {
 public:
-    BitSet();
+    BitSet(int maxCount);
     BitSet(const std::initializer_list<int> &other);
 
     std::set<int> toSet() const;
@@ -38,26 +39,35 @@ public:
     void reset(int n);
 
 private:
-    static constexpr int bufferSize = (N + 1) / 64;
-    static constexpr size_t bufferSizeBytes = bufferSize * sizeof(uint64_t);
+    int maxCount;
+    int bufferSize, bufferSizeBytes;
 
-    uint64_t buffer[bufferSize];
+    uint64_t buffer[(N + 1) / 64];
 };
 
 template<int N>
-BitSet<N>::BitSet()
+BitSet<N>::BitSet(int maxCount)
+    :maxCount(maxCount),
+     bufferSize((maxCount + 1) / 64),
+     bufferSizeBytes(bufferSize * sizeof(uint64_t))
 {
     __builtin_memset(buffer, 0, bufferSizeBytes);
 }
 
 template<int N>
 BitSet<N>::BitSet(const std::initializer_list<int> &list)
-    :BitSet()
+    :BitSet(N)
 {
+    maxCount = 0;
+
     for (const int n : list)
     {
+        maxCount = std::max(maxCount, n);
         set(n);
     }
+
+    bufferSize = (maxCount + 1) / 64;
+    bufferSizeBytes = bufferSize * sizeof(uint64_t);
 }
 
 template <int N>
@@ -96,7 +106,7 @@ bool BitSet<N>::operator==(const std::set<int> &other) const
 template <int N>
 BitSet<N> BitSet<N>::operator&(const BitSet<N> &other) const
 {
-    BitSet<N> ret;
+    BitSet<N> ret(maxCount);
 
     for (int i = 0; i < bufferSize; ++i)
     {
