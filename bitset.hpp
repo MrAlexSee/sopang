@@ -15,6 +15,7 @@ class BitSet
 {
 public:
     BitSet(int maxCount);
+    BitSet(int maxCount, const std::initializer_list<int> &other);
     BitSet(const std::initializer_list<int> &other);
 
     std::set<int> toSet() const;
@@ -54,6 +55,16 @@ BitSet<N>::BitSet(int maxCount)
 {
     assert(maxCount <= N);
     __builtin_memset(buffer, 0, bufferSizeBytes);
+}
+
+template<int N>
+BitSet<N>::BitSet(int maxCount, const std::initializer_list<int> &list)
+    :BitSet(maxCount)
+{
+    for (const int n : list)
+    {
+        set(n);
+    }
 }
 
 template<int N>
@@ -183,7 +194,7 @@ inline int modulo(const int input, const int ceil)
 template <int N>
 bool BitSet<N>::test(int n) const
 {
-    assert(n <= maxCount);
+    assert(n < maxCount);
     return (buffer[n / 64] & (0x1ULL << (modulo(n, 64))));
 }
 
@@ -196,7 +207,7 @@ void BitSet<N>::set()
 template <int N>
 void BitSet<N>::set(int n)
 {
-    assert(n <= maxCount);
+    assert(n < maxCount);
     buffer[n / 64] |= (0x1ULL << (modulo(n, 64)));
 }
 
@@ -209,7 +220,7 @@ void BitSet<N>::reset()
 template <int N>
 void BitSet<N>::reset(int n)
 {
-    assert(n <= maxCount);
+    assert(n < maxCount);
     buffer[n / 64] &= (~(0x1ULL << (modulo(n, 64))));
 }
 

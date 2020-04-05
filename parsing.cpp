@@ -146,7 +146,7 @@ int parseSourceCount(const string &text, size_t &startIdx)
     return ret;
 }
 
-void handleSourceNumberEnd(string &curNumber, Sopang::SourceSet &curVariant, size_t charIdx)
+void handleSourceNumberEnd(string &curNumber, Sopang::SourceSet &curVariant, int sourceCount, size_t charIdx)
 {
     if (curNumber.empty())
     {
@@ -154,6 +154,12 @@ void handleSourceNumberEnd(string &curNumber, Sopang::SourceSet &curVariant, siz
     }
 
     const int sourceIdx = stoi(curNumber);
+
+    if (sourceIdx >= sourceCount)
+    {
+        throw runtime_error((boost::format("bad source index = %1% >= source count = %2%")
+            % sourceIdx % sourceCount).str());
+    }
 
     if (curVariant.test(sourceIdx))
     {
@@ -202,7 +208,7 @@ void handleSourceSegmentEnd(vector<Sopang::SourceSet> &curSegment,
     vector<vector<Sopang::SourceSet>> &sources,
     int sourceCount, size_t charIdx)
 {
-    handleSourceNumberEnd(curNumber, curVariant, charIdx);
+    handleSourceNumberEnd(curNumber, curVariant, sourceCount, charIdx);
     handleSourceVariantEnd(curVariant, curSegment);
 
     addReferenceSources(curSegment, sourceCount);
@@ -252,7 +258,7 @@ vector<vector<Sopang::SourceSet>> parseSources(string text, int &sourceCount)
                 }
                 else if (curChar == ',')
                 {
-                    handleSourceNumberEnd(curNumber, curVariant, charIdx);
+                    handleSourceNumberEnd(curNumber, curVariant, sourceCount, charIdx);
                 }
                 else if (curChar == '}')
                 {
@@ -275,7 +281,7 @@ vector<vector<Sopang::SourceSet>> parseSources(string text, int &sourceCount)
                 }
                 else if (curChar == ',')
                 {
-                    handleSourceNumberEnd(curNumber, curVariant, charIdx);
+                    handleSourceNumberEnd(curNumber, curVariant, sourceCount, charIdx);
                 }
                 else if (curChar == '}' and text[charIdx + 1] == '}') // Segment end.
                 {
@@ -288,7 +294,7 @@ vector<vector<Sopang::SourceSet>> parseSources(string text, int &sourceCount)
                 }
                 else if (curChar == '}') // Variant end.
                 {    
-                    handleSourceNumberEnd(curNumber, curVariant, charIdx);
+                    handleSourceNumberEnd(curNumber, curVariant, sourceCount, charIdx);
                     handleSourceVariantEnd(curVariant, curSegment);
                 }
                 else if (curChar != '{')
@@ -409,7 +415,7 @@ vector<vector<Sopang::SourceSet>> parseSourcesCompressed(string text, int &sourc
             int sourceVal = unpackNumber(text[charIdx], text[charIdx + 1], shift);
             sourceVal += prevVal;
 
-            assert(not curVariant.test(sourceVal));
+            assert(sourceVal <= sourceCount and (not curVariant.test(sourceVal)));
             curVariant.set(sourceVal);
 
             prevVal = sourceVal;

@@ -290,7 +290,7 @@ Sopang::SourceSet calcMatchSources(const string *const *segments,
         }
 
         deterministicSegmentMatch = true;
-        return { };
+        return SourceSet(sourceCount);
     }
 
     vector<pair<SourceSet, int>> leaves;
