@@ -75,7 +75,7 @@ BitSet<N>::BitSet(const std::initializer_list<int> &list)
 
     for (const int n : list)
     {
-        maxCount = std::max(maxCount, n);
+        maxCount = std::max(maxCount - 1, n) + 1;
         set(n);
     }
 

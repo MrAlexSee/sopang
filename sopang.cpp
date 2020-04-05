@@ -90,7 +90,7 @@ unordered_set<int> Sopang::matchApprox(const string *const *segments,
     const uint64_t counterMask = 0xFULL - k;
     // Hit mask indicates whether the most significant bit in the last counter is set.
     const uint64_t hitMask = (0x1ULL << ((pattern.size() * saCounterSize) - 1));
-    
+
     uint64_t D = 0x0ULL;
 
     for (size_t i = 0; i < pattern.size(); ++i)
@@ -128,7 +128,7 @@ unordered_set<int> Sopang::matchApprox(const string *const *segments,
         }
 
         D = 0x0ULL;
-        
+
         // As a join operation, we take the minimum (the most promising alternative) from each counter.
         for (size_t i = 0; i < pattern.size(); ++i)
         {
@@ -170,7 +170,7 @@ bool verifyMatch(const string *const *segments,
 
     vector<pair<SourceSet, int>> leaves;
     SourceSet rootSources(sourceCount);
-    
+
     if (sourceMap.count(matchIdx) > 0)
     {
         rootSources = sourceMap.at(matchIdx)[match.first];
@@ -201,7 +201,7 @@ bool verifyMatch(const string *const *segments,
 
             vector<pair<SourceSet, int>> newLeaves;
             newLeaves.reserve(leaves.size() * segmentSizes[segmentIdx]);
-            
+
             for (const auto &leaf : leaves)
             {
                 for (int variantIdx = 0; variantIdx < segmentSizes[segmentIdx]; ++variantIdx)
@@ -559,7 +559,7 @@ void Sopang::fillPatternMaskBufferApprox(const string &pattern)
         for (size_t iC = 0; iC < pattern.size(); ++iC)
         {
             maskBuffer[static_cast<unsigned char>(c)] |= (0x1ULL << (iC * saCounterSize));
-        }    
+        }
     }
 
     for (size_t iC = 0; iC < pattern.size(); ++iC)
