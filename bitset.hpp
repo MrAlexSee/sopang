@@ -2,6 +2,7 @@
 #define BITSET_HPP
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <initializer_list>
 #include <set>
@@ -26,7 +27,7 @@ public:
     BitSet<N> &operator|=(const BitSet<N> &other);
 
     int count() const;
-    
+
     bool empty() const;
     bool any() const;
 
@@ -42,15 +43,16 @@ private:
     int maxCount;
     int bufferSize, bufferSizeBytes;
 
-    uint64_t buffer[(N + 1) / 64];
+    uint64_t buffer[(N + 63) / 64];
 };
 
 template<int N>
 BitSet<N>::BitSet(int maxCount)
     :maxCount(maxCount),
-     bufferSize((maxCount + 1) / 64),
+     bufferSize((maxCount + 63) / 64),
      bufferSizeBytes(bufferSize * sizeof(uint64_t))
 {
+    assert(maxCount <= N);
     __builtin_memset(buffer, 0, bufferSizeBytes);
 }
 
@@ -66,7 +68,7 @@ BitSet<N>::BitSet(const std::initializer_list<int> &list)
         set(n);
     }
 
-    bufferSize = (maxCount + 1) / 64;
+    bufferSize = (maxCount + 63) / 64;
     bufferSizeBytes = bufferSize * sizeof(uint64_t);
 }
 
@@ -106,6 +108,7 @@ bool BitSet<N>::operator==(const std::set<int> &other) const
 template <int N>
 BitSet<N> BitSet<N>::operator&(const BitSet<N> &other) const
 {
+    assert(other.maxCount >= this->maxCount);
     BitSet<N> ret(maxCount);
 
     for (int i = 0; i < bufferSize; ++i)
@@ -119,6 +122,8 @@ BitSet<N> BitSet<N>::operator&(const BitSet<N> &other) const
 template <int N>
 BitSet<N> &BitSet<N>::operator|=(const BitSet<N> &other)
 {
+    assert(other.maxCount >= this->maxCount);
+
     for (int i = 0; i < bufferSize; ++i)
     {
         this->buffer[i] |= other.buffer[i];
@@ -178,6 +183,7 @@ inline int modulo(const int input, const int ceil)
 template <int N>
 bool BitSet<N>::test(int n) const
 {
+    assert(n <= maxCount);
     return (buffer[n / 64] & (0x1ULL << (modulo(n, 64))));
 }
 
@@ -190,6 +196,7 @@ void BitSet<N>::set()
 template <int N>
 void BitSet<N>::set(int n)
 {
+    assert(n <= maxCount);
     buffer[n / 64] |= (0x1ULL << (modulo(n, 64)));
 }
 
@@ -202,6 +209,7 @@ void BitSet<N>::reset()
 template <int N>
 void BitSet<N>::reset(int n)
 {
+    assert(n <= maxCount);
     buffer[n / 64] &= (~(0x1ULL << (modulo(n, 64))));
 }
 
