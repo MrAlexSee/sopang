@@ -20,7 +20,7 @@ $(EXE): $(OBJ)
 main.o: main.cpp helpers.hpp params.hpp parsing.hpp sopang.hpp zstd_helper.hpp
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c main.cpp
 
-parsing.o: parsing.cpp parsing.hpp helpers.hpp sopang.hpp
+parsing.o: parsing.cpp parsing.hpp helpers.hpp sopang.hpp bitset.hpp
 	$(CC) $(CCFLAGS) $(OPTFLAGS) $(INCLUDE) -c parsing.cpp
 
 sopang.o: sopang.cpp sopang.hpp bitset.hpp

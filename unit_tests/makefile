@@ -35,7 +35,7 @@ sopang_exact_tests.o: sopang_exact_tests.cpp sopang_whitebox.hpp ../sopang.hpp .
 sopang_sources_tests.o: sopang_sources_tests.cpp ../sopang.hpp ../parsing.hpp $(TEST_FILES)
 	$(CC) $(CCFLAGS) $(INCLUDE) -c sopang_sources_tests.cpp
 
-parsing.o: ../parsing.cpp ../parsing.hpp ../helpers.hpp ../sopang.hpp
+parsing.o: ../parsing.cpp ../parsing.hpp ../helpers.hpp ../sopang.hpp ../bitset.hpp
 	$(CC) $(CCFLAGS) $(INCLUDE) -c ../parsing.cpp
 
 sopang.o: ../sopang.cpp ../sopang.hpp ../bitset.hpp
