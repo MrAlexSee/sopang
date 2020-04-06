@@ -26,7 +26,7 @@ Pattern sizes of 8, 16, 32, and 64 characters were tested, without any noticeabl
 Intel i7-4930K@3.4 GHz, 64 GB DDR3 RAM.
 
 <p align="center">
-  <img src="pics/performance.png?raw=true" alt="Performance diagram"/>
+  <img src="pics/performance.png?raw=true" alt="Performance diagram" width="400"/>
 </p>
 
 #### Sources
