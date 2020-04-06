@@ -57,7 +57,7 @@ struct Params
     static constexpr int noValue = -1;
 
     /** Current version: major.minor.patch */
-    const std::string versionInfo = "sopang v1.4.0";
+    const std::string versionInfo = "sopang v2.0.0";
     const std::string usageInfoString = "[options] <input text file> <input pattern file>";
 
     const std::string verboseInfoString =
