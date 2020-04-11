@@ -68,7 +68,7 @@ Requires support for the C++17 standard.
 Type `make` for optimized compile.
 Comment out `OPTFLAGS` in the makefile in order to disable optimization.
 
-Tested with gcc 64-bit 7.2.0 and Boost 1.67.0 (the latter is not performance-critical, used only for parameter and data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
+Tested with gcc 64-bit 7.4.0 and Boost 1.67.0 (the latter is not performance-critical, used only for parameter and data parsing and formatting) on Ubuntu 17.10 Linux version 4.13.0-36 64-bit.
 
 A binary (compiled executable) for Linux is available in the release (file name `sopang`).
 
@@ -150,9 +150,9 @@ A complete testing procedure including data generation is as follows.
 
 1. Unpack the files. Move the reference file `hs37d5.fa` to the `data` folder. Move all .vcf files to the `data` folder, rename them as `chr1.vcf`, `chr2.vcf`, ..., `chr24.vcf`. The above 2 points can be automated with the `download_genome_data.sh` script, however, note that it would download and unpack a huge amount of data in a single run.
 
-1. Run `generate_real_source_data.sh`. For all chromosomes, this will take a very long time. However, it only needs to be performed once in order to obtain elastic-degenerate data with sources.
+1. Run `generate_real_source_data.sh`. For all chromosomes, this will take a very long time. However, it only needs to be performed once in order to obtain elastic-degenerate data with sources. Instead of generating the data on your own, it is possible to download `.edz` and `.edsz` files for chromosomes 1-22 here: http://szgrabowski.kis.p.lodz.pl/ed/ed_chr1-22.zip.
 
-1. Compile SoPanG (see above).
+1. Compile SoPanG (see above) or download a compiled version from the latest release (please note though that it is compiled using default settings).
 
 1. Run `run_all_real_data.sh` and `run_all_synthetic_data.sh`.
 
