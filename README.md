@@ -5,8 +5,8 @@ It can be used for matching patterns in elastic-degenerate (ED) text (simplified
 Authors for the current release version: Aleksander Cisłak, Szymon Grabowski.
 Authors of the SOPanG algorithm: Aleksander Cisłak, Szymon Grabowski, Jan Holub.
 
-* Published as an applications note entitled *SOPanG: online text searching over a pan-genome* (Cisłak, Grabowski, Holub), Bioinformatics, Vol. 34, Issue 24, 12/2018, pp. 4290-4292. DOI link: https://doi.org/10.1093/bioinformatics/bty506
-* For the second version (follow-up work) see arXiv preprint entitled *SOPanG 2: online searching over a pan-genome without false positives* (Cisłak and Grabowski). DOI link:
+* Published as an applications note entitled *SOPanG: online text searching over a pan-genome* (Cisłak, Grabowski, Holub), Bioinformatics, Vol. 34, Issue 24, 12/2018, pp. 4290-4292. Link: https://doi.org/10.1093/bioinformatics/bty506
+* For the second version (follow-up work) see arXiv preprint entitled *SOPanG 2: online searching over a pan-genome without false positives* (Cisłak and Grabowski). Link: https://arxiv.org/abs/2004.03033
 
 ED text is in the following format: `{A,C,}GAAT{AT,A}ATT`.
 Braces determine the start and end of each non-deterministic segment (a segment having multiple variants), and commas delimit segment variants.
